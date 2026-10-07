@@ -1,0 +1,1905 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>NexusLab, dashboard</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* ==========================================================================
+   NexusLab, dashboard interne. Tout le style est ici.
+   Couleurs centralisées dans les variables ci-dessous (mode jour et mode nuit).
+   ========================================================================== */
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800; font-display: swap;
+  src: url("fonts/manrope-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800; font-display: swap;
+  src: url("fonts/manrope-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+:root {
+  --navy: #14213D; --navy-deep: #0D1730; --navy-soft: #1D2D52;
+  --creme: #F6F2EC; --creme-2: #EFE9E0; --carte: #FFFDFA;
+  --corail: #FF6B57; --corail-fonce: #B5402D; --corail-doux: #FFE9E4;
+  --texte: #14213D; --texte-2: #4A5568; --texte-3: #6B7280;
+  --ligne: #E4DDD2; --ligne-forte: #CFC6B8;
+  --fond: var(--creme); --champ: #FFFFFF;
+  --sur-navy: #F6F2EC; --sur-navy-2: #C9D1E0;
+  --ombre: 0 1px 2px rgba(20,33,61,.05), 0 6px 20px rgba(20,33,61,.05);
+  --rayon: 16px; --rayon-s: 10px;
+  --t-gris: #4A5568;   --t-gris-bg: #EDEEF0;
+  --t-bleu: #34548A;   --t-bleu-bg: #E7EDF7;
+  --t-vert: #2F6544;   --t-vert-bg: #E4EFE7;
+  --t-jaune: #80560A;  --t-jaune-bg: #FAF0DA;
+  --t-violet: #5A4699; --t-violet-bg: #EEEAF8;
+  --t-corail: #B5402D; --t-corail-bg: #FFE9E4;
+  --t-rouge: #A3241A;  --t-rouge-bg: #FBE1DD;
+  --barre: #FF6B57;
+}
+:root[data-theme="nuit"] {
+  --fond: #0D1730; --carte: #16244A; --creme-2: #1A2950; --champ: #111D3D;
+  --texte: #F6F2EC; --texte-2: #C9D1E0; --texte-3: #9AA6BF;
+  --ligne: #26365E; --ligne-forte: #36497A;
+  --ombre: 0 1px 2px rgba(0,0,0,.25), 0 6px 20px rgba(0,0,0,.2);
+  --corail-doux: rgba(255,107,87,.16);
+  --t-gris: #C9D1E0;   --t-gris-bg: rgba(201,209,224,.12);
+  --t-bleu: #A9C1EC;   --t-bleu-bg: rgba(91,127,184,.22);
+  --t-vert: #9FD0AE;   --t-vert-bg: rgba(110,156,126,.22);
+  --t-jaune: #F2C670;  --t-jaune-bg: rgba(217,162,58,.2);
+  --t-violet: #C6B8F0; --t-violet-bg: rgba(143,123,200,.24);
+  --t-corail: #FFB0A3; --t-corail-bg: rgba(255,107,87,.2);
+  --t-rouge: #FF9B8F;  --t-rouge-bg: rgba(218,41,28,.22);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: "Manrope", system-ui, sans-serif; background: var(--fond); color: var(--texte); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+h1, h2, h3 { margin: 0; letter-spacing: -0.02em; line-height: 1.2; }
+h1 { font-size: 1.75rem; font-weight: 800; }
+h2 { font-size: 1.05rem; font-weight: 800; }
+h3 { font-size: .95rem; font-weight: 700; }
+[hidden] { display: none !important; }
+.muted { color: var(--texte-3); }
+.petit { font-size: .82rem; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--corail); outline-offset: 2px; }
+
+/* ---------- Logo ---------- */
+.logo { display: inline-flex; align-items: center; gap: 11px; color: var(--sur-navy); text-decoration: none; }
+.logo-mark { width: 42px; height: 19px; flex: none; }
+.logo-mark .dot-a, .logo-mark .link { fill: currentColor; }
+.logo-mark .dot-b { fill: var(--corail); }
+.logo-word { font-weight: 800; font-size: 1.35rem; letter-spacing: -0.035em; line-height: 1; }
+
+/* ---------- Écrans de connexion ---------- */
+.ecran-auth { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--navy); }
+.carte-auth { width: 100%; max-width: 400px; background: var(--carte); color: var(--texte); border-radius: 20px; padding: 32px 28px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.carte-auth .logo { color: var(--texte); margin-bottom: 18px; }
+.carte-auth p.signature { color: var(--texte-2); margin: 0 0 22px; }
+.carte-auth form { display: grid; gap: 14px; }
+.carte-auth .lien { background: none; border: 0; padding: 0; color: var(--texte-2); text-decoration: underline; cursor: pointer; font-size: .88rem; justify-self: start; }
+.message { padding: 10px 12px; border-radius: var(--rayon-s); font-size: .9rem; }
+.message.erreur { background: var(--t-rouge-bg); color: var(--t-rouge); }
+.message.ok { background: var(--t-vert-bg); color: var(--t-vert); }
+
+/* ---------- Structure : barre latérale + contenu ---------- */
+.app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+.barre { background: var(--navy); color: var(--sur-navy); display: flex; flex-direction: column; padding: 22px 14px; position: sticky; top: 0; height: 100vh; }
+.barre .logo { padding: 0 10px 4px; }
+.barre .sous-logo { color: var(--sur-navy-2); font-size: .78rem; padding: 0 10px; margin: 6px 0 22px; opacity: .8; }
+.nav { display: grid; gap: 2px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--sur-navy-2); font-weight: 600; font-size: .93rem; }
+.nav a svg { width: 19px; height: 19px; flex: none; }
+.nav a:hover { background: var(--navy-soft); color: var(--sur-navy); }
+.nav a[aria-current="page"] { background: var(--navy-soft); color: #fff; box-shadow: inset 3px 0 0 var(--corail); }
+.nav a .compteur { margin-left: auto; background: var(--corail); color: var(--navy); font-size: .72rem; font-weight: 800; border-radius: 99px; padding: 1px 7px; }
+.barre-pied { margin-top: auto; border-top: 1px solid var(--navy-soft); padding-top: 14px; display: grid; gap: 8px; }
+.utilisateur { display: flex; align-items: center; gap: 10px; padding: 0 8px; font-size: .88rem; }
+.utilisateur .avatar { width: 30px; height: 30px; }
+.barre-pied .actions { display: flex; gap: 6px; padding: 0 4px; }
+.barre-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 1px solid var(--navy-soft); color: var(--sur-navy-2); border-radius: 10px; padding: 7px 10px; cursor: pointer; font-size: .82rem; font-weight: 600; }
+.barre-btn:hover { background: var(--navy-soft); color: #fff; }
+.barre-btn svg { width: 16px; height: 16px; }
+.haut-mobile { display: none; }
+
+main#contenu { padding: 32px 36px 64px; min-width: 0; max-width: 1400px; width: 100%; }
+main#contenu:focus { outline: none; }
+.app > div { min-width: 0; }
+.entete { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.entete .sous-titre { color: var(--texte-2); margin-top: 6px; }
+.entete .boutons { display: flex; gap: 8px; flex-wrap: wrap; }
+.fil { font-size: .85rem; margin-bottom: 8px; }
+.fil a { color: var(--texte-2); text-decoration: none; }
+.fil a:hover { color: var(--corail-fonce); }
+
+/* ---------- Boutons ---------- */
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ligne-forte); background: var(--carte); color: var(--texte); border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: .88rem; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:hover { border-color: var(--texte-3); }
+.btn svg { width: 16px; height: 16px; }
+.btn.primaire { background: var(--corail); border-color: var(--corail); color: var(--navy); }
+.btn.primaire:hover { background: var(--corail-fonce); border-color: var(--corail-fonce); color: #fff; }
+.btn.danger { color: var(--t-rouge); border-color: transparent; background: transparent; }
+.btn.danger:hover { background: var(--t-rouge-bg); }
+.btn.discret { border-color: transparent; background: transparent; color: var(--texte-2); padding: 6px 10px; }
+.btn.discret:hover { background: var(--creme-2); color: var(--texte); }
+.btn.mini { padding: 4px 9px; font-size: .8rem; border-radius: 8px; }
+.btn[disabled] { opacity: .55; cursor: progress; }
+.btn.large { width: 100%; justify-content: center; padding: 11px 14px; font-size: .95rem; }
+.icone-btn { background: none; border: 0; cursor: pointer; color: var(--texte-2); font-size: 1.4rem; line-height: 1; padding: 4px 8px; border-radius: 8px; }
+.icone-btn:hover { background: var(--creme-2); color: var(--texte); }
+
+/* ---------- Cartes et grilles ---------- */
+.carte { background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--rayon); padding: 20px 22px; box-shadow: var(--ombre); min-width: 0; }
+.carte > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.carte.sans-marge { padding: 0; }
+.carte.sans-marge > header { padding: 18px 22px 0; }
+.grille { display: grid; gap: 18px; }
+.g2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.g-fiche { grid-template-columns: minmax(0,1fr) minmax(0,2fr); align-items: start; }
+.pile { display: grid; gap: 18px; align-content: start; min-width: 0; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpi { background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--rayon); padding: 16px 18px; box-shadow: var(--ombre); text-decoration: none; display: block; }
+.kpi:hover { border-color: var(--ligne-forte); }
+.kpi .label { color: var(--texte-2); font-size: .82rem; font-weight: 600; }
+.kpi .valeur { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.kpi .detail { font-size: .8rem; color: var(--texte-3); margin-top: 2px; }
+.kpi.alerte .valeur { color: var(--corail-fonce); }
+:root[data-theme="nuit"] .kpi.alerte .valeur { color: var(--corail); }
+
+/* ---------- Badges, avatars ---------- */
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 99px; font-size: .76rem; font-weight: 700; white-space: nowrap; }
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .8; }
+.badge.sans-point::before { display: none; }
+.t-gris { color: var(--t-gris); background: var(--t-gris-bg); }
+.t-bleu { color: var(--t-bleu); background: var(--t-bleu-bg); }
+.t-vert { color: var(--t-vert); background: var(--t-vert-bg); }
+.t-jaune { color: var(--t-jaune); background: var(--t-jaune-bg); }
+.t-violet { color: var(--t-violet); background: var(--t-violet-bg); }
+.t-corail { color: var(--t-corail); background: var(--t-corail-bg); }
+.t-rouge { color: var(--t-rouge); background: var(--t-rouge-bg); }
+.avatar { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: .68rem; font-weight: 800; flex: none; letter-spacing: 0; }
+.avatar.vide { background: var(--creme-2); color: var(--texte-3); }
+.avatar.grand { width: 52px; height: 52px; font-size: 1.05rem; }
+.raci { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; color: var(--texte-3); font-weight: 700; }
+
+/* ---------- Tableaux ---------- */
+.table-wrap { overflow-x: auto; }
+table.liste { width: 100%; border-collapse: collapse; font-size: .9rem; }
+table.liste th { text-align: left; font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-3); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--ligne); white-space: nowrap; }
+table.liste td { padding: 11px 14px; border-bottom: 1px solid var(--ligne); vertical-align: middle; }
+table.liste tr:last-child td { border-bottom: 0; }
+table.liste tr[data-href] { cursor: pointer; }
+table.liste tr[data-href]:hover td { background: var(--creme-2); }
+table.liste td.fort { font-weight: 700; }
+table.liste .num { text-align: right; }
+.vide-liste { padding: 26px 22px; color: var(--texte-3); text-align: center; font-size: .92rem; }
+
+/* ---------- Filtres ---------- */
+.filtres { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.filtres input[type="search"], .filtres select { border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 10px; padding: 8px 12px; min-width: 0; }
+.filtres input[type="search"] { width: 260px; max-width: 100%; }
+.puces { display: flex; gap: 6px; flex-wrap: wrap; }
+.puce { border: 1px solid var(--ligne-forte); background: var(--carte); border-radius: 99px; padding: 5px 12px; font-size: .82rem; font-weight: 700; cursor: pointer; color: var(--texte-2); }
+.puce[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: var(--sur-navy); }
+:root[data-theme="nuit"] .puce[aria-pressed="true"] { background: var(--corail); border-color: var(--corail); color: var(--navy); }
+.puce .n { opacity: .7; margin-left: 4px; }
+.onglets { display: inline-flex; background: var(--creme-2); border-radius: 12px; padding: 3px; gap: 2px; }
+.onglets button { border: 0; background: transparent; padding: 6px 14px; border-radius: 9px; font-weight: 700; font-size: .85rem; cursor: pointer; color: var(--texte-2); }
+.onglets button[aria-pressed="true"] { background: var(--carte); color: var(--texte); box-shadow: var(--ombre); }
+
+/* ---------- Fiches (détails) ---------- */
+dl.infos { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: 9px 16px; margin: 0; font-size: .9rem; }
+dl.infos dt { color: var(--texte-3); font-weight: 600; }
+dl.infos dd { margin: 0; overflow-wrap: anywhere; }
+dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-underline-offset: 3px; }
+.statut-rapide { border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 10px; padding: 6px 10px; font-weight: 700; font-size: .85rem; }
+.texte-libre { white-space: pre-wrap; font-size: .9rem; color: var(--texte-2); margin: 0; }
+.ligne-item { display: flex; align-items: flex-start; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--ligne); }
+.ligne-item:last-child { border-bottom: 0; }
+.ligne-item .corps { flex: 1; min-width: 0; }
+.ligne-item .titre { font-weight: 700; font-size: .92rem; }
+.ligne-item .meta { color: var(--texte-3); font-size: .8rem; }
+.ligne-item.cliquable { cursor: pointer; }
+.ligne-item.cliquable:hover .titre { color: var(--corail-fonce); }
+:root[data-theme="nuit"] .ligne-item.cliquable:hover .titre { color: var(--corail); }
+.ligne-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--corail); margin-top: 2px; }
+.fait .titre { text-decoration: line-through; color: var(--texte-3); }
+.retard { color: var(--t-rouge); font-weight: 700; }
+.chrono { list-style: none; margin: 0; padding: 0; }
+.chrono li { position: relative; padding: 0 0 14px 22px; font-size: .88rem; }
+.chrono li::before { content: ""; position: absolute; left: 4px; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--corail); }
+.chrono li::after { content: ""; position: absolute; left: 7.5px; top: 18px; bottom: 0; width: 1px; background: var(--ligne); }
+.chrono li:last-child::after { display: none; }
+.chrono .quand { color: var(--texte-3); font-size: .78rem; }
+
+/* ---------- Accueil ---------- */
+.barres { display: grid; gap: 10px; }
+.barre-ligne { display: grid; grid-template-columns: 120px 1fr 32px; align-items: center; gap: 10px; font-size: .86rem; text-decoration: none; }
+.barre-ligne .piste { height: 10px; background: var(--creme-2); border-radius: 99px; overflow: hidden; }
+.barre-ligne .rempli { height: 100%; background: var(--barre); border-radius: 99px; min-width: 2px; }
+.barre-ligne:hover .rempli { background: var(--corail-fonce); }
+
+/* ---------- Offres ---------- */
+.offres { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+.offre { display: flex; flex-direction: column; gap: 10px; }
+.offre .prix { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+.offre .prix small { font-size: .85rem; font-weight: 600; color: var(--texte-3); letter-spacing: 0; }
+.offre ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: .9rem; }
+.offre li { display: flex; gap: 8px; }
+.offre li::before { content: ""; width: 7px; height: 7px; margin-top: 8px; border-radius: 50%; background: var(--corail); flex: none; }
+.offre.inactive { opacity: .6; }
+.offre footer { margin-top: auto; display: flex; gap: 8px; align-items: center; padding-top: 8px; border-top: 1px solid var(--ligne); }
+
+/* ---------- Tâches (tableau) ---------- */
+.kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
+.colonne { background: var(--creme-2); border-radius: var(--rayon); padding: 12px; min-height: 120px; }
+.colonne > header { display: flex; align-items: center; justify-content: space-between; margin: 2px 4px 10px; }
+.colonne.survol { outline: 2px dashed var(--corail); outline-offset: -2px; }
+.cartes { display: grid; gap: 9px; }
+.tache { background: var(--carte); border: 1px solid var(--ligne); border-radius: 12px; padding: 11px 12px; cursor: pointer; display: grid; gap: 7px; box-shadow: var(--ombre); }
+.tache:hover { border-color: var(--ligne-forte); }
+.tache.glisse { opacity: .5; }
+.tache .titre { font-weight: 700; font-size: .9rem; line-height: 1.35; }
+.tache .projet { font-size: .77rem; color: var(--texte-3); }
+.tache .bas { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .77rem; color: var(--texte-2); }
+.tache .bas .droite { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; }
+.resume-heures { display: flex; gap: 18px; flex-wrap: wrap; font-size: .86rem; color: var(--texte-2); margin-bottom: 14px; }
+.resume-heures strong { color: var(--texte); }
+
+/* ---------- Équipe ---------- */
+.membres { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; margin-bottom: 18px; }
+.membre-tete { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.stat { background: var(--creme-2); border-radius: 10px; padding: 8px 10px; }
+.stat .v { font-weight: 800; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.stat .l { font-size: .72rem; color: var(--texte-3); font-weight: 600; }
+.charge { height: 8px; background: var(--creme-2); border-radius: 99px; overflow: hidden; }
+.charge > div { height: 100%; background: var(--corail); border-radius: 99px; }
+
+/* ---------- Documents ---------- */
+.groupe-docs + .groupe-docs { margin-top: 18px; }
+.groupe-docs h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.sous-groupe { margin: 10px 0 0 0; }
+.sous-groupe h4 { margin: 0 0 2px; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-3); }
+.icone-doc { width: 34px; height: 34px; border-radius: 9px; background: var(--corail-doux); color: var(--corail-fonce); display: grid; place-items: center; font-size: .66rem; font-weight: 800; flex: none; text-transform: uppercase; }
+:root[data-theme="nuit"] .icone-doc { color: var(--corail); }
+
+/* ---------- Formulaires ---------- */
+.grille-form { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 16px; }
+.champ { display: grid; gap: 5px; min-width: 0; }
+.champ.pleine { grid-column: 1 / -1; }
+.champ label { font-size: .82rem; font-weight: 700; color: var(--texte-2); }
+.champ .req { color: var(--corail-fonce); }
+.champ small { color: var(--texte-3); font-size: .78rem; }
+.champ input, .champ select, .champ textarea, .carte-auth input, .lignes input {
+  width: 100%; border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 10px; padding: 9px 11px; min-width: 0; }
+.champ textarea { resize: vertical; }
+.champ input:focus, .champ select:focus, .champ textarea:focus, .carte-auth input:focus, .lignes input:focus { outline: 2px solid var(--corail); outline-offset: 0; border-color: transparent; }
+.champ.case { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .9rem; color: var(--texte); align-self: end; padding-bottom: 8px; }
+.champ.case input { width: 18px; height: 18px; accent-color: var(--corail); }
+.carte-auth label { font-size: .85rem; font-weight: 700; color: var(--texte-2); display: grid; gap: 5px; }
+
+/* ---------- Fenêtre modale ---------- */
+dialog { border: 0; padding: 0; border-radius: 20px; background: var(--carte); color: var(--texte); width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 0 24px 80px rgba(13,23,48,.35); }
+dialog.large { width: min(920px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(13,23,48,.55); }
+.modale-form { display: flex; flex-direction: column; max-height: calc(100vh - 32px); }
+.modale-form > header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 10px; }
+.modale-form > .corps { padding: 8px 22px 18px; overflow-y: auto; }
+.modale-form > footer { display: flex; gap: 8px; align-items: center; padding: 14px 22px; border-top: 1px solid var(--ligne); flex-wrap: wrap; }
+.espace { flex: 1; }
+#confirmation { width: min(420px, calc(100vw - 32px)); }
+#confirmation .corps { padding: 22px 22px 6px; }
+
+/* Lignes de devis */
+.lignes { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.lignes th { font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-3); text-align: left; padding: 6px 4px; }
+.lignes td { padding: 4px; vertical-align: top; }
+.lignes td.total { padding-top: 13px; font-weight: 700; }
+.lignes .c-q { width: 90px; } .lignes .c-p { width: 130px; } .lignes .c-t { width: 120px; } .lignes .c-x { width: 36px; }
+.totaux { display: grid; justify-content: end; gap: 4px; margin-top: 10px; font-size: .92rem; }
+.totaux div { display: flex; gap: 24px; justify-content: space-between; min-width: 260px; }
+.totaux .ttc { font-weight: 800; font-size: 1.05rem; border-top: 2px solid var(--corail); padding-top: 6px; margin-top: 4px; }
+.separateur { grid-column: 1 / -1; border-top: 1px solid var(--ligne); margin: 4px 0; }
+
+/* ---------- Notifications ---------- */
+#toasts { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 1000; }
+.toast { background: var(--navy); color: var(--sur-navy); padding: 11px 16px; border-radius: 12px; font-size: .9rem; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: 360px; border-left: 4px solid var(--corail); }
+.toast.erreur { background: #7A1D14; border-left-color: #FFB0A3; }
+.chargement { display: grid; place-items: center; min-height: 50vh; color: var(--texte-3); }
+.pointille { display: inline-block; width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--ligne); border-top-color: var(--corail); animation: tourne .8s linear infinite; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pointille { animation-duration: 3s; } }
+
+/* ---------- Téléphone et tablette ---------- */
+@media (max-width: 1100px) {
+  .g3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .g-fiche { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .barre { position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 60; transform: translateX(-100%); transition: transform .2s ease; }
+  .app.menu-ouvert .barre { transform: none; box-shadow: 0 0 0 100vmax rgba(13,23,48,.5); }
+  .haut-mobile { display: flex; align-items: center; justify-content: space-between; background: var(--navy); padding: 12px 16px; position: sticky; top: 0; z-index: 50; }
+  .haut-mobile .icone-btn { color: var(--sur-navy); }
+  main#contenu { padding: 20px 16px 48px; }
+  .g2, .g3 { grid-template-columns: 1fr; }
+  .grille-form { grid-template-columns: 1fr; }
+  h1 { font-size: 1.45rem; }
+  .filtres input[type="search"] { width: 100%; }
+  .masquer-mobile { display: none; }
+  .barre-ligne { grid-template-columns: 100px 1fr 28px; }
+}
+@media print {
+  .barre, .haut-mobile, .entete .boutons, .filtres { display: none !important; }
+  .app { display: block; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<!-- Écran de connexion -->
+<div id="ecran-connexion" class="ecran-auth" hidden>
+  <div class="carte-auth">
+    <span class="logo" aria-label="NexusLab">
+      <svg class="logo-mark" viewBox="0 0 48 22" aria-hidden="true"><rect class="link" x="18" y="7.9" width="10" height="6.2" rx="1"/><circle class="dot-a" cx="11" cy="11" r="10.5"/><circle class="dot-b" cx="36.5" cy="11" r="10.5"/></svg>
+      <span class="logo-word">nexus</span>
+    </span>
+    <h1 id="auth-titre">Connexion</h1>
+    <p class="signature" id="auth-sous-titre">Le lien entre votre métier et le digital. Espace réservé à l’équipe.</p>
+    <div id="auth-message" class="message" hidden></div>
+    <form id="form-connexion">
+      <label>E-mail<input type="email" name="email" autocomplete="username" required></label>
+      <label>Mot de passe<input type="password" name="mdp" autocomplete="current-password" required></label>
+      <button class="btn primaire large" type="submit">Se connecter</button>
+      <button class="lien" type="button" id="btn-oubli">Mot de passe oublié ?</button>
+    </form>
+    <form id="form-nouveau-mdp" hidden>
+      <label>Nouveau mot de passe<input type="password" name="mdp" autocomplete="new-password" minlength="8" required></label>
+      <label>Confirmer<input type="password" name="mdp2" autocomplete="new-password" minlength="8" required></label>
+      <button class="btn primaire large" type="submit">Enregistrer le mot de passe</button>
+    </form>
+  </div>
+</div>
+
+<!-- Application -->
+<div id="app" class="app" hidden>
+  <aside class="barre" aria-label="Navigation principale">
+    <a class="logo" href="#/accueil" aria-label="NexusLab, accueil">
+      <svg class="logo-mark" viewBox="0 0 48 22" aria-hidden="true"><rect class="link" x="18" y="7.9" width="10" height="6.2" rx="1"/><circle class="dot-a" cx="11" cy="11" r="10.5"/><circle class="dot-b" cx="36.5" cy="11" r="10.5"/></svg>
+      <span class="logo-word">nexus</span>
+    </a>
+    <div class="sous-logo">Poste de commande</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="barre-pied">
+      <div class="utilisateur" id="utilisateur"></div>
+      <div class="actions">
+        <button class="barre-btn" type="button" data-action="theme" id="btn-theme"></button>
+        <button class="barre-btn" type="button" data-action="deconnexion" title="Se déconnecter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg>
+          Sortir
+        </button>
+      </div>
+    </div>
+  </aside>
+  <div>
+    <div class="haut-mobile">
+      <a class="logo" href="#/accueil" aria-label="NexusLab, accueil">
+        <svg class="logo-mark" viewBox="0 0 48 22" aria-hidden="true"><rect class="link" x="18" y="7.9" width="10" height="6.2" rx="1"/><circle class="dot-a" cx="11" cy="11" r="10.5"/><circle class="dot-b" cx="36.5" cy="11" r="10.5"/></svg>
+        <span class="logo-word">nexus</span>
+      </a>
+      <button class="icone-btn" type="button" data-action="menu" aria-label="Ouvrir le menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+    <main id="contenu" tabindex="-1"></main>
+  </div>
+</div>
+
+<dialog id="modale"></dialog>
+<dialog id="confirmation">
+  <form method="dialog" class="modale-form">
+    <div class="corps"><h2 id="confirmation-texte"></h2></div>
+    <footer><span class="espace"></span><button class="btn" value="non">Annuler</button><button class="btn primaire" value="oui" id="confirmation-oui">Confirmer</button></footer>
+  </form>
+</dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.min.js"></script>
+<script>
+"use strict";
+/* ==========================================================================
+   Configuration : URL du projet Supabase et clé publique (anon).
+   La clé anon est publique par nature ; la sécurité vient des règles RLS.
+   La clé service ne doit JAMAIS apparaître ici.
+   ========================================================================== */
+const CONFIG = {
+  supabaseUrl: "__SUPABASE_URL__",
+  supabaseAnon: "__SUPABASE_ANON__",
+  bucket: "documents",
+};
+const LIBS_PDF = [
+  "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js",
+  "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js",
+];
+
+const configOk = !CONFIG.supabaseUrl.startsWith("__") && !CONFIG.supabaseAnon.startsWith("__");
+const sb = configOk ? supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnon, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+}) : null;
+
+/* ---------- Petits outils ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const arrondi = (n) => Math.round((Number(n) || 0) * 100) / 100;
+const fmtNombre = new Intl.NumberFormat("de-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtEntier = new Intl.NumberFormat("de-CH", { maximumFractionDigits: 0 });
+const chf = (n) => "CHF " + fmtNombre.format(Number(n) || 0);
+const chfCourt = (n) => "CHF " + fmtEntier.format(Math.round(Number(n) || 0));
+const heures = (n) => (Number(n) || 0).toLocaleString("fr-CH", { maximumFractionDigits: 2 }) + " h";
+function isoLocal(d = new Date()) { const z = d.getTimezoneOffset() * 60000; return new Date(d - z).toISOString().slice(0, 10); }
+const aujourdhui = () => isoLocal();
+function ajouterJours(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + Number(n || 0)); return isoLocal(d); }
+function dateFr(v) { if (!v) return ""; const d = new Date(String(v).length <= 10 ? v + "T12:00:00" : v); return d.toLocaleDateString("fr-CH", { day: "2-digit", month: "2-digit", year: "numeric" }); }
+function dateCourte(v) { if (!v) return ""; const d = new Date(String(v).length <= 10 ? v + "T12:00:00" : v); return d.toLocaleDateString("fr-CH", { day: "numeric", month: "short" }); }
+const vide = '<span class="muted">·</span>';
+function lienExterne(url, texte) {
+  if (!url) return vide;
+  const href = /^https?:\/\//i.test(url) ? url : "https://" + url;
+  return `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(texte || url.replace(/^https?:\/\//i, ""))}</a>`;
+}
+const lienGithub = (d) => !d ? vide : lienExterne(/^https?:/i.test(d) ? d : "https://github.com/" + d.replace(/^\/+/, ""), d.replace(/^https?:\/\/github\.com\//i, ""));
+const lienNetlify = (n) => !n ? vide : lienExterne(/^https?:/i.test(n) ? n : "https://app.netlify.com/projects/" + n, n);
+function nomFichierSur(nom) {
+  return String(nom).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 120) || "fichier";
+}
+function tailleFichier(o) { if (!o) return ""; if (o < 1024) return o + " o"; if (o < 1048576) return Math.round(o / 1024) + " Ko"; return (o / 1048576).toFixed(1).replace(".", ",") + " Mo"; }
+function lireStockage(cle) { try { return localStorage.getItem(cle); } catch { return null; } }
+function ecrireStockage(cle, v) { try { localStorage.setItem(cle, v); } catch { /* navigation privée */ } }
+
+/* ---------- Libellés ---------- */
+const ETIQ = {
+  statutClient: { prospect: ["Prospect", "gris"], contacte: ["Contacté", "bleu"], rendez_vous: ["Rendez-vous", "violet"], offre_envoyee: ["Offre envoyée", "jaune"], mandat_signe: ["Mandat signé", "corail"], livre: ["Livré", "vert"], termine: ["Terminé", "gris"], perdu: ["Perdu", "rouge"] },
+  statutProjet: { brief: ["Brief", "gris"], design: ["Design", "violet"], developpement: ["Développement", "bleu"], revue_client: ["Revue client", "jaune"], en_ligne: ["En ligne", "vert"], maintenance: ["Maintenance", "corail"], termine: ["Terminé", "gris"] },
+  typeProjet: { vitrine: "Vitrine", vitrine_reservation: "Vitrine + réservation", pack_visibilite: "Pack visibilité", outil: "Outil sur mesure", autre: "Autre" },
+  statutDf: { brouillon: ["Brouillon", "gris"], envoye: ["Envoyé", "bleu"], accepte: ["Accepté", "violet"], facture: ["Facturé", "jaune"], paye: ["Payé", "vert"], annule: ["Annulé", "rouge"] },
+  statutTache: { a_faire: ["À faire", "gris"], en_cours: ["En cours", "bleu"], a_valider: ["À valider", "jaune"], fait: ["Fait", "vert"] },
+  typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", autre: "Autre" },
+  periode: { unique: "Paiement unique", mois: "Par mois", an: "Par an" },
+};
+const STATUTS_DF_PAR_TYPE = { devis: ["brouillon", "envoye", "accepte", "facture", "annule"], facture: ["brouillon", "envoye", "paye", "annule"] };
+const PROJETS_EN_COURS = ["brief", "design", "developpement", "revue_client"];
+const libelle = (dict, v) => { const e = ETIQ[dict][v]; return Array.isArray(e) ? e[0] : (e || ""); };
+const options = (dict, cles) => (cles || Object.keys(ETIQ[dict])).map((k) => [k, libelle(dict, k)]);
+function badge(dict, v) { const e = ETIQ[dict][v]; return e ? `<span class="badge t-${e[1]}">${esc(e[0])}</span>` : ""; }
+
+/* ---------- Icônes ---------- */
+const ICONES = {
+  accueil: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
+  clients: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
+  projets: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 13h6M7 16h4"/>',
+  offres: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  devis: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/>',
+  taches: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/>',
+  equipe: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  documents: '<path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  reglages: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  pdf: '<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/>',
+  lune: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  soleil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  crayon: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+};
+const icone = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
+
+/* ==========================================================================
+   Données : tout est chargé au démarrage (petite équipe, petits volumes).
+   ========================================================================== */
+const TABLES = {
+  membres: { ordre: ["cree_le", true] },
+  offres: { ordre: ["ordre", true] },
+  clients: { ordre: ["nom", true] },
+  projets: { ordre: ["cree_le", false] },
+  devis_factures: { ordre: ["date_emission", false] },
+  taches: { ordre: ["echeance", true] },
+  documents: { ordre: ["date", false] },
+  versions: { ordre: ["date", false] },
+  retours: { ordre: ["date", false] },
+  parametres: { ordre: ["id", true] },
+};
+const db = Object.fromEntries(Object.keys(TABLES).map((t) => [t, []]));
+let session = null;
+let dernierChargement = 0;
+
+async function charger(table) {
+  const [col, asc] = TABLES[table].ordre;
+  const { data, error } = await sb.from(table).select("*").order(col, { ascending: asc, nullsFirst: false });
+  if (error) throw error;
+  db[table] = data;
+}
+async function chargerTout() { await Promise.all(Object.keys(TABLES).map(charger)); dernierChargement = Date.now(); }
+async function enregistrer(table, valeurs, id) {
+  const req = id ? sb.from(table).update(valeurs).eq("id", id) : sb.from(table).insert(valeurs);
+  const { data, error } = await req.select().single();
+  if (error) throw error;
+  await charger(table);
+  return data;
+}
+async function supprimerLigne(table, id) {
+  const { error } = await sb.from(table).delete().eq("id", id);
+  if (error) throw error;
+  await charger(table);
+}
+function msgErreur(e) {
+  const m = (e && (e.message || e.error_description)) || String(e);
+  if (e && e.code === "23505") return "Cette valeur existe déjà (doublon).";
+  if (e && e.code === "23503") return "Élément encore utilisé ailleurs.";
+  if (e && (e.code === "42501" || /row-level security/i.test(m))) return "Accès refusé : votre compte n’est pas reconnu comme membre actif.";
+  if (/Invalid login credentials/i.test(m)) return "E-mail ou mot de passe incorrect.";
+  if (/Failed to fetch|NetworkError/i.test(m)) return "Connexion impossible. Vérifiez internet et réessayez.";
+  if (/rate limit/i.test(m)) return "Trop de tentatives. Réessayez dans quelques minutes.";
+  return m;
+}
+
+const parId = (t, id) => (id ? db[t].find((x) => x.id === id) : undefined);
+const nomClient = (id) => parId("clients", id)?.nom || "";
+const nomProjet = (id) => parId("projets", id)?.nom || "";
+const parametres = () => db.parametres[0] || {};
+const membresActifs = () => db.membres.filter((m) => m.actif);
+const moi = () => db.membres.find((m) => m.email && session && m.email.toLowerCase() === (session.user.email || "").toLowerCase());
+const initiales = (nom) => String(nom || "?").trim().split(/\s+/).map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+const TEINTES = ["corail", "bleu", "vert", "violet", "jaune"];
+function avatar(id, role, grand) {
+  const m = parId("membres", id);
+  if (!m) return `<span class="avatar vide${grand ? " grand" : ""}" title="${esc(role ? role + " : personne" : "Personne")}">?</span>`;
+  const i = db.membres.indexOf(m);
+  return `<span class="avatar t-${TEINTES[i % TEINTES.length]}${grand ? " grand" : ""}" title="${esc((role ? role + " : " : "") + m.nom)}">${esc(initiales(m.nom))}</span>`;
+}
+const enRetard = (t) => t.echeance && t.statut !== "fait" && t.echeance < aujourdhui();
+const optClients = () => db.clients.map((c) => [c.id, c.nom]);
+const optProjets = () => db.projets.map((p) => [p.id, p.nom + (p.client_id ? " (" + nomClient(p.client_id) + ")" : "")]);
+const optMembres = (tous) => (tous ? db.membres : membresActifs()).map((m) => [m.id, m.nom]);
+const optOffres = () => db.offres.map((o) => [o.id, o.nom + (o.active ? "" : " (inactive)")]);
+
+/* ==========================================================================
+   Notifications, confirmation, modale de formulaire
+   ========================================================================== */
+function toast(texte, type) {
+  const el = document.createElement("div");
+  el.className = "toast" + (type === "erreur" ? " erreur" : "");
+  el.textContent = texte;
+  $("#toasts").appendChild(el);
+  setTimeout(() => el.remove(), type === "erreur" ? 7000 : 3200);
+}
+function confirmer(texte, bouton = "Supprimer") {
+  const d = $("#confirmation");
+  $("#confirmation-texte").textContent = texte;
+  $("#confirmation-oui").textContent = bouton;
+  d.returnValue = "";
+  d.showModal();
+  return new Promise((ok) => d.addEventListener("close", () => ok(d.returnValue === "oui"), { once: true }));
+}
+const dlg = $("#modale");
+function fermerModale() { if (dlg.open) dlg.close(); }
+
+function champHtml(c, v) {
+  const id = "f_" + c.nom;
+  const req = c.requis ? " required" : "";
+  const cls = "champ" + (c.pleine ? " pleine" : "");
+  if (c.type === "separateur") return '<div class="separateur"></div>';
+  if (c.type === "checkbox") return `<label class="${cls} case"><input type="checkbox" name="${c.nom}"${v ? " checked" : ""}> <span>${esc(c.label)}</span></label>`;
+  let input;
+  if (c.type === "textarea") input = `<textarea id="${id}" name="${c.nom}" rows="${c.rows || 3}"${req}>${esc(v ?? "")}</textarea>`;
+  else if (c.type === "liste") input = `<textarea id="${id}" name="${c.nom}" rows="${c.rows || 4}">${esc((v || []).join("\n"))}</textarea>`;
+  else if (c.type === "select") {
+    const vides = c.vide === false ? "" : `<option value="">${esc(c.vide || "Aucun")}</option>`;
+    input = `<select id="${id}" name="${c.nom}"${req}>${vides}${c.options.map(([k, l]) => `<option value="${esc(k)}"${String(v ?? "") === String(k) ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+  } else {
+    const extra = (c.step ? ` step="${c.step}"` : "") + (c.min != null ? ` min="${c.min}"` : "") + (c.placeholder ? ` placeholder="${esc(c.placeholder)}"` : "") + (c.liste ? ` list="${c.liste}"` : "") + (c.auto ? ` autocomplete="${c.auto}"` : "");
+    input = `<input id="${id}" name="${c.nom}" type="${c.type || "text"}" value="${esc(v ?? "")}"${extra}${req}>`;
+  }
+  return `<div class="${cls}"><label for="${id}">${esc(c.label)}${c.requis ? ' <span class="req">*</span>' : ""}</label>${input}${c.aide ? `<small>${esc(c.aide)}</small>` : ""}</div>`;
+}
+function lireForm(form, champs) {
+  const o = {};
+  for (const c of champs) {
+    if (c.type === "separateur" || c.lectureSeule) continue;
+    const el = form.elements[c.nom];
+    if (!el) continue;
+    if (c.type === "checkbox") o[c.nom] = el.checked;
+    else if (c.type === "number") o[c.nom] = el.value === "" ? (c.defaut ?? null) : Number(el.value);
+    else if (c.type === "liste") o[c.nom] = el.value.split("\n").map((s) => s.trim()).filter(Boolean);
+    else { const s = el.value.trim(); o[c.nom] = s === "" ? (c.defaut ?? null) : s; }
+  }
+  return o;
+}
+/* Ouvre une modale avec un formulaire généré à partir d'une liste de champs. */
+function formulaire({ titre, champs, valeurs = {}, enregistrer: surEnregistrer, supprimer, large, texteBouton = "Enregistrer", extra = "", apresOuverture }) {
+  dlg.className = large ? "large" : "";
+  dlg.innerHTML = `<form class="modale-form" novalidate>
+    <header><h2>${esc(titre)}</h2><button type="button" class="icone-btn" data-fermer aria-label="Fermer">×</button></header>
+    <div class="corps"><div class="grille-form">${champs.map((c) => champHtml(c, valeurs[c.nom])).join("")}</div>${extra}</div>
+    <footer>${supprimer ? '<button type="button" class="btn danger" data-suppr>Supprimer</button>' : ""}<span class="espace"></span>
+      <button type="button" class="btn" data-fermer>Annuler</button><button type="submit" class="btn primaire">${esc(texteBouton)}</button></footer></form>`;
+  const form = $("form", dlg);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    const btn = $('[type="submit"]', form);
+    btn.disabled = true;
+    try { await surEnregistrer(lireForm(form, champs), form); fermerModale(); rendre(); }
+    catch (err) { toast(msgErreur(err), "erreur"); }
+    finally { btn.disabled = false; }
+  });
+  if (supprimer) $("[data-suppr]", form).addEventListener("click", async () => {
+    if (!(await confirmer("Supprimer définitivement cet élément ?"))) return;
+    try { await supprimer(); fermerModale(); rendre(); toast("Supprimé."); }
+    catch (err) { toast(msgErreur(err), "erreur"); }
+  });
+  dlg.showModal();
+  if (apresOuverture) apresOuverture(form);
+  const premier = $("input:not([type=checkbox]),select,textarea", form);
+  if (premier) premier.focus();
+}
+
+/* ==========================================================================
+   Formulaires par type d'élément
+   ========================================================================== */
+const champsClient = () => [
+  { nom: "nom", label: "Nom de la PME", requis: true, pleine: true },
+  { nom: "secteur", label: "Secteur", placeholder: "Coiffure, restaurant, artisan..." },
+  { nom: "statut", label: "Statut", type: "select", options: options("statutClient"), vide: false, defaut: "prospect" },
+  { nom: "contact", label: "Personne de contact" },
+  { nom: "email", label: "E-mail", type: "email" },
+  { nom: "telephone", label: "Téléphone", type: "tel" },
+  { nom: "source", label: "Source", placeholder: "Appel, réseau, site, visite..." },
+  { nom: "adresse", label: "Rue et numéro", aide: "Utile pour l’adresse des factures." },
+  { nom: "npa", label: "NPA" },
+  { nom: "localite", label: "Localité" },
+  { nom: "notes", label: "Notes", type: "textarea", pleine: true, rows: 4 },
+];
+function editerClient(id) {
+  const c = parId("clients", id);
+  formulaire({
+    titre: c ? "Modifier le client" : "Nouveau client", champs: champsClient(), valeurs: c || { statut: "prospect" },
+    enregistrer: async (v) => { const r = await enregistrer("clients", v, id); if (!id) location.hash = "#/clients/" + r.id; toast("Client enregistré."); },
+    supprimer: c ? async () => { await supprimerLigne("clients", id); location.hash = "#/clients"; } : null,
+  });
+}
+
+const champsProjet = () => [
+  { nom: "nom", label: "Nom du site", requis: true },
+  { nom: "client_id", label: "Pour qui (client)", type: "select", options: optClients() },
+  { nom: "type", label: "Type", type: "select", options: options("typeProjet"), vide: false, defaut: "vitrine" },
+  { nom: "offre_id", label: "Offre", type: "select", options: optOffres() },
+  { nom: "statut", label: "Statut", type: "select", options: options("statutProjet"), vide: false, defaut: "brief" },
+  { nom: "version", label: "Version", placeholder: "v1" },
+  { nom: "responsable_id", label: "Responsable", type: "select", options: optMembres() },
+  { nom: "date_mise_en_ligne", label: "Date de mise en ligne", type: "date" },
+  { nom: "prochaine_etape", label: "Prochaine étape", pleine: true },
+  { type: "separateur" },
+  { nom: "url_en_ligne", label: "Adresse en ligne", placeholder: "https://..." },
+  { nom: "domaine", label: "Domaine", placeholder: "exemple.ch" },
+  { nom: "depot_github", label: "Dépôt GitHub", placeholder: "nexuslab-ch/nom-du-site" },
+  { nom: "projet_netlify", label: "Projet Netlify", placeholder: "nom-du-projet", aide: "Sur le compte Netlify du client." },
+  { nom: "registrar", label: "Registrar", placeholder: "Infomaniak, Hostpoint..." },
+  { nom: "base_supabase", label: "Base Supabase", type: "checkbox" },
+  { nom: "notes", label: "Notes", type: "textarea", pleine: true },
+];
+function editerProjet(id, defauts = {}) {
+  const p = parId("projets", id);
+  formulaire({
+    titre: p ? "Modifier le site" : "Nouveau site", champs: champsProjet(), large: true,
+    valeurs: p || { statut: "brief", type: "vitrine", ...defauts },
+    enregistrer: async (v) => { const r = await enregistrer("projets", v, id); if (!id) location.hash = "#/projets/" + r.id; toast("Site enregistré."); },
+    supprimer: p ? async () => { await supprimerLigne("projets", id); location.hash = "#/projets"; } : null,
+  });
+}
+
+const champsOffre = () => [
+  { nom: "nom", label: "Nom de l’offre", requis: true },
+  { nom: "prix_depart", label: "Prix de départ (CHF)", type: "number", step: "1", min: 0 },
+  { nom: "periode", label: "Facturation", type: "select", options: options("periode"), vide: false, defaut: "unique" },
+  { nom: "ordre", label: "Ordre d’affichage", type: "number", step: "1", defaut: 0 },
+  { nom: "description", label: "Description", type: "textarea", pleine: true },
+  { nom: "inclus", label: "Ce qui est inclus (une ligne par élément)", type: "liste", pleine: true, rows: 5 },
+  { nom: "active", label: "Offre active (proposée aux clients)", type: "checkbox", pleine: true },
+];
+function editerOffre(id) {
+  const o = parId("offres", id);
+  formulaire({
+    titre: o ? "Modifier l’offre" : "Nouvelle offre", champs: champsOffre(),
+    valeurs: o || { active: true, periode: "unique", ordre: db.offres.length + 1 },
+    enregistrer: async (v) => { await enregistrer("offres", v, id); toast("Offre enregistrée."); },
+    supprimer: o ? () => supprimerLigne("offres", id) : null,
+  });
+}
+
+const champsTache = () => [
+  { nom: "titre", label: "Titre", requis: true, pleine: true },
+  { nom: "projet_id", label: "Site lié", type: "select", options: optProjets() },
+  { nom: "sprint", label: "Sprint", placeholder: "Sprint 1", liste: "liste-sprints" },
+  { nom: "responsable_id", label: "Responsable (R)", type: "select", options: optMembres() },
+  { nom: "valideur_id", label: "Valideur (A)", type: "select", options: optMembres() },
+  { nom: "statut", label: "Statut", type: "select", options: options("statutTache"), vide: false, defaut: "a_faire" },
+  { nom: "echeance", label: "Échéance", type: "date" },
+  { nom: "heures_estimees", label: "Heures estimées", type: "number", step: "0.25", min: 0 },
+  { nom: "heures_reelles", label: "Heures réelles", type: "number", step: "0.25", min: 0 },
+  { nom: "description", label: "Description", type: "textarea", pleine: true },
+];
+function sprints() { return [...new Set(db.taches.map((t) => t.sprint).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr", { numeric: true })); }
+function editerTache(id, defauts = {}) {
+  const t = parId("taches", id);
+  formulaire({
+    titre: t ? "Modifier la tâche" : "Nouvelle tâche", champs: champsTache(),
+    valeurs: t || { statut: "a_faire", responsable_id: moi()?.id, ...defauts },
+    extra: `<datalist id="liste-sprints">${sprints().map((s) => `<option value="${esc(s)}">`).join("")}</datalist>`,
+    enregistrer: async (v) => { await enregistrer("taches", v, id); toast("Tâche enregistrée."); },
+    supprimer: t ? () => supprimerLigne("taches", id) : null,
+  });
+}
+
+const champsMembre = () => [
+  { nom: "nom", label: "Nom", requis: true },
+  { nom: "role", label: "Rôle" },
+  { nom: "email", label: "E-mail de connexion", type: "email", pleine: true, aide: "Le même que celui du compte de connexion. Sans lui, la personne n’a pas accès." },
+  { nom: "actif", label: "Membre actif", type: "checkbox", pleine: true },
+];
+function editerMembre(id) {
+  const m = parId("membres", id);
+  formulaire({
+    titre: m ? "Modifier le membre" : "Nouveau membre", champs: champsMembre(), valeurs: m || { actif: true },
+    enregistrer: async (v) => {
+      if (v.email) v.email = v.email.toLowerCase();
+      if (m && moi()?.id === id && (!v.actif || v.email !== m.email)) {
+        if (!(await confirmer("Vous modifiez votre propre accès. Vous risquez de ne plus pouvoir vous connecter. Continuer ?", "Continuer"))) throw new Error("Modification annulée.");
+      }
+      await enregistrer("membres", v, id); toast("Membre enregistré.");
+    },
+    supprimer: m && moi()?.id !== id ? () => supprimerLigne("membres", id) : null,
+  });
+}
+
+const champsVersion = () => [
+  { nom: "numero", label: "Numéro de version", requis: true, placeholder: "v2" },
+  { nom: "date", label: "Date", type: "date", requis: true },
+  { nom: "notes", label: "Ce qui a changé", type: "textarea", pleine: true, rows: 4 },
+];
+function editerVersion(id, projetId) {
+  const v0 = parId("versions", id);
+  formulaire({
+    titre: v0 ? "Modifier la version" : "Nouvelle version", champs: champsVersion(),
+    valeurs: v0 || { date: aujourdhui() },
+    enregistrer: async (v) => {
+      if (!id) v.projet_id = projetId;
+      await enregistrer("versions", v, id);
+      const p = parId("projets", v0 ? v0.projet_id : projetId);
+      if (!id && p && v.numero && p.version !== v.numero && (await confirmer(`Indiquer ${v.numero} comme version actuelle du site ?`, "Oui"))) await enregistrer("projets", { version: v.numero }, p.id);
+      toast("Version enregistrée.");
+    },
+    supprimer: v0 ? () => supprimerLigne("versions", id) : null,
+  });
+}
+
+const champsRetour = () => [
+  { nom: "auteur", label: "Auteur", placeholder: "Nom du client" },
+  { nom: "date", label: "Date", type: "date", requis: true },
+  { nom: "contenu", label: "Retour", type: "textarea", requis: true, pleine: true, rows: 4 },
+  { nom: "traite", label: "Traité", type: "checkbox", pleine: true },
+];
+function editerRetour(id, projetId) {
+  const r = parId("retours", id);
+  const p = parId("projets", r ? r.projet_id : projetId);
+  const client = p && parId("clients", p.client_id);
+  formulaire({
+    titre: r ? "Modifier le retour" : "Nouveau retour client", champs: champsRetour(),
+    valeurs: r || { date: aujourdhui(), auteur: client?.contact || client?.nom || "" },
+    enregistrer: async (v) => { if (!id) v.projet_id = projetId; await enregistrer("retours", v, id); toast("Retour enregistré."); },
+    supprimer: r ? () => supprimerLigne("retours", id) : null,
+  });
+}
+
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+const PAGES = {
+  accueil: { titre: "Accueil", icone: "accueil", rendre: pageAccueil },
+  clients: { titre: "Clients", icone: "clients", rendre: pageClients },
+  projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets },
+  offres: { titre: "Offres", icone: "offres", rendre: pageOffres },
+  devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis },
+  taches: { titre: "Tâches", icone: "taches", rendre: pageTaches },
+  equipe: { titre: "Équipe", icone: "equipe", rendre: pageEquipe },
+  documents: { titre: "Documents", icone: "documents", rendre: pageDocuments },
+  reglages: { titre: "Réglages", icone: "reglages", rendre: pageReglages },
+};
+const filtres = {
+  clients: { q: "", statut: "" },
+  projets: { q: "", statut: "actifs" },
+  devis: { type: "", statut: "", q: "" },
+  taches: { vue: "statut", sprint: "", personne: "", projet: "", fait: "1" },
+  documents: { q: "", client: "", projet: "", type: "" },
+};
+function lireRoute() {
+  const h = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
+  const [page, id] = h.split("/");
+  return { page: PAGES[page] ? page : "accueil", id: id || null };
+}
+function rendreNav(page) {
+  const mesTaches = moi() ? db.taches.filter((t) => t.statut !== "fait" && (t.responsable_id === moi().id || (t.valideur_id === moi().id && t.statut === "a_valider"))).length : 0;
+  $("#nav").innerHTML = Object.entries(PAGES).map(([k, p]) =>
+    `<a href="#/${k}"${k === page ? ' aria-current="page"' : ""}>${icone(p.icone)}<span>${esc(p.titre)}</span>${k === "taches" && mesTaches ? `<span class="compteur" title="Mes tâches ouvertes">${mesTaches}</span>` : ""}</a>`).join("");
+}
+function rendre() {
+  if (!session) return;
+  const { page, id } = lireRoute();
+  rendreNav(page);
+  const main = $("#contenu");
+  try { main.innerHTML = PAGES[page].rendre(id); }
+  catch (err) { console.error(err); main.innerHTML = `<div class="message erreur">Erreur d’affichage : ${esc(err.message)}</div>`; }
+  document.title = PAGES[page].titre + ", NexusLab";
+  $("#app").classList.remove("menu-ouvert");
+  apresRendu(page);
+}
+function apresRendu(page) { if (page === "taches") brancherGlisser(); }
+window.addEventListener("hashchange", () => {
+  if (/access_token|error_description/.test(location.hash)) return;
+  rendre();
+  $("#contenu").focus({ preventScroll: true });
+  window.scrollTo(0, 0);
+});
+
+/* ==========================================================================
+   Accueil
+   ========================================================================== */
+function kpi(label, valeur, detail, href, alerte) {
+  return `<a class="kpi${alerte ? " alerte" : ""}" href="${href}"><div class="label">${esc(label)}</div><div class="valeur">${valeur}</div>${detail ? `<div class="detail">${detail}</div>` : ""}</a>`;
+}
+function pageAccueil() {
+  const auj = aujourdhui(), dans7 = ajouterJours(auj, 7), annee = auj.slice(0, 4);
+  const factures = db.devis_factures.filter((d) => d.type === "facture");
+  const devisAttente = db.devis_factures.filter((d) => d.type === "devis" && d.statut === "envoye");
+  const facturees = factures.filter((d) => ["envoye", "paye"].includes(d.statut) && (d.date_emission || "").startsWith(annee));
+  const payees = factures.filter((d) => d.statut === "paye" && (d.date_paiement || d.date_emission || "").startsWith(annee));
+  const aEncaisser = factures.filter((d) => d.statut === "envoye");
+  const facturesRetard = aEncaisser.filter((d) => d.echeance && d.echeance < auj);
+  const projetsEnCours = db.projets.filter((p) => PROJETS_EN_COURS.includes(p.statut));
+  const tachesRetard = db.taches.filter(enRetard);
+  const somme = (l) => l.reduce((s, d) => s + Number(d.montant_ttc || 0), 0);
+  const m = moi();
+
+  const semaine = [];
+  for (const t of db.taches) if (t.statut !== "fait" && t.echeance && t.echeance <= dans7)
+    semaine.push({ date: t.echeance, titre: t.titre, meta: "Tâche" + (t.projet_id ? " · " + nomProjet(t.projet_id) : ""), href: "#/taches", retard: t.echeance < auj, av: t.responsable_id });
+  for (const d of aEncaisser) if (d.echeance && d.echeance <= dans7)
+    semaine.push({ date: d.echeance, titre: `Facture ${d.numero} · ${chf(d.montant_ttc)}`, meta: "Paiement attendu · " + nomClient(d.client_id), href: "#/devis", retard: d.echeance < auj });
+  for (const d of devisAttente) if (d.echeance && d.echeance <= dans7)
+    semaine.push({ date: d.echeance, titre: `Devis ${d.numero} expire`, meta: nomClient(d.client_id), href: "#/devis", retard: d.echeance < auj });
+  for (const p of db.projets) if (p.date_mise_en_ligne && p.date_mise_en_ligne >= auj && p.date_mise_en_ligne <= dans7 && p.statut !== "en_ligne")
+    semaine.push({ date: p.date_mise_en_ligne, titre: `Mise en ligne : ${p.nom}`, meta: nomClient(p.client_id), href: "#/projets/" + p.id });
+  semaine.sort((a, b) => a.date.localeCompare(b.date));
+
+  const parStatut = Object.keys(ETIQ.statutClient).map((k) => [k, db.clients.filter((c) => c.statut === k).length]);
+  const max = Math.max(1, ...parStatut.map((x) => x[1]));
+  const mesTaches = m ? db.taches.filter((t) => t.responsable_id === m.id && t.statut !== "fait").sort((a, b) => (a.echeance || "9").localeCompare(b.echeance || "9")) : [];
+  const aValider = m ? db.taches.filter((t) => t.valideur_id === m.id && t.statut === "a_valider") : [];
+  const prenom = m ? m.nom.split(" ")[0] : "";
+
+  return `
+  <div class="entete"><div><h1>Bonjour${prenom ? " " + esc(prenom) : ""}</h1>
+    <div class="sous-titre">${esc(new Date().toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</div></div>
+    <div class="boutons"><button class="btn" data-action="nouvelleTache">${icone("plus")}Tâche</button><button class="btn" data-action="nouveauClient">${icone("plus")}Client</button><button class="btn primaire" data-action="nouveauDf" data-type="devis">${icone("plus")}Devis</button></div></div>
+  <div class="kpis">
+    ${kpi("Projets en cours", projetsEnCours.length, `${db.projets.filter((p) => p.statut === "en_ligne" || p.statut === "maintenance").length} en ligne`, "#/projets")}
+    ${kpi("Devis en attente", devisAttente.length, devisAttente.length ? chf(somme(devisAttente)) : "Aucun devis envoyé", "#/devis")}
+    ${kpi("Facturé " + annee, chfCourt(somme(facturees)), `${facturees.length} facture${facturees.length > 1 ? "s" : ""}`, "#/devis")}
+    ${kpi("Encaissé " + annee, chfCourt(somme(payees)), aEncaisser.length ? `${chf(somme(aEncaisser))} à encaisser` : "Rien en attente", "#/devis")}
+    ${kpi("Factures en retard", facturesRetard.length, facturesRetard.length ? chf(somme(facturesRetard)) : "Tout est à jour", "#/devis", facturesRetard.length > 0)}
+    ${kpi("Tâches en retard", tachesRetard.length, `${db.taches.filter((t) => t.statut !== "fait").length} tâches ouvertes`, "#/taches", tachesRetard.length > 0)}
+  </div>
+  <div class="grille g2">
+    <section class="carte"><header><h2>Cette semaine</h2><span class="muted petit">jusqu’au ${dateFr(dans7)}</span></header>
+      ${semaine.length ? semaine.map((e) => `<div class="ligne-item cliquable" data-href="${e.href}">${e.av !== undefined ? avatar(e.av, "Responsable") : ""}<div class="corps"><div class="titre">${esc(e.titre)}</div><div class="meta">${esc(e.meta)}</div></div><span class="petit ${e.retard ? "retard" : "muted"}">${e.retard ? "En retard · " : ""}${dateCourte(e.date)}</span></div>`).join("") : '<div class="vide-liste">Rien de prévu dans les 7 prochains jours.</div>'}
+    </section>
+    <section class="carte"><header><h2>Clients par statut</h2><a class="btn discret mini" href="#/clients">Voir tout</a></header>
+      <div class="barres">${parStatut.map(([k, n]) => `<a class="barre-ligne" href="#/clients" data-action="filtrerClients" data-statut="${k}"><span>${esc(libelle("statutClient", k))}</span><span class="piste"><span class="rempli" style="display:block;width:${(n / max) * 100}%${n ? "" : ";min-width:0"}"></span></span><span class="num fort">${n}</span></a>`).join("")}</div>
+    </section>
+    <section class="carte"><header><h2>Mes tâches</h2><a class="btn discret mini" href="#/taches" data-action="filtrerTachesMoi">Tableau</a></header>
+      ${m ? (mesTaches.length ? mesTaches.slice(0, 8).map(ligneTache).join("") : '<div class="vide-liste">Aucune tâche ouverte. Bravo.</div>') : '<div class="vide-liste">Votre e-mail n’est relié à aucun membre.</div>'}
+      ${aValider.length ? `<h3 style="margin:16px 0 4px">À valider par moi</h3>${aValider.map(ligneTache).join("")}` : ""}
+    </section>
+    <section class="carte"><header><h2>Sites en cours</h2><a class="btn discret mini" href="#/projets">Voir tout</a></header>
+      ${projetsEnCours.length ? projetsEnCours.map((p) => `<div class="ligne-item cliquable" data-href="#/projets/${p.id}">${avatar(p.responsable_id, "Responsable")}<div class="corps"><div class="titre">${esc(p.nom)}</div><div class="meta">${esc(p.prochaine_etape || "Prochaine étape à définir")}</div></div>${badge("statutProjet", p.statut)}</div>`).join("") : '<div class="vide-liste">Aucun site en cours.</div>'}
+    </section>
+  </div>`;
+}
+function ligneTache(t) {
+  return `<div class="ligne-item cliquable${t.statut === "fait" ? " fait" : ""}" data-action="modifierTache" data-id="${t.id}">
+    ${avatar(t.responsable_id, "Responsable (R)")}
+    <div class="corps"><div class="titre">${esc(t.titre)}</div><div class="meta">${esc([t.projet_id && nomProjet(t.projet_id), t.sprint, t.valideur_id && "A : " + (parId("membres", t.valideur_id)?.nom || "")].filter(Boolean).join(" · "))}</div></div>
+    <div style="display:grid;justify-items:end;gap:4px">${badge("statutTache", t.statut)}${t.echeance ? `<span class="petit ${enRetard(t) ? "retard" : "muted"}">${dateCourte(t.echeance)}</span>` : ""}</div></div>`;
+}
+
+/* ==========================================================================
+   Clients
+   ========================================================================== */
+function pageClients(id) {
+  if (id) return ficheClient(id);
+  const f = filtres.clients;
+  return `
+  <div class="entete"><div><h1>Clients</h1><div class="sous-titre">${db.clients.length} PME et indépendants suivis</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouveauClient">${icone("plus")}Nouveau client</button></div></div>
+  <div class="filtres">
+    <input type="search" placeholder="Rechercher un nom, un contact, une localité" value="${esc(f.q)}" data-filtre="clients.q" aria-label="Rechercher">
+    <div class="puces">${[["", "Tous", db.clients.length], ...Object.keys(ETIQ.statutClient).map((k) => [k, libelle("statutClient", k), db.clients.filter((c) => c.statut === k).length])].filter((x) => x[0] === "" || x[2] > 0 || f.statut === x[0])
+      .map(([k, l, n]) => `<button class="puce" aria-pressed="${f.statut === k}" data-action="puce" data-filtre="clients.statut" data-valeur="${k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div>
+  </div>
+  <section class="carte sans-marge"><div class="table-wrap" id="liste-clients">${listeClients()}</div></section>`;
+}
+function listeClients() {
+  const f = filtres.clients, q = f.q.toLowerCase();
+  const l = db.clients.filter((c) => (!f.statut || c.statut === f.statut) && (!q || [c.nom, c.contact, c.localite, c.secteur, c.email].join(" ").toLowerCase().includes(q)));
+  if (!l.length) return '<div class="vide-liste">Aucun client ne correspond.</div>';
+  return `<table class="liste"><thead><tr><th>Nom</th><th class="masquer-mobile">Secteur</th><th class="masquer-mobile">Contact</th><th class="masquer-mobile">Localité</th><th>Statut</th><th class="num">Sites</th></tr></thead><tbody>
+    ${l.map((c) => `<tr data-href="#/clients/${c.id}"><td class="fort">${esc(c.nom)}</td><td class="masquer-mobile">${esc(c.secteur || "")}</td><td class="masquer-mobile">${esc(c.contact || "")}</td><td class="masquer-mobile">${esc(c.localite || "")}</td><td>${badge("statutClient", c.statut)}</td><td class="num">${db.projets.filter((p) => p.client_id === c.id).length}</td></tr>`).join("")}
+  </tbody></table>`;
+}
+function selectStatut(table, id, dict, valeur, cles) {
+  return `<select class="statut-rapide" data-maj="${table}" data-id="${id}" data-champ="statut" aria-label="Changer le statut">${options(dict, cles).map(([k, l]) => `<option value="${k}"${k === valeur ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+}
+function tableDf(liste, avecClient) {
+  if (!liste.length) return '<div class="vide-liste">Aucun devis ni facture.</div>';
+  return `<div class="table-wrap"><table class="liste"><thead><tr><th>Numéro</th>${avecClient ? '<th>Client</th>' : ""}<th class="masquer-mobile">Objet</th><th class="num">Montant</th><th>Statut</th><th class="masquer-mobile">Date</th><th></th></tr></thead><tbody>
+    ${liste.map((d) => `<tr data-action="modifierDf" data-id="${d.id}" style="cursor:pointer"><td class="fort" style="white-space:nowrap">${esc(d.numero)}</td>${avecClient ? `<td>${esc(nomClient(d.client_id))}</td>` : ""}<td class="masquer-mobile">${esc(d.objet || "")}</td><td class="num">${chf(d.montant_ttc)}</td><td>${badge("statutDf", d.statut)}</td><td class="masquer-mobile">${dateFr(d.date_emission)}</td><td class="num"><button class="btn discret mini" data-action="pdfDf" data-id="${d.id}" title="Télécharger le PDF">${icone("pdf")}PDF</button></td></tr>`).join("")}
+  </tbody></table></div>`;
+}
+function listeDocs(liste) {
+  if (!liste.length) return '<div class="vide-liste">Aucun document.</div>';
+  return liste.map((d) => `<div class="ligne-item"><span class="icone-doc">${esc((d.nom.split(".").pop() || "").slice(0, 4))}</span><div class="corps"><div class="titre">${esc(d.nom)}</div><div class="meta">${esc(libelle("typeDoc", d.type))} · ${dateFr(d.date)}${d.taille ? " · " + tailleFichier(d.taille) : ""}${d.projet_id ? " · " + esc(nomProjet(d.projet_id)) : ""}</div></div>
+    <button class="btn discret mini" data-action="ouvrirDocument" data-id="${d.id}">Ouvrir</button><button class="btn danger mini" data-action="supprimerDocument" data-id="${d.id}" aria-label="Supprimer ${esc(d.nom)}">×</button></div>`).join("");
+}
+function ficheClient(id) {
+  const c = parId("clients", id);
+  if (!c) return '<div class="vide-liste">Client introuvable. <a href="#/clients">Retour à la liste</a></div>';
+  const projets = db.projets.filter((p) => p.client_id === id);
+  const df = db.devis_factures.filter((d) => d.client_id === id);
+  const docs = db.documents.filter((d) => d.client_id === id);
+  const idsProjets = new Set(projets.map((p) => p.id));
+  const evts = [{ q: c.cree_le, t: "Client ajouté au suivi" }];
+  for (const p of projets) evts.push({ q: p.cree_le, t: `Site créé : ${p.nom}` });
+  for (const v of db.versions.filter((v) => idsProjets.has(v.projet_id))) evts.push({ q: v.date, t: `Version ${v.numero} de ${nomProjet(v.projet_id)}` });
+  for (const r of db.retours.filter((r) => idsProjets.has(r.projet_id))) evts.push({ q: r.date, t: `Retour de ${r.auteur || "client"} : ${r.contenu.slice(0, 80)}` });
+  for (const d of df) { evts.push({ q: d.date_emission, t: `${d.type === "devis" ? "Devis" : "Facture"} ${d.numero} (${chf(d.montant_ttc)})` }); if (d.date_paiement) evts.push({ q: d.date_paiement, t: `Paiement reçu : ${d.numero}` }); }
+  for (const d of docs) evts.push({ q: d.date, t: `Document ajouté : ${d.nom}` });
+  evts.sort((a, b) => String(b.q).localeCompare(String(a.q)));
+  const adresse = [c.adresse, [c.npa, c.localite].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  return `
+  <div class="fil"><a href="#/clients">Clients</a></div>
+  <div class="entete"><div><h1>${esc(c.nom)}</h1><div class="sous-titre">${esc([c.secteur, c.localite].filter(Boolean).join(" · ") || "PME")}</div></div>
+    <div class="boutons">${selectStatut("clients", c.id, "statutClient", c.statut)}<button class="btn" data-action="modifierClient" data-id="${c.id}">${icone("crayon")}Modifier</button></div></div>
+  <div class="grille g-fiche">
+    <div class="pile">
+      <section class="carte"><header><h2>Coordonnées</h2></header><dl class="infos">
+        <dt>Contact</dt><dd>${esc(c.contact || "") || vide}</dd>
+        <dt>E-mail</dt><dd>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : vide}</dd>
+        <dt>Téléphone</dt><dd>${c.telephone ? `<a href="tel:${esc(c.telephone.replace(/\s/g, ""))}">${esc(c.telephone)}</a>` : vide}</dd>
+        <dt>Adresse</dt><dd>${esc(adresse) || vide}</dd>
+        <dt>Source</dt><dd>${esc(c.source || "") || vide}</dd>
+        <dt>Suivi depuis</dt><dd>${dateFr(c.cree_le)}</dd></dl></section>
+      <section class="carte"><header><h2>Notes</h2></header>${c.notes ? `<p class="texte-libre">${esc(c.notes)}</p>` : '<p class="muted petit" style="margin:0">Pas de note.</p>'}</section>
+      <section class="carte"><header><h2>Historique</h2></header><ul class="chrono">${evts.slice(0, 25).map((e) => `<li><div>${esc(e.t)}</div><div class="quand">${dateFr(e.q)}</div></li>`).join("")}</ul></section>
+    </div>
+    <div class="pile">
+      <section class="carte"><header><h2>Sites</h2><button class="btn mini" data-action="nouveauProjet" data-client="${c.id}">${icone("plus")}Site</button></header>
+        ${projets.length ? projets.map((p) => `<div class="ligne-item cliquable" data-href="#/projets/${p.id}"><div class="corps"><div class="titre">${esc(p.nom)} ${p.version ? `<span class="muted petit">${esc(p.version)}</span>` : ""}</div><div class="meta">${esc(p.prochaine_etape || libelle("typeProjet", p.type))}</div></div>${badge("statutProjet", p.statut)}</div>`).join("") : '<div class="vide-liste">Aucun site pour ce client.</div>'}</section>
+      <section class="carte sans-marge"><header><h2>Devis et factures</h2><div class="boutons" style="display:flex;gap:6px"><button class="btn mini" data-action="nouveauDf" data-type="devis" data-client="${c.id}">${icone("plus")}Devis</button><button class="btn mini" data-action="nouveauDf" data-type="facture" data-client="${c.id}">${icone("plus")}Facture</button></div></header>
+        <div style="padding:8px 8px 6px">${tableDf(df, false)}</div></section>
+      <section class="carte"><header><h2>Documents</h2><button class="btn mini" data-action="ajouterDocument" data-client="${c.id}">${icone("plus")}Ajouter</button></header>${listeDocs(docs)}</section>
+    </div>
+  </div>`;
+}
+
+/* ==========================================================================
+   Projets / Sites
+   ========================================================================== */
+function pageProjets(id) {
+  if (id) return ficheProjet(id);
+  const f = filtres.projets;
+  const puces = [["actifs", "Actifs", db.projets.filter((p) => p.statut !== "termine").length], ["", "Tous", db.projets.length], ...Object.keys(ETIQ.statutProjet).map((k) => [k, libelle("statutProjet", k), db.projets.filter((p) => p.statut === k).length]).filter((x) => x[2] > 0 || f.statut === x[0])];
+  return `
+  <div class="entete"><div><h1>Projets / Sites</h1><div class="sous-titre">Le suivi de chaque site : client, version, mise en ligne, prochaine étape</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouveauProjet">${icone("plus")}Nouveau site</button></div></div>
+  <div class="filtres"><input type="search" placeholder="Rechercher un site, un client, un domaine" value="${esc(f.q)}" data-filtre="projets.q" aria-label="Rechercher">
+    <div class="puces">${puces.map(([k, l, n]) => `<button class="puce" aria-pressed="${f.statut === k}" data-action="puce" data-filtre="projets.statut" data-valeur="${k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div></div>
+  <section class="carte sans-marge"><div class="table-wrap" id="liste-projets">${listeProjets()}</div></section>`;
+}
+function listeProjets() {
+  const f = filtres.projets, q = f.q.toLowerCase();
+  const l = db.projets.filter((p) => (f.statut === "" || (f.statut === "actifs" ? p.statut !== "termine" : p.statut === f.statut)) && (!q || [p.nom, nomClient(p.client_id), p.domaine, p.url_en_ligne, p.depot_github].join(" ").toLowerCase().includes(q)));
+  if (!l.length) return '<div class="vide-liste">Aucun site ne correspond.</div>';
+  return `<table class="liste"><thead><tr><th>Site</th><th>Pour qui</th><th>Version</th><th class="masquer-mobile">En ligne</th><th>Statut</th><th class="masquer-mobile">Prochaine étape</th><th class="masquer-mobile">Resp.</th></tr></thead><tbody>
+    ${l.map((p) => `<tr data-href="#/projets/${p.id}"><td class="fort">${esc(p.nom)}</td><td>${esc(nomClient(p.client_id))}</td><td>${esc(p.version || "")}</td><td class="masquer-mobile">${p.url_en_ligne ? lienExterne(p.url_en_ligne, p.domaine || undefined) : vide}</td><td>${badge("statutProjet", p.statut)}</td><td class="masquer-mobile">${esc(p.prochaine_etape || "")}</td><td class="masquer-mobile">${avatar(p.responsable_id, "Responsable")}</td></tr>`).join("")}
+  </tbody></table>`;
+}
+function ficheProjet(id) {
+  const p = parId("projets", id);
+  if (!p) return '<div class="vide-liste">Site introuvable. <a href="#/projets">Retour à la liste</a></div>';
+  const offre = parId("offres", p.offre_id);
+  const versions = db.versions.filter((v) => v.projet_id === id);
+  const retours = db.retours.filter((r) => r.projet_id === id).sort((a, b) => Number(a.traite) - Number(b.traite) || b.date.localeCompare(a.date));
+  const points = db.taches.filter((t) => t.projet_id === id).sort((a, b) => Number(a.statut === "fait") - Number(b.statut === "fait") || (a.echeance || "9").localeCompare(b.echeance || "9"));
+  const ouverts = points.filter((t) => t.statut !== "fait");
+  const docs = db.documents.filter((d) => d.projet_id === id);
+  const df = db.devis_factures.filter((d) => d.projet_id === id);
+  return `
+  <div class="fil"><a href="#/projets">Projets / Sites</a>${p.client_id ? ` · <a href="#/clients/${p.client_id}">${esc(nomClient(p.client_id))}</a>` : ""}</div>
+  <div class="entete"><div><h1>${esc(p.nom)}</h1><div class="sous-titre">${esc([libelle("typeProjet", p.type), offre && "Offre " + offre.nom, p.version].filter(Boolean).join(" · "))}</div></div>
+    <div class="boutons">${selectStatut("projets", p.id, "statutProjet", p.statut)}<button class="btn" data-action="modifierProjet" data-id="${p.id}">${icone("crayon")}Modifier</button></div></div>
+  <div class="grille g-fiche">
+    <div class="pile">
+      <section class="carte"><header><h2>Fiche technique</h2></header><dl class="infos">
+        <dt>En ligne</dt><dd>${lienExterne(p.url_en_ligne)}</dd>
+        <dt>Dépôt GitHub</dt><dd>${lienGithub(p.depot_github)}</dd>
+        <dt>Projet Netlify</dt><dd>${lienNetlify(p.projet_netlify)}</dd>
+        <dt>Domaine</dt><dd>${esc(p.domaine || "") || vide}</dd>
+        <dt>Registrar</dt><dd>${esc(p.registrar || "") || vide}</dd>
+        <dt>Base Supabase</dt><dd>${p.base_supabase ? "Oui" : "Non"}</dd>
+        <dt>Version</dt><dd>${esc(p.version || "") || vide}</dd>
+        <dt>Responsable</dt><dd>${parId("membres", p.responsable_id) ? esc(parId("membres", p.responsable_id).nom) : vide}</dd>
+        <dt>Mise en ligne</dt><dd>${p.date_mise_en_ligne ? dateFr(p.date_mise_en_ligne) : vide}</dd>
+        <dt>Client</dt><dd>${p.client_id ? `<a href="#/clients/${p.client_id}">${esc(nomClient(p.client_id))}</a>` : vide}</dd></dl></section>
+      <section class="carte"><header><h2>Prochaine étape</h2></header><p class="texte-libre" style="color:var(--texte);font-weight:600">${esc(p.prochaine_etape || "À définir")}</p>${p.notes ? `<p class="texte-libre" style="margin-top:10px">${esc(p.notes)}</p>` : ""}</section>
+      <section class="carte"><header><h2>Journal des versions</h2><button class="btn mini" data-action="nouvelleVersion" data-projet="${p.id}">${icone("plus")}Version</button></header>
+        ${versions.length ? `<ul class="chrono">${versions.map((v) => `<li class="ligne-item cliquable" style="border:0;padding:0 0 14px 22px;display:block" data-action="modifierVersion" data-id="${v.id}"><div class="titre">${esc(v.numero)}</div>${v.notes ? `<div class="petit">${esc(v.notes)}</div>` : ""}<div class="quand">${dateFr(v.date)}</div></li>`).join("")}</ul>` : '<div class="vide-liste">Aucune version notée.</div>'}</section>
+    </div>
+    <div class="pile">
+      <section class="carte"><header><h2>Points ouverts <span class="muted petit">${ouverts.length}</span></h2><button class="btn mini" data-action="nouvelleTache" data-projet="${p.id}">${icone("plus")}Tâche</button></header>
+        ${points.length ? points.slice(0, 20).map(ligneTache).join("") : '<div class="vide-liste">Aucun point ouvert.</div>'}</section>
+      <section class="carte"><header><h2>Retours clients <span class="muted petit">${retours.filter((r) => !r.traite).length} à traiter</span></h2><button class="btn mini" data-action="nouveauRetour" data-projet="${p.id}">${icone("plus")}Retour</button></header>
+        ${retours.length ? retours.map((r) => `<div class="ligne-item${r.traite ? " fait" : ""}"><input type="checkbox" ${r.traite ? "checked" : ""} data-action="basculerRetour" data-id="${r.id}" aria-label="Marquer comme traité"><div class="corps cliquable" data-action="modifierRetour" data-id="${r.id}" style="cursor:pointer"><div class="titre" style="font-weight:600;white-space:pre-wrap">${esc(r.contenu)}</div><div class="meta">${esc(r.auteur || "Client")} · ${dateFr(r.date)}</div></div></div>`).join("") : '<div class="vide-liste">Aucun retour client.</div>'}</section>
+      <section class="carte sans-marge"><header><h2>Devis et factures</h2><button class="btn mini" data-action="nouveauDf" data-type="devis" data-client="${p.client_id || ""}" data-projet="${p.id}">${icone("plus")}Devis</button></header><div style="padding:8px 8px 6px">${tableDf(df, false)}</div></section>
+      <section class="carte"><header><h2>Documents</h2><button class="btn mini" data-action="ajouterDocument" data-client="${p.client_id || ""}" data-projet="${p.id}">${icone("plus")}Ajouter</button></header>${listeDocs(docs)}</section>
+    </div>
+  </div>`;
+}
+
+/* ==========================================================================
+   Offres
+   ========================================================================== */
+function pageOffres() {
+  return `
+  <div class="entete"><div><h1>Offres</h1><div class="sous-titre">Les formules packagées. Prix de départ, modifiables à tout moment.</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouvelleOffre">${icone("plus")}Nouvelle offre</button></div></div>
+  ${db.offres.length ? `<div class="offres">${db.offres.map((o) => {
+    const nb = db.projets.filter((p) => p.offre_id === o.id).length;
+    return `<article class="carte offre${o.active ? "" : " inactive"}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>${esc(o.nom)}</h2>${o.active ? '<span class="badge t-vert">Active</span>' : '<span class="badge t-gris">Inactive</span>'}</div>
+      <div class="prix">${o.prix_depart != null ? `<small>dès </small>${chfCourt(o.prix_depart)}${o.periode !== "unique" ? ` <small>${esc(libelle("periode", o.periode).toLowerCase())}</small>` : ""}` : '<small>Prix à définir</small>'}</div>
+      ${o.description ? `<p class="texte-libre" style="margin:0">${esc(o.description)}</p>` : ""}
+      ${o.inclus?.length ? `<ul>${o.inclus.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}
+      <footer><span class="muted petit">${nb} site${nb > 1 ? "s" : ""}</span><span class="espace"></span><button class="btn mini" data-action="basculerOffre" data-id="${o.id}">${o.active ? "Désactiver" : "Activer"}</button><button class="btn mini" data-action="modifierOffre" data-id="${o.id}">${icone("crayon")}Modifier</button></footer></article>`;
+  }).join("")}</div>` : '<div class="carte vide-liste">Aucune offre pour l’instant.</div>'}`;
+}
+
+/* ==========================================================================
+   Devis et factures
+   ========================================================================== */
+function pageDevis() {
+  const f = filtres.devis;
+  const auj = aujourdhui();
+  const retard = db.devis_factures.filter((d) => d.type === "facture" && d.statut === "envoye" && d.echeance && d.echeance < auj);
+  return `
+  <div class="entete"><div><h1>Devis et factures</h1><div class="sous-titre">Création, PDF au format NexusLab avec QR-facture, suivi des paiements</div></div>
+    <div class="boutons"><button class="btn" data-action="nouveauDf" data-type="facture">${icone("plus")}Facture</button><button class="btn primaire" data-action="nouveauDf" data-type="devis">${icone("plus")}Devis</button></div></div>
+  ${retard.length ? `<div class="message erreur" style="margin-bottom:16px">${retard.length} facture${retard.length > 1 ? "s" : ""} en retard de paiement : ${retard.map((d) => esc(d.numero + " (" + nomClient(d.client_id) + ")")).join(", ")}.</div>` : ""}
+  <div class="filtres">
+    <div class="onglets" role="group" aria-label="Type">${[["", "Tous"], ["devis", "Devis"], ["facture", "Factures"]].map(([k, l]) => `<button aria-pressed="${f.type === k}" data-action="puce" data-filtre="devis.type" data-valeur="${k}">${l}</button>`).join("")}</div>
+    <select data-filtre="devis.statut" aria-label="Statut"><option value="">Tous les statuts</option>${options("statutDf").map(([k, l]) => `<option value="${k}"${f.statut === k ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
+    <input type="search" placeholder="Numéro, client, objet" value="${esc(f.q)}" data-filtre="devis.q" aria-label="Rechercher">
+  </div>
+  <section class="carte sans-marge" id="liste-devis">${listeDevis()}</section>`;
+}
+function listeDevis() {
+  const f = filtres.devis, q = f.q.toLowerCase();
+  const l = db.devis_factures.filter((d) => (!f.type || d.type === f.type) && (!f.statut || d.statut === f.statut) && (!q || [d.numero, nomClient(d.client_id), d.objet].join(" ").toLowerCase().includes(q)));
+  const total = l.filter((d) => d.statut !== "annule").reduce((s, d) => s + Number(d.montant_ttc || 0), 0);
+  return `<div style="padding:8px 8px 6px">${tableDf(l, true)}</div>${l.length ? `<div class="petit muted" style="padding:0 22px 14px;text-align:right">${l.length} élément${l.length > 1 ? "s" : ""} · total hors annulés ${chf(total)}</div>` : ""}`;
+}
+
+function nouvelleLigneHtml(l = {}) {
+  return `<tr><td><input data-l="description" value="${esc(l.description || "")}" placeholder="Prestation" aria-label="Description"></td>
+    <td class="c-q"><input data-l="quantite" type="number" step="0.25" min="0" value="${l.quantite ?? 1}" aria-label="Quantité"></td>
+    <td class="c-p"><input data-l="prix" type="number" step="0.05" value="${l.prix ?? 0}" aria-label="Prix unitaire"></td>
+    <td class="c-t num total"></td><td class="c-x"><button type="button" class="icone-btn" data-suppr-ligne aria-label="Retirer la ligne">×</button></td></tr>`;
+}
+function editeurDf(id, defauts = {}) {
+  const p = parametres();
+  const ex = parId("devis_factures", id);
+  const type = ex ? ex.type : defauts.type || "devis";
+  const d = ex ? { ...ex } : {
+    type, client_id: defauts.client_id || null, projet_id: defauts.projet_id || null, objet: "",
+    lignes: [{ description: "", quantite: 1, prix: 0 }], taux_tva: Number(p.taux_tva_defaut || 0), statut: "brouillon",
+    date_emission: aujourdhui(), echeance: ajouterJours(aujourdhui(), type === "facture" ? p.delai_paiement_jours || 30 : p.validite_devis_jours || 30),
+  };
+  const champs = [
+    { nom: "client_id", label: "Client", type: "select", options: optClients(), requis: true, vide: "Choisir un client" },
+    { nom: "projet_id", label: "Site lié", type: "select", options: optProjets() },
+    { nom: "objet", label: "Objet", pleine: true, placeholder: type === "devis" ? "Création du site vitrine" : "Création du site vitrine, solde" },
+    { nom: "date_emission", label: "Date", type: "date", requis: true },
+    { nom: "echeance", label: type === "facture" ? "Échéance de paiement" : "Valable jusqu’au", type: "date" },
+    { nom: "statut", label: "Statut", type: "select", options: options("statutDf", STATUTS_DF_PAR_TYPE[type]), vide: false, defaut: "brouillon" },
+    { nom: "taux_tva", label: "TVA (%)", type: "number", step: "0.1", min: 0, defaut: 0, aide: Number(p.taux_tva_defaut) ? "" : "0 tant que NexusLab n’est pas assujetti." },
+    ...(type === "facture" ? [{ nom: "date_paiement", label: "Payée le", type: "date" }] : []),
+    { nom: "notes", label: "Remarques (imprimées sur le PDF)", type: "textarea", pleine: true, rows: 2 },
+  ];
+  const lignes = Array.isArray(d.lignes) && d.lignes.length ? d.lignes : [{ description: "", quantite: 1, prix: 0 }];
+  const extra = `<h3 style="margin:18px 0 4px">Prestations</h3>
+    <div class="table-wrap"><table class="lignes"><thead><tr><th>Description</th><th class="c-q">Quantité</th><th class="c-p">Prix unitaire</th><th class="c-t num">Total</th><th class="c-x"></th></tr></thead><tbody id="lignes-corps">${lignes.map(nouvelleLigneHtml).join("")}</tbody></table></div>
+    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap"><button type="button" class="btn mini" id="ajout-ligne">${icone("plus")}Ligne</button>
+      <select id="ajout-offre" class="statut-rapide" aria-label="Ajouter une offre"><option value="">Ajouter une offre...</option>${db.offres.filter((o) => o.active).map((o) => `<option value="${o.id}">${esc(o.nom)} (${chfCourt(o.prix_depart)})</option>`).join("")}</select></div>
+    <div class="totaux" id="totaux"></div>`;
+  const titre = ex ? `${type === "devis" ? "Devis" : "Facture"} ${ex.numero}` : type === "devis" ? "Nouveau devis" : "Nouvelle facture";
+  let pdfApres = false;
+
+  formulaire({
+    titre, champs, valeurs: d, extra, large: true,
+    enregistrer: async (v, form) => {
+      const avecPdf = pdfApres; pdfApres = false;
+      const lg = $$("#lignes-corps tr", form).map((tr) => ({
+        description: $('[data-l="description"]', tr).value.trim(),
+        quantite: Number($('[data-l="quantite"]', tr).value) || 0,
+        prix: Number($('[data-l="prix"]', tr).value) || 0,
+      })).filter((l) => l.description || l.prix);
+      if (!lg.length) throw new Error("Ajoutez au moins une prestation.");
+      v.lignes = lg;
+      v.montant_ht = arrondi(lg.reduce((s, l) => s + arrondi(l.quantite * l.prix), 0));
+      if (v.statut === "paye" && !v.date_paiement) v.date_paiement = aujourdhui();
+      let r;
+      if (ex) r = await enregistrer("devis_factures", v, id);
+      else {
+        const { data: numero, error } = await sb.rpc("prochain_numero", { p_type: type });
+        if (error) throw error;
+        r = await enregistrer("devis_factures", { ...v, type, numero });
+      }
+      toast(`${type === "devis" ? "Devis" : "Facture"} ${r.numero} enregistré${type === "facture" ? "e" : ""}.`);
+      if (avecPdf) await telechargerPdf(r.id);
+    },
+    supprimer: ex ? () => supprimerLigne("devis_factures", id) : null,
+    apresOuverture: (form) => {
+      const corps = $("#lignes-corps", form);
+      const recalcul = () => {
+        let ht = 0;
+        for (const tr of $$("tr", corps)) {
+          const t = arrondi((Number($('[data-l="quantite"]', tr).value) || 0) * (Number($('[data-l="prix"]', tr).value) || 0));
+          ht += t; $(".total", tr).textContent = fmtNombre.format(t);
+        }
+        ht = arrondi(ht);
+        const taux = Number(form.elements.taux_tva.value) || 0, tva = arrondi((ht * taux) / 100);
+        $("#totaux", form).innerHTML = `<div><span>Sous-total HT</span><span class="num">${chf(ht)}</span></div>${taux ? `<div><span>TVA ${taux} %</span><span class="num">${chf(tva)}</span></div>` : ""}<div class="ttc"><span>Total</span><span class="num">${chf(ht + tva)}</span></div>`;
+      };
+      form.addEventListener("input", recalcul);
+      corps.addEventListener("click", (e) => { if (e.target.closest("[data-suppr-ligne]")) { e.target.closest("tr").remove(); if (!$("tr", corps)) corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml()); recalcul(); } });
+      $("#ajout-ligne", form).addEventListener("click", () => { corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml()); $("tr:last-child input", corps).focus(); recalcul(); });
+      $("#ajout-offre", form).addEventListener("change", (e) => {
+        const o = parId("offres", e.target.value); e.target.value = "";
+        if (!o) return;
+        const premiere = $("tr", corps);
+        if (corps.children.length === 1 && premiere && !$('[data-l="description"]', premiere).value) premiere.remove();
+        corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml({ description: `Offre ${o.nom}${o.periode !== "unique" ? " (" + libelle("periode", o.periode).toLowerCase() + ")" : ""}`, quantite: 1, prix: Number(o.prix_depart || 0) }));
+        if (!form.elements.objet.value) form.elements.objet.value = "Offre " + o.nom;
+        recalcul();
+      });
+      form.elements.projet_id.addEventListener("change", (e) => { const pr = parId("projets", e.target.value); if (pr?.client_id && !form.elements.client_id.value) form.elements.client_id.value = pr.client_id; });
+      recalcul();
+      // Boutons supplémentaires : PDF, transformer en facture, payée
+      const pied = $("footer", form), envoi = $('[type="submit"]', pied);
+      const bPdf = document.createElement("button");
+      bPdf.type = "button"; bPdf.className = "btn"; bPdf.innerHTML = icone("pdf") + "Enregistrer et PDF";
+      bPdf.addEventListener("click", () => { pdfApres = true; form.requestSubmit(envoi); });
+      envoi.addEventListener("click", () => (pdfApres = false));
+      pied.insertBefore(bPdf, envoi);
+      if (ex && ex.type === "devis" && ["envoye", "accepte"].includes(ex.statut)) {
+        const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "Transformer en facture";
+        b.addEventListener("click", () => facturerDevis(ex.id)); pied.insertBefore(b, $("[data-fermer]", pied));
+      }
+      if (ex && ex.type === "facture" && ex.statut === "envoye") {
+        const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "Marquer payée";
+        b.addEventListener("click", () => marquerPayee(ex.id)); pied.insertBefore(b, $("[data-fermer]", pied));
+      }
+    },
+  });
+}
+async function facturerDevis(id) {
+  const d = parId("devis_factures", id);
+  if (!d || !(await confirmer(`Créer une facture à partir du devis ${d.numero} ?`, "Créer la facture"))) return;
+  try {
+    const p = parametres();
+    const { data: numero, error } = await sb.rpc("prochain_numero", { p_type: "facture" });
+    if (error) throw error;
+    const f = await enregistrer("devis_factures", {
+      type: "facture", numero, client_id: d.client_id, projet_id: d.projet_id, objet: d.objet, lignes: d.lignes,
+      montant_ht: d.montant_ht, taux_tva: d.taux_tva, statut: "brouillon", date_emission: aujourdhui(),
+      echeance: ajouterJours(aujourdhui(), p.delai_paiement_jours || 30), devis_origine_id: d.id, notes: d.notes,
+    });
+    await enregistrer("devis_factures", { statut: "facture" }, d.id);
+    const c = parId("clients", d.client_id);
+    if (c && ["prospect", "contacte", "rendez_vous", "offre_envoyee"].includes(c.statut)) await enregistrer("clients", { statut: "mandat_signe" }, c.id);
+    fermerModale(); rendre(); toast(`Facture ${f.numero} créée.`);
+    editeurDf(f.id);
+  } catch (err) { toast(msgErreur(err), "erreur"); }
+}
+async function marquerPayee(id) {
+  try { await enregistrer("devis_factures", { statut: "paye", date_paiement: aujourdhui() }, id); fermerModale(); rendre(); toast("Facture marquée payée."); }
+  catch (err) { toast(msgErreur(err), "erreur"); }
+}
+
+/* ==========================================================================
+   Tâches
+   ========================================================================== */
+function pageTaches() {
+  const f = filtres.taches;
+  return `
+  <div class="entete"><div><h1>Tâches</h1><div class="sous-titre">R : responsable, celui qui fait · A : valideur, celui qui valide</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouvelleTache">${icone("plus")}Nouvelle tâche</button></div></div>
+  <div class="filtres">
+    <div class="onglets" role="group" aria-label="Vue">${[["statut", "Par statut"], ["personne", "Par personne"], ["sprint", "Par sprint"]].map(([k, l]) => `<button aria-pressed="${f.vue === k}" data-action="puce" data-filtre="taches.vue" data-valeur="${k}">${l}</button>`).join("")}</div>
+    <select data-filtre="taches.sprint" aria-label="Sprint"><option value="">Tous les sprints</option>${sprints().map((s) => `<option${f.sprint === s ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>
+    <select data-filtre="taches.personne" aria-label="Personne"><option value="">Toute l’équipe</option>${db.membres.map((m) => `<option value="${m.id}"${f.personne === m.id ? " selected" : ""}>${esc(m.nom)}</option>`).join("")}</select>
+    <select data-filtre="taches.projet" aria-label="Site"><option value="">Tous les sites</option>${db.projets.map((p) => `<option value="${p.id}"${f.projet === p.id ? " selected" : ""}>${esc(p.nom)}</option>`).join("")}</select>
+    <label class="petit" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-filtre="taches.fait" ${f.fait === "1" ? "checked" : ""}> Afficher les tâches faites</label>
+  </div>
+  <div id="liste-taches">${listeTaches()}</div>`;
+}
+function tachesFiltrees() {
+  const f = filtres.taches;
+  return db.taches.filter((t) => (!f.sprint || t.sprint === f.sprint) && (!f.projet || t.projet_id === f.projet)
+    && (!f.personne || t.responsable_id === f.personne || t.valideur_id === f.personne) && (f.fait === "1" || t.statut !== "fait"));
+}
+function carteTache(t) {
+  const h = t.heures_estimees != null || t.heures_reelles != null ? `<span title="Heures réelles / estimées">${(Number(t.heures_reelles) || 0).toLocaleString("fr-CH")} / ${(Number(t.heures_estimees) || 0).toLocaleString("fr-CH")} h</span>` : "";
+  return `<article class="tache" draggable="true" data-id="${t.id}" data-action="modifierTache" tabindex="0">
+    ${t.projet_id ? `<div class="projet">${esc(nomProjet(t.projet_id))}</div>` : ""}
+    <div class="titre">${esc(t.titre)}</div>
+    <div class="bas"><span class="raci">R ${avatar(t.responsable_id, "Responsable (R)")}</span><span class="raci">A ${avatar(t.valideur_id, "Valideur (A)")}</span>
+      <span class="droite">${h}${t.echeance ? `<span class="${enRetard(t) ? "retard" : ""}">${dateCourte(t.echeance)}</span>` : ""}</span></div>
+    ${filtres.taches.vue !== "statut" ? `<div>${badge("statutTache", t.statut)}${t.sprint && filtres.taches.vue !== "sprint" ? ` <span class="muted petit">${esc(t.sprint)}</span>` : ""}</div>` : t.sprint ? `<div class="muted petit">${esc(t.sprint)}</div>` : ""}
+  </article>`;
+}
+function listeTaches() {
+  const f = filtres.taches, l = tachesFiltrees();
+  const est = l.reduce((s, t) => s + Number(t.heures_estimees || 0), 0), reel = l.reduce((s, t) => s + Number(t.heures_reelles || 0), 0);
+  let cols;
+  if (f.vue === "personne") cols = [...membresActifs().map((m) => [m.id, m.nom, l.filter((t) => t.responsable_id === m.id)]), ["", "Non attribuées", l.filter((t) => !parId("membres", t.responsable_id))]].filter((c) => c[0] !== "" || c[2].length);
+  else if (f.vue === "sprint") { const s = sprints().filter((x) => !f.sprint || x === f.sprint); cols = [...s.map((x) => [x, x, l.filter((t) => t.sprint === x)]), ["", "Sans sprint", l.filter((t) => !t.sprint)]].filter((c) => c[0] !== "" || c[2].length); }
+  else cols = Object.keys(ETIQ.statutTache).filter((k) => k !== "fait" || f.fait === "1").map((k) => [k, libelle("statutTache", k), l.filter((t) => t.statut === k)]);
+  return `<div class="resume-heures"><span><strong>${l.filter((t) => t.statut !== "fait").length}</strong> ouvertes</span><span><strong>${l.filter(enRetard).length}</strong> en retard</span><span>Heures estimées <strong>${heures(est)}</strong></span><span>Heures réelles <strong>${heures(reel)}</strong></span></div>
+  <div class="kanban">${cols.map(([k, titre, ts]) => `<section class="colonne"${f.vue === "statut" ? ` data-statut="${k}"` : ""}><header><h3>${esc(titre)}</h3><span class="muted petit">${ts.length}</span></header><div class="cartes">${ts.map(carteTache).join("") || '<div class="muted petit" style="padding:8px 4px">Rien ici.</div>'}</div></section>`).join("")}</div>`;
+}
+function brancherGlisser() {
+  if (filtres.taches.vue !== "statut") return;
+  let glisse = null;
+  for (const c of $$(".tache")) {
+    c.addEventListener("dragstart", (e) => { glisse = c.dataset.id; c.classList.add("glisse"); e.dataTransfer.effectAllowed = "move"; });
+    c.addEventListener("dragend", () => c.classList.remove("glisse"));
+  }
+  for (const col of $$(".colonne[data-statut]")) {
+    col.addEventListener("dragover", (e) => { e.preventDefault(); col.classList.add("survol"); });
+    col.addEventListener("dragleave", () => col.classList.remove("survol"));
+    col.addEventListener("drop", async (e) => {
+      e.preventDefault(); col.classList.remove("survol");
+      const t = parId("taches", glisse);
+      if (!t || t.statut === col.dataset.statut) return;
+      try { await enregistrer("taches", { statut: col.dataset.statut }, t.id); rendre(); }
+      catch (err) { toast(msgErreur(err), "erreur"); }
+    });
+  }
+}
+
+/* ==========================================================================
+   Équipe
+   ========================================================================== */
+function pageEquipe() {
+  const auj = aujourdhui();
+  const charges = db.membres.map((m) => db.taches.filter((t) => t.responsable_id === m.id && t.statut !== "fait").reduce((s, t) => s + Math.max(0, Number(t.heures_estimees || 0) - Number(t.heures_reelles || 0)), 0));
+  const maxCharge = Math.max(1, ...charges);
+  const sp = sprints();
+  const actifs = membresActifs();
+  return `
+  <div class="entete"><div><h1>Équipe</h1><div class="sous-titre">Rôles, charge de travail et heures</div></div>
+    <div class="boutons"><button class="btn" data-action="nouveauMembre">${icone("plus")}Membre</button></div></div>
+  <div class="membres">${db.membres.map((m, i) => {
+    const r = db.taches.filter((t) => t.responsable_id === m.id);
+    const ouvertes = r.filter((t) => t.statut !== "fait");
+    const aValider = db.taches.filter((t) => t.valideur_id === m.id && t.statut === "a_valider");
+    const retard = ouvertes.filter((t) => t.echeance && t.echeance < auj);
+    const reel = r.reduce((s, t) => s + Number(t.heures_reelles || 0), 0);
+    const projets = db.projets.filter((p) => p.responsable_id === m.id && p.statut !== "termine");
+    return `<article class="carte${m.actif ? "" : " offre inactive"}">
+      <div class="membre-tete">${avatar(m.id, "", true)}<div style="flex:1;min-width:0"><h2>${esc(m.nom)}</h2><div class="muted petit">${esc(m.role || "")}</div></div><button class="btn discret mini" data-action="modifierMembre" data-id="${m.id}" aria-label="Modifier ${esc(m.nom)}">${icone("crayon")}</button></div>
+      <div class="petit muted">${m.email ? esc(m.email) : '<span class="retard">E-mail de connexion manquant</span>'}${m.actif ? "" : " · inactif"}</div>
+      <div class="stats"><div class="stat"><div class="v">${ouvertes.length}</div><div class="l">Tâches (R)</div></div><div class="stat"><div class="v">${aValider.length}</div><div class="l">À valider (A)</div></div><div class="stat"><div class="v${retard.length ? " retard" : ""}">${retard.length}</div><div class="l">En retard</div></div></div>
+      <div class="petit" style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Charge restante</span><strong>${heures(charges[i])}</strong></div>
+      <div class="charge"><div style="width:${(charges[i] / maxCharge) * 100}%"></div></div>
+      <div class="petit muted" style="margin-top:10px">${heures(reel)} réalisées au total${projets.length ? " · responsable de " + projets.map((p) => esc(p.nom)).join(", ") : ""}</div>
+    </article>`;
+  }).join("")}</div>
+  <section class="carte sans-marge"><header><h2>Heures par sprint</h2><span class="muted petit">réelles / estimées</span></header>
+    ${sp.length ? `<div class="table-wrap" style="padding:8px 8px 6px"><table class="liste"><thead><tr><th>Sprint</th>${actifs.map((m) => `<th class="num">${esc(m.nom)}</th>`).join("")}<th class="num">Total</th></tr></thead><tbody>
+      ${sp.map((s) => { const ts = db.taches.filter((t) => t.sprint === s); const cell = (l) => `${heures(l.reduce((a, t) => a + Number(t.heures_reelles || 0), 0))} / ${heures(l.reduce((a, t) => a + Number(t.heures_estimees || 0), 0))}`;
+        return `<tr><td class="fort">${esc(s)}</td>${actifs.map((m) => `<td class="num">${cell(ts.filter((t) => t.responsable_id === m.id))}</td>`).join("")}<td class="num fort">${cell(ts)}</td></tr>`; }).join("")}
+    </tbody></table></div>` : '<div class="vide-liste">Les heures apparaîtront ici dès que des tâches auront un sprint.</div>'}
+  </section>`;
+}
+
+/* ==========================================================================
+   Documents (GED)
+   ========================================================================== */
+function pageDocuments() {
+  const f = filtres.documents;
+  return `
+  <div class="entete"><div><h1>Documents</h1><div class="sous-titre">Fichiers classés par client et par site</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="ajouterDocument">${icone("plus")}Ajouter des fichiers</button></div></div>
+  <div class="filtres">
+    <input type="search" placeholder="Nom du fichier" value="${esc(f.q)}" data-filtre="documents.q" aria-label="Rechercher">
+    <select data-filtre="documents.client" aria-label="Client"><option value="">Tous les clients</option>${db.clients.map((c) => `<option value="${c.id}"${f.client === c.id ? " selected" : ""}>${esc(c.nom)}</option>`).join("")}</select>
+    <select data-filtre="documents.projet" aria-label="Site"><option value="">Tous les sites</option>${db.projets.map((p) => `<option value="${p.id}"${f.projet === p.id ? " selected" : ""}>${esc(p.nom)}</option>`).join("")}</select>
+    <select data-filtre="documents.type" aria-label="Type"><option value="">Tous les types</option>${options("typeDoc").map(([k, l]) => `<option value="${k}"${f.type === k ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
+  </div>
+  <div id="liste-documents">${listeDocuments()}</div>`;
+}
+function listeDocuments() {
+  const f = filtres.documents, q = f.q.toLowerCase();
+  const l = db.documents.filter((d) => (!q || d.nom.toLowerCase().includes(q)) && (!f.client || d.client_id === f.client) && (!f.projet || d.projet_id === f.projet) && (!f.type || d.type === f.type));
+  if (!l.length) return '<div class="carte vide-liste">Aucun document. Ajoutez des contrats, maquettes, logos ou photos.</div>';
+  const groupes = new Map();
+  for (const d of l) { const k = d.client_id || ""; if (!groupes.has(k)) groupes.set(k, []); groupes.get(k).push(d); }
+  return [...groupes.entries()].sort((a, b) => (nomClient(a[0]) || "zzz").localeCompare(nomClient(b[0]) || "zzz", "fr")).map(([cid, docs]) => {
+    const parProjet = new Map();
+    for (const d of docs) { const k = d.projet_id || ""; if (!parProjet.has(k)) parProjet.set(k, []); parProjet.get(k).push(d); }
+    return `<section class="carte groupe-docs"><h3>${cid ? `<a href="#/clients/${cid}">${esc(nomClient(cid))}</a>` : "Sans client"} <span class="muted petit">${docs.length}</span></h3>
+      ${[...parProjet.entries()].map(([pid, ds]) => `<div class="sous-groupe"><h4>${pid ? esc(nomProjet(pid)) : "Général"}</h4>${listeDocs(ds)}</div>`).join("")}</section>`;
+  }).join("");
+}
+function ajouterDocument(defauts = {}) {
+  const champs = [
+    { nom: "client_id", label: "Client", type: "select", options: optClients() },
+    { nom: "projet_id", label: "Site", type: "select", options: optProjets(), vide: "Général" },
+    { nom: "type", label: "Type", type: "select", options: options("typeDoc"), vide: false, defaut: "autre" },
+    { nom: "date", label: "Date", type: "date", requis: true },
+  ];
+  formulaire({
+    titre: "Ajouter des fichiers", champs, texteBouton: "Envoyer",
+    valeurs: { client_id: defauts.client_id || null, projet_id: defauts.projet_id || null, type: "autre", date: aujourdhui() },
+    extra: `<div class="champ pleine" style="margin-top:14px"><label for="f_fichiers">Fichiers <span class="req">*</span></label><input id="f_fichiers" name="fichiers" type="file" multiple required><small>50 Mo maximum par fichier.</small></div>`,
+    enregistrer: async (v, form) => {
+      const fichiers = [...form.elements.fichiers.files];
+      if (!fichiers.length) throw new Error("Choisissez au moins un fichier.");
+      const trop = fichiers.find((f) => f.size > 52428800);
+      if (trop) throw new Error(`${trop.name} dépasse 50 Mo.`);
+      if (v.projet_id && !v.client_id) v.client_id = parId("projets", v.projet_id)?.client_id || null;
+      for (const f of fichiers) {
+        const chemin = `${v.client_id || "sans-client"}/${v.projet_id || "general"}/${Date.now()}-${nomFichierSur(f.name)}`;
+        const { error } = await sb.storage.from(CONFIG.bucket).upload(chemin, f, { contentType: f.type || undefined, upsert: false });
+        if (error) throw error;
+        const { error: e2 } = await sb.from("documents").insert({ ...v, nom: f.name, fichier_path: chemin, taille: f.size, mime: f.type || null });
+        if (e2) { await sb.storage.from(CONFIG.bucket).remove([chemin]); throw e2; }
+      }
+      await charger("documents");
+      toast(fichiers.length > 1 ? `${fichiers.length} fichiers ajoutés.` : "Fichier ajouté.");
+    },
+    apresOuverture: (form) => form.elements.projet_id.addEventListener("change", (e) => { const p = parId("projets", e.target.value); if (p?.client_id) form.elements.client_id.value = p.client_id; }),
+  });
+}
+async function ouvrirDocument(id) {
+  const d = parId("documents", id);
+  if (!d) return;
+  const fenetre = window.open("", "_blank");
+  const { data, error } = await sb.storage.from(CONFIG.bucket).createSignedUrl(d.fichier_path, 300);
+  if (error) { if (fenetre) fenetre.close(); toast(msgErreur(error), "erreur"); return; }
+  if (fenetre) fenetre.location.href = data.signedUrl; else location.href = data.signedUrl;
+}
+async function supprimerDocument(id) {
+  const d = parId("documents", id);
+  if (!d || !(await confirmer(`Supprimer définitivement « ${d.nom} » ?`))) return;
+  try {
+    const { error } = await sb.storage.from(CONFIG.bucket).remove([d.fichier_path]);
+    if (error) throw error;
+    await supprimerLigne("documents", id);
+    const lie = db.devis_factures.find((x) => x.pdf_path === d.fichier_path);
+    if (lie) await enregistrer("devis_factures", { pdf_path: null }, lie.id);
+    rendre(); toast("Document supprimé.");
+  } catch (err) { toast(msgErreur(err), "erreur"); }
+}
+
+/* ==========================================================================
+   Réglages
+   ========================================================================== */
+const champsParametres = () => [
+  { nom: "raison_sociale", label: "Raison sociale (bénéficiaire)", requis: true },
+  { nom: "complement", label: "Complément d’adresse", placeholder: "c/o ..." },
+  { nom: "adresse", label: "Rue et numéro" },
+  { nom: "npa", label: "NPA" },
+  { nom: "localite", label: "Localité" },
+  { nom: "pays", label: "Pays (code)", defaut: "CH" },
+  { nom: "email", label: "E-mail", type: "email" },
+  { nom: "telephone", label: "Téléphone", type: "tel" },
+  { nom: "site_web", label: "Site web" },
+  { type: "separateur" },
+  { nom: "iban", label: "IBAN ou QR-IBAN", placeholder: "CH00 0000 0000 0000 0000 0", aide: "Nécessaire pour la QR-facture. Compte de Vardena." },
+  { nom: "numero_tva", label: "Numéro TVA", placeholder: "CHE-000.000.000 TVA" },
+  { nom: "taux_tva_defaut", label: "Taux TVA par défaut (%)", type: "number", step: "0.1", min: 0, defaut: 0 },
+  { nom: "delai_paiement_jours", label: "Délai de paiement (jours)", type: "number", step: "1", min: 0, defaut: 30 },
+  { nom: "validite_devis_jours", label: "Validité des devis (jours)", type: "number", step: "1", min: 0, defaut: 30 },
+  { nom: "mention_pied", label: "Mention en pied de page des PDF", type: "textarea", pleine: true, rows: 2 },
+];
+function pageReglages() {
+  const p = parametres();
+  const nuit = document.documentElement.dataset.theme === "nuit";
+  return `
+  <div class="entete"><div><h1>Réglages</h1><div class="sous-titre">Coordonnées de l’agence pour les devis et factures, compte personnel</div></div></div>
+  <div class="grille g-fiche">
+    <div class="pile">
+      <section class="carte"><header><h2>Mon compte</h2></header>
+        <dl class="infos"><dt>Connecté</dt><dd>${esc(session?.user?.email || "")}</dd><dt>Membre</dt><dd>${esc(moi()?.nom || "") || vide}</dd></dl>
+        <form id="form-mdp" class="grille-form" style="grid-template-columns:1fr;margin-top:16px">
+          <div class="champ"><label for="mdp-n">Nouveau mot de passe</label><input id="mdp-n" type="password" name="mdp" minlength="8" autocomplete="new-password" required></div>
+          <button class="btn" type="submit">Changer le mot de passe</button></form></section>
+      <section class="carte"><header><h2>Affichage</h2></header><button class="btn" data-action="theme">${icone(nuit ? "soleil" : "lune")}${nuit ? "Passer en mode jour" : "Passer en mode nuit"}</button></section>
+    </div>
+    <section class="carte"><header><h2>Coordonnées de l’agence</h2></header>
+      <form id="form-parametres"><div class="grille-form">${champsParametres().map((c) => champHtml(c, p[c.nom])).join("")}</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn primaire" type="submit">Enregistrer</button></div></form></section>
+  </div>`;
+}
+function ibanNettoye(i) { return String(i || "").replace(/\s+/g, "").toUpperCase(); }
+function ibanValide(i) {
+  const s = ibanNettoye(i);
+  if (!/^(CH|LI)\d{2}[0-9A-Z]{17}$/.test(s)) return false;
+  const r = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, (c) => c.charCodeAt(0) - 55);
+  let m = 0; for (const ch of r) m = (m * 10 + Number(ch)) % 97;
+  return m === 1;
+}
+document.addEventListener("submit", async (e) => {
+  if (e.target.id === "form-parametres") {
+    e.preventDefault();
+    const v = lireForm(e.target, champsParametres());
+    if (v.iban) { if (!ibanValide(v.iban)) { toast("IBAN invalide : vérifiez les chiffres (compte suisse CH ou LI).", "erreur"); return; } v.iban = ibanNettoye(v.iban); }
+    try {
+      const { error } = await sb.from("parametres").upsert({ id: 1, ...v });
+      if (error) throw error;
+      await charger("parametres"); toast("Réglages enregistrés."); rendre();
+    } catch (err) { toast(msgErreur(err), "erreur"); }
+  }
+  if (e.target.id === "form-mdp") {
+    e.preventDefault();
+    const { error } = await sb.auth.updateUser({ password: e.target.elements.mdp.value });
+    if (error) toast(msgErreur(error), "erreur"); else { toast("Mot de passe changé."); e.target.reset(); }
+  }
+});
+
+/* ==========================================================================
+   PDF : devis et factures (pdf-lib), QR-facture suisse (qrcode-generator)
+   ========================================================================== */
+function chargerScript(src) {
+  return new Promise((ok, ko) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error("Impossible de charger l’outil PDF. Vérifiez la connexion.")); document.head.appendChild(s); });
+}
+async function chargerLibsPdf() {
+  if (!window.PDFLib) await chargerScript(LIBS_PDF[0]);
+  if (!window.qrcode) await chargerScript(LIBS_PDF[1]);
+}
+/* Helvetica (PDF standard) ne connaît que l'alphabet Windows-1252 : on retire le reste. */
+function pdfTexte(s) {
+  return String(s ?? "").replace(/[\r\n\t]+/g, " ").replace(/[‐-―−]/g, "-").replace(/[   ]/g, " ")
+    .replace(/[^\x20-\x7E\xA0-\xFF‘’“”…€Œœ]/g, "");
+}
+function couper(texte, police, taille, largeur) {
+  const lignes = [];
+  for (const para of String(texte ?? "").split(/\n/)) {
+    const mots = pdfTexte(para).split(" ");
+    let l = "";
+    for (const m of mots) {
+      const essai = l ? l + " " + m : m;
+      if (police.widthOfTextAtSize(essai, taille) <= largeur || !l) l = essai; else { lignes.push(l); l = m; }
+    }
+    lignes.push(l);
+  }
+  return lignes;
+}
+function estQrIban(iban) { const iid = Number(ibanNettoye(iban).slice(4, 9)); return iid >= 30000 && iid <= 31999; }
+/* Référence QR (27 chiffres, contrôle modulo 10 récursif) à partir du numéro de facture */
+function referenceQrr(numero) {
+  const base = (String(numero).replace(/\D/g, "") || "0").slice(-26).padStart(26, "0");
+  const table = [0, 9, 4, 6, 8, 2, 7, 1, 3, 5];
+  let report = 0;
+  for (const ch of base) report = table[(report + Number(ch)) % 10];
+  return base + ((10 - report) % 10);
+}
+const groupeRef = (r) => r.slice(0, 2) + " " + r.slice(2).replace(/(\d{5})(?=\d)/g, "$1 ");
+const groupeIban = (i) => ibanNettoye(i).replace(/(.{4})(?=.)/g, "$1 ");
+const montantQr = (n) => Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+async function genererPdf(d) {
+  await chargerLibsPdf();
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const p = parametres(), client = parId("clients", d.client_id), projet = parId("projets", d.projet_id);
+  const estFacture = d.type === "facture";
+  const avecQr = estFacture && ibanValide(p.iban) && d.statut !== "annule";
+  const mm = (v) => (v * 72) / 25.4, W = 595.28, H = 841.89, M = mm(20);
+  const C = { navy: rgb(20 / 255, 33 / 255, 61 / 255), corail: rgb(1, 107 / 255, 87 / 255), gris: rgb(74 / 255, 85 / 255, 104 / 255), ligne: rgb(228 / 255, 221 / 255, 210 / 255), creme: rgb(246 / 255, 242 / 255, 236 / 255), noir: rgb(0, 0, 0), blanc: rgb(1, 1, 1) };
+  const pdf = await PDFDocument.create();
+  const titreDoc = `${estFacture ? "Facture" : "Devis"} ${d.numero}`;
+  pdf.setTitle(titreDoc); pdf.setAuthor(p.raison_sociale || "NexusLab"); pdf.setCreator("Dashboard NexusLab"); pdf.setLanguage("fr-CH");
+  const f = await pdf.embedFont(StandardFonts.Helvetica), fb = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const T = (pg, s, x, y, o = {}) => {
+    const font = o.font || f, size = o.size || 9.5, txt = pdfTexte(s), w = font.widthOfTextAtSize(txt, size);
+    pg.drawText(txt, { x: o.align === "right" ? x - w : o.align === "centre" ? x - w / 2 : x, y, size, font, color: o.color || C.navy });
+  };
+  const pages = [];
+  const nouvellePage = () => { const pg = pdf.addPage([W, H]); pages.push(pg); return pg; };
+  let page = nouvellePage();
+
+  // En-tête : logo « nexus » et coordonnées
+  const s = 0.62, x0 = M, haut = H - M;
+  page.drawCircle({ x: x0 + 11 * s, y: haut - 11 * s, size: 10.5 * s, color: C.navy });
+  page.drawRectangle({ x: x0 + 18 * s, y: haut - 14.1 * s, width: 10 * s, height: 6.2 * s, color: C.navy });
+  page.drawCircle({ x: x0 + 36.5 * s, y: haut - 11 * s, size: 10.5 * s, color: C.corail });
+  T(page, "nexus", x0 + 48 * s + 8, haut - 18 * s + 1, { font: fb, size: 19 });
+  const coord = [p.complement, p.adresse, [p.npa, p.localite].filter(Boolean).join(" "), p.email, p.telephone, p.site_web].filter(Boolean);
+  T(page, p.raison_sociale || "NexusLab", W - M, haut - 8, { font: fb, size: 10, align: "right" });
+  coord.forEach((l, i) => T(page, l, W - M, haut - 21 - i * 11, { size: 8.5, color: C.gris, align: "right" }));
+
+  // Titre et destinataire
+  let y = H - M - mm(42);
+  T(page, estFacture ? "Facture" : "Devis", M, y, { font: fb, size: 26 });
+  T(page, d.numero, M, y - 18, { font: fb, size: 11, color: C.corail });
+  const xc = mm(118);
+  let yc = H - M - mm(36);
+  T(page, estFacture ? "Facturé à" : "Adressé à", xc, yc, { size: 8, color: C.gris }); yc -= 14;
+  const lignesClient = client ? [client.nom, client.contact, client.adresse, [client.npa, client.localite].filter(Boolean).join(" ")].filter(Boolean) : ["Client à préciser"];
+  lignesClient.forEach((l, i) => { T(page, l, xc, yc, { font: i === 0 ? fb : f, size: i === 0 ? 11 : 9.5 }); yc -= i === 0 ? 14 : 12; });
+
+  y -= 48;
+  const meta = [["Date", dateFr(d.date_emission)], [estFacture ? "Échéance" : "Valable jusqu’au", d.echeance ? dateFr(d.echeance) : ""], ["Site", projet?.nom || ""]].filter((m) => m[1]);
+  if (d.devis_origine_id) meta.push(["Selon devis", parId("devis_factures", d.devis_origine_id)?.numero || ""]);
+  for (const [k, v] of meta) { T(page, k, M, y, { size: 8.5, color: C.gris }); T(page, v, M + 80, y, { size: 9.5 }); y -= 14; }
+  y = Math.min(y, yc) - 16;
+  if (d.objet) { for (const l of couper(d.objet, fb, 12.5, W - 2 * M)) { T(page, l, M, y, { font: fb, size: 12.5 }); y -= 16; } y -= 8; }
+
+  // Tableau des prestations
+  const xQ = W - M - mm(58), xP = W - M - mm(30), xT = W - M - 6, largeurDesc = xQ - mm(16) - (M + 6);
+  const enteteTableau = () => {
+    page.drawRectangle({ x: M, y: y - 7, width: W - 2 * M, height: 22, color: C.creme });
+    T(page, "Description", M + 6, y, { font: fb, size: 8.5 });
+    T(page, "Qté", xQ, y, { font: fb, size: 8.5, align: "right" });
+    T(page, "Prix unitaire", xP, y, { font: fb, size: 8.5, align: "right" });
+    T(page, "Total CHF", xT, y, { font: fb, size: 8.5, align: "right" });
+    y -= 24;
+  };
+  enteteTableau();
+  const basPage = mm(28);
+  for (const l of d.lignes || []) {
+    const desc = couper(l.description || "", f, 9.5, largeurDesc);
+    const hauteur = desc.length * 12 + 10;
+    if (y - hauteur < basPage) { page = nouvellePage(); y = H - M; enteteTableau(); }
+    desc.forEach((t, i) => T(page, t, M + 6, y - i * 12));
+    T(page, Number(l.quantite || 0).toLocaleString("de-CH", { maximumFractionDigits: 2 }), xQ, y, { align: "right" });
+    T(page, fmtNombre.format(l.prix || 0), xP, y, { align: "right" });
+    T(page, fmtNombre.format(arrondi((l.quantite || 0) * (l.prix || 0))), xT, y, { align: "right" });
+    y -= hauteur;
+    page.drawLine({ start: { x: M, y: y + 8 }, end: { x: W - M, y: y + 8 }, thickness: 0.5, color: C.ligne });
+  }
+
+  // Totaux
+  const taux = Number(d.taux_tva || 0);
+  if (y - 80 < basPage) { page = nouvellePage(); y = H - M; }
+  y -= 8;
+  const xL = W - M - mm(70);
+  T(page, "Sous-total HT", xL, y, { color: C.gris }); T(page, fmtNombre.format(d.montant_ht || 0), xT, y, { align: "right" }); y -= 15;
+  if (taux) { T(page, `TVA ${taux.toLocaleString("de-CH")} %`, xL, y, { color: C.gris }); T(page, fmtNombre.format(d.montant_tva || 0), xT, y, { align: "right" }); y -= 15; }
+  page.drawLine({ start: { x: xL, y: y + 9 }, end: { x: W - M, y: y + 9 }, thickness: 1.5, color: C.corail });
+  y -= 6;
+  T(page, "Total CHF", xL, y, { font: fb, size: 12 }); T(page, fmtNombre.format(d.montant_ttc || 0), xT, y, { font: fb, size: 12, align: "right" });
+  y -= 30;
+
+  // Conditions et remarques
+  const conditions = [];
+  if (estFacture) conditions.push(d.echeance ? `Payable jusqu’au ${dateFr(d.echeance)}${ibanValide(p.iban) ? ", sur le compte " + groupeIban(p.iban) : ""}.` : "Payable à réception.");
+  else conditions.push(`${d.echeance ? "Offre valable jusqu’au " + dateFr(d.echeance) + ". " : ""}Rien ne commence sans votre accord écrit. Nom de domaine et hébergement en sus, sauf mention contraire.`);
+  if (!taux) conditions.push(p.numero_tva ? "" : "NexusLab n’est pas assujetti à la TVA.");
+  if (d.notes) conditions.push(d.notes);
+  for (const c of conditions.filter(Boolean)) for (const l of couper(c, f, 9, W - 2 * M)) {
+    if (y < basPage) { page = nouvellePage(); y = H - M; }
+    T(page, l, M, y, { size: 9, color: C.gris }); y -= 12;
+  }
+
+  // Section paiement (QR-facture) en bas de la dernière page, ou sur une nouvelle page
+  if (avecQr) { if (y < mm(105) + mm(14)) { page = nouvellePage(); y = H - M; } dessinerQrFacture(page, f, fb, d, p, client, C, mm, W); }
+  else if (estFacture && !ibanValide(p.iban)) toast("PDF sans QR-facture : renseignez l’IBAN dans Réglages.", "erreur");
+
+  // Pied de page sur chaque page
+  const pied = [p.mention_pied, p.numero_tva].filter(Boolean).join(" · ");
+  pages.forEach((pg, i) => {
+    const yp = avecQr && i === pages.length - 1 ? mm(105) + mm(5) : mm(12);
+    if (pied) T(pg, pied, M, yp, { size: 7.5, color: C.gris });
+    if (pages.length > 1) T(pg, `${i + 1} / ${pages.length}`, W - M, yp, { size: 7.5, color: C.gris, align: "right" });
+  });
+  return pdf.save();
+}
+
+function dessinerQrFacture(page, f, fb, d, p, client, C, mm, W) {
+  const iban = ibanNettoye(p.iban), qrIban = estQrIban(iban);
+  const reference = qrIban ? referenceQrr(d.numero) : "";
+  const message = pdfTexte(`${d.numero}${d.objet ? " " + d.objet : ""}`).slice(0, 140);
+  const deb = client && client.nom && client.npa && client.localite ? client : null;
+  const coupe = (s, n) => pdfTexte(s || "").slice(0, n);
+  const donnees = [
+    "SPC", "0200", "1", iban,
+    "S", coupe(p.raison_sociale, 70), coupe(p.adresse, 70), "", coupe(p.npa, 16), coupe(p.localite, 35), (p.pays || "CH").slice(0, 2),
+    "", "", "", "", "", "", "",
+    Number(d.montant_ttc).toFixed(2), "CHF",
+    ...(deb ? ["S", coupe(deb.nom, 70), coupe(deb.adresse, 70), "", coupe(deb.npa, 16), coupe(deb.localite, 35), "CH"] : ["", "", "", "", "", "", ""]),
+    qrIban ? "QRR" : "NON", reference, message, "EPD",
+  ].join("\n");
+
+  const T = (s, x, y, font, size) => page.drawText(pdfTexte(s), { x, y, size, font, color: C.noir });
+  const haut = mm(105);
+  // Lignes de découpe
+  page.drawLine({ start: { x: 0, y: haut }, end: { x: W, y: haut }, thickness: 0.5, color: C.noir, dashArray: [3, 2] });
+  page.drawLine({ start: { x: mm(62), y: 0 }, end: { x: mm(62), y: haut }, thickness: 0.5, color: C.noir, dashArray: [3, 2] });
+  const avis = "Séparer avant paiement";
+  T(avis, W / 2 - f.widthOfTextAtSize(avis, 7) / 2, haut + 3, f, 7);
+
+  const creancier = [groupeIban(iban), p.raison_sociale, p.adresse, [p.npa, p.localite].filter(Boolean).join(" ")].filter(Boolean);
+  const debiteur = deb ? [deb.nom, deb.adresse, [deb.npa, deb.localite].join(" ")].filter(Boolean) : null;
+  const cadre = (x, y, w, h) => {
+    const k = mm(3), o = { thickness: 0.75, color: C.noir };
+    [[x, y + h, x + k, y + h], [x, y + h, x, y + h - k], [x + w, y + h, x + w - k, y + h], [x + w, y + h, x + w, y + h - k],
+     [x, y, x + k, y], [x, y, x, y + k], [x + w, y, x + w - k, y], [x + w, y, x + w, y + k]].forEach(([a, b, c, e]) => page.drawLine({ start: { x: a, y: b }, end: { x: c, y: e }, ...o }));
+  };
+
+  // Récépissé (gauche, 62 mm)
+  let x = mm(5), y = haut - mm(5) - 11;
+  T("Récépissé", x, y, fb, 11); y -= 18;
+  T("Compte / Payable à", x, y, fb, 6); y -= 9;
+  for (const l of creancier) { T(l, x, y, f, 8); y -= 9; }
+  if (reference) { y -= 4; T("Référence", x, y, fb, 6); y -= 9; T(groupeRef(reference), x, y, f, 8); y -= 9; }
+  y -= 4; T("Payable par", x, y, fb, 6); y -= 9;
+  if (debiteur) for (const l of debiteur) { T(l, x, y, f, 8); y -= 9; }
+  else cadre(x, y - mm(20) + 6, mm(52), mm(20));
+  T("Monnaie", x, mm(33), fb, 6); T("Montant", x + mm(13), mm(33), fb, 6);
+  T("CHF", x, mm(29), f, 8); T(montantQr(d.montant_ttc), x + mm(13), mm(29), f, 8);
+  const depot = "Point de dépôt";
+  T(depot, mm(57) - fb.widthOfTextAtSize(depot, 6), mm(19), fb, 6);
+
+  // Section paiement (droite)
+  x = mm(67); y = haut - mm(5) - 11;
+  T("Section paiement", x, y, fb, 11);
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+  const qr = qrcode(0, "M"); qr.addData(donnees, "Byte"); qr.make();
+  const n = qr.getModuleCount(), taille = mm(46), cell = taille / n, qx = mm(67), qy = mm(42);
+  // Un seul tracé, modules sombres regroupés par ligne et légèrement chevauchants : pas de joints blancs
+  let chemin = "";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+    if (!qr.isDark(r, c)) continue;
+    let fin = c; while (fin + 1 < n && qr.isDark(r, fin + 1)) fin++;
+    chemin += `M${c} ${r - 0.03}H${fin + 1}V${r + 1.03}H${c}Z`;
+    c = fin;
+  }
+  page.drawSvgPath(chemin, { x: qx, y: qy + taille, scale: cell, color: C.noir, borderWidth: 0 });
+  // Croix suisse au centre
+  const cx = qx + taille / 2, cy = qy + taille / 2;
+  page.drawRectangle({ x: cx - mm(3.5), y: cy - mm(3.5), width: mm(7), height: mm(7), color: C.blanc });
+  page.drawRectangle({ x: cx - mm(3.05), y: cy - mm(3.05), width: mm(6.1), height: mm(6.1), color: C.noir });
+  page.drawRectangle({ x: cx - mm(1.95), y: cy - mm(0.6), width: mm(3.9), height: mm(1.2), color: C.blanc });
+  page.drawRectangle({ x: cx - mm(0.6), y: cy - mm(1.95), width: mm(1.2), height: mm(3.9), color: C.blanc });
+  T("Monnaie", x, mm(33), fb, 8); T("Montant", x + mm(14), mm(33), fb, 8);
+  T("CHF", x, mm(28.5), f, 10); T(montantQr(d.montant_ttc), x + mm(14), mm(28.5), f, 10);
+
+  x = mm(118); y = haut - mm(5) - 8;
+  T("Compte / Payable à", x, y, fb, 8); y -= 11;
+  for (const l of creancier) { T(l, x, y, f, 10); y -= 11; }
+  if (reference) { y -= 5; T("Référence", x, y, fb, 8); y -= 11; T(groupeRef(reference), x, y, f, 10); y -= 11; }
+  y -= 5; T("Informations supplémentaires", x, y, fb, 8); y -= 11;
+  for (const l of couper(message, f, 10, mm(87)).slice(0, 2)) { T(l, x, y, f, 10); y -= 11; }
+  y -= 5; T("Payable par", x, y, fb, 8); y -= 11;
+  if (debiteur) for (const l of debiteur) { T(l, x, y, f, 10); y -= 11; }
+  else cadre(x, y - mm(25) + 8, mm(65), mm(25));
+}
+
+async function telechargerPdf(id) {
+  const d = parId("devis_factures", id);
+  if (!d) return;
+  toast("Préparation du PDF...");
+  try {
+    const octets = await genererPdf(d);
+    const blob = new Blob([octets], { type: "application/pdf" });
+    const nom = `${d.numero} ${nomClient(d.client_id)}`.trim();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = nomFichierSur(nom) + ".pdf";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    // Archive dans la GED (classé par client et par site)
+    const chemin = `${d.client_id || "sans-client"}/${d.projet_id || "general"}/${nomFichierSur(d.numero)}.pdf`;
+    const { error } = await sb.storage.from(CONFIG.bucket).upload(chemin, blob, { contentType: "application/pdf", upsert: true });
+    if (error) throw error;
+    const { error: e2 } = await sb.from("documents").upsert({ client_id: d.client_id, projet_id: d.projet_id, nom: `${d.numero}.pdf`, type: d.type, fichier_path: chemin, taille: blob.size, mime: "application/pdf", date: aujourdhui() }, { onConflict: "fichier_path" });
+    if (e2) throw e2;
+    if (d.pdf_path !== chemin) await enregistrer("devis_factures", { pdf_path: chemin }, d.id);
+    await charger("documents");
+    rendre();
+  } catch (err) { console.error(err); toast("PDF : " + msgErreur(err), "erreur"); }
+}
+
+/* ==========================================================================
+   Actions (boutons) et filtres : délégation d'événements
+   ========================================================================== */
+const ACTIONS = {
+  nouveauClient: () => editerClient(),
+  modifierClient: (ds) => editerClient(ds.id),
+  filtrerClients: (ds) => { filtres.clients.statut = ds.statut; location.hash = "#/clients"; },
+  nouveauProjet: (ds) => editerProjet(null, { client_id: ds.client || null }),
+  modifierProjet: (ds) => editerProjet(ds.id),
+  nouvelleOffre: () => editerOffre(),
+  modifierOffre: (ds) => editerOffre(ds.id),
+  basculerOffre: async (ds) => { const o = parId("offres", ds.id); try { await enregistrer("offres", { active: !o.active }, o.id); rendre(); } catch (err) { toast(msgErreur(err), "erreur"); } },
+  nouveauDf: (ds) => editeurDf(null, { type: ds.type, client_id: ds.client || null, projet_id: ds.projet || null }),
+  modifierDf: (ds) => editeurDf(ds.id),
+  pdfDf: (ds) => telechargerPdf(ds.id),
+  nouvelleTache: (ds) => editerTache(null, { projet_id: ds.projet || null }),
+  modifierTache: (ds) => editerTache(ds.id),
+  filtrerTachesMoi: () => { if (moi()) filtres.taches.personne = moi().id; location.hash = "#/taches"; },
+  nouveauMembre: () => editerMembre(),
+  modifierMembre: (ds) => editerMembre(ds.id),
+  nouvelleVersion: (ds) => editerVersion(null, ds.projet),
+  modifierVersion: (ds) => editerVersion(ds.id),
+  nouveauRetour: (ds) => editerRetour(null, ds.projet),
+  modifierRetour: (ds) => editerRetour(ds.id),
+  basculerRetour: async (ds) => { const r = parId("retours", ds.id); try { await enregistrer("retours", { traite: !r.traite }, r.id); rendre(); } catch (err) { toast(msgErreur(err), "erreur"); } },
+  ajouterDocument: (ds) => ajouterDocument({ client_id: ds.client || null, projet_id: ds.projet || null }),
+  ouvrirDocument: (ds) => ouvrirDocument(ds.id),
+  supprimerDocument: (ds) => supprimerDocument(ds.id),
+  puce: (ds) => { const [pg, cle] = ds.filtre.split("."); filtres[pg][cle] = ds.valeur; rendre(); },
+  theme: () => { appliquerTheme(document.documentElement.dataset.theme === "nuit" ? "jour" : "nuit", true); if (lireRoute().page === "reglages") rendre(); },
+  deconnexion: async () => { await sb.auth.signOut(); },
+  menu: () => $("#app").classList.toggle("menu-ouvert"),
+};
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-fermer]")) { fermerModale(); return; }
+  const a = e.target.closest("[data-action]");
+  if (a && !a.closest("dialog")) {
+    if (a.tagName !== "INPUT") e.preventDefault();
+    const fn = ACTIONS[a.dataset.action];
+    if (fn) fn(a.dataset, a);
+    return;
+  }
+  const l = e.target.closest("[data-href]");
+  if (l && !e.target.closest("a, button, input, select, label")) location.hash = l.dataset.href;
+  if ($("#app").classList.contains("menu-ouvert") && !e.target.closest(".barre, [data-action=menu]")) $("#app").classList.remove("menu-ouvert");
+});
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches("article.tache[data-action]")) { e.preventDefault(); ACTIONS.modifierTache(e.target.dataset); }
+});
+const LISTES = { clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
+function majFiltre(el) {
+  const [pg, cle] = el.dataset.filtre.split(".");
+  filtres[pg][cle] = el.type === "checkbox" ? (el.checked ? "1" : "") : el.value;
+  const [sel, fn] = LISTES[pg];
+  const cible = $(sel);
+  if (cible) { cible.innerHTML = fn(); apresRendu(pg); }
+}
+document.addEventListener("input", (e) => { if (e.target.matches('input[type="search"][data-filtre]')) majFiltre(e.target); });
+document.addEventListener("change", async (e) => {
+  const el = e.target;
+  if (el.matches("select[data-filtre], input[type=checkbox][data-filtre]")) { majFiltre(el); return; }
+  if (el.matches("select[data-maj]")) {
+    try { await enregistrer(el.dataset.maj, { [el.dataset.champ]: el.value }, el.dataset.id); toast("Statut mis à jour."); rendre(); }
+    catch (err) { toast(msgErreur(err), "erreur"); rendre(); }
+  }
+});
+
+/* ==========================================================================
+   Thème (jour / nuit)
+   ========================================================================== */
+function appliquerTheme(t, memoriser) {
+  document.documentElement.dataset.theme = t;
+  if (memoriser) ecrireStockage("nexus-theme", t);
+  const nuit = t === "nuit";
+  $("#btn-theme").innerHTML = icone(nuit ? "soleil" : "lune") + (nuit ? "Jour" : "Nuit");
+  $("#btn-theme").title = nuit ? "Passer en mode jour" : "Passer en mode nuit";
+}
+appliquerTheme(lireStockage("nexus-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "nuit" : "jour"));
+
+/* ==========================================================================
+   Connexion et démarrage
+   ========================================================================== */
+function messageAuth(texte, type) { const m = $("#auth-message"); m.hidden = !texte; m.className = "message " + (type || "erreur"); m.textContent = texte || ""; }
+function afficherConnexion(texte, type) {
+  $("#app").hidden = true; $("#ecran-connexion").hidden = false;
+  $("#form-connexion").hidden = false; $("#form-nouveau-mdp").hidden = true;
+  $("#auth-titre").textContent = "Connexion";
+  messageAuth(texte, type);
+}
+function afficherNouveauMdp() {
+  $("#app").hidden = true; $("#ecran-connexion").hidden = false;
+  $("#form-connexion").hidden = true; $("#form-nouveau-mdp").hidden = false;
+  $("#auth-titre").textContent = "Choisir un mot de passe";
+  $("#auth-sous-titre").textContent = "Bienvenue. Choisissez votre mot de passe (8 caractères minimum).";
+  messageAuth("");
+}
+async function entrer() {
+  $("#ecran-connexion").hidden = true; $("#app").hidden = false;
+  $("#contenu").innerHTML = '<div class="chargement"><span class="pointille" aria-label="Chargement"></span></div>';
+  try { await chargerTout(); }
+  catch (err) { $("#contenu").innerHTML = `<div class="message erreur">Chargement impossible : ${esc(msgErreur(err))}</div>`; return; }
+  const m = moi();
+  if (!m) {
+    messageSortie = `Le compte ${session?.user?.email || ""} n’est relié à aucun membre actif de NexusLab. Demandez à un membre de l’ajouter dans Équipe.`;
+    await sb.auth.signOut();
+    afficherConnexion(`Le compte ${session?.user?.email || ""} n’est relié à aucun membre actif de NexusLab. Demandez à un membre de l’ajouter dans Équipe.`);
+    return;
+  }
+  $("#utilisateur").innerHTML = `${avatar(m.id, "")}<div><div style="font-weight:700;color:#fff">${esc(m.nom)}</div><div style="font-size:.75rem;opacity:.75">${esc(m.role || "")}</div></div>`;
+  if (!location.hash || /access_token|type=/.test(location.hash)) history.replaceState(null, "", location.pathname + "#/accueil");
+  rendre();
+}
+$("#form-connexion").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!sb) return;
+  const btn = $('[type="submit"]', e.target); btn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email: e.target.email.value.trim(), password: e.target.mdp.value });
+  btn.disabled = false;
+  if (error) messageAuth(msgErreur(error));
+});
+$("#btn-oubli").addEventListener("click", async () => {
+  const email = $("#form-connexion").email.value.trim();
+  if (!email) { messageAuth("Indiquez d’abord votre e-mail ci-dessus."); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  messageAuth(error ? msgErreur(error) : "Si ce compte existe, un e-mail de réinitialisation vient d’être envoyé.", error ? "erreur" : "ok");
+});
+$("#form-nouveau-mdp").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (e.target.mdp.value !== e.target.mdp2.value) { messageAuth("Les deux mots de passe ne sont pas identiques."); return; }
+  const { error } = await sb.auth.updateUser({ password: e.target.mdp.value });
+  if (error) { messageAuth(msgErreur(error)); return; }
+  e.target.reset();
+  history.replaceState(null, "", location.pathname + "#/accueil");
+  await entrer();
+});
+
+let dejaEntre = false;
+let messageSortie = "";
+async function demarrer() {
+  if (!sb) { afficherConnexion("La base de données n’est pas encore configurée (URL et clé Supabase manquantes)."); $("#form-connexion").hidden = true; return; }
+  const modeMdp = /type=(invite|recovery)/.test(location.hash);
+  const erreurLien = /error_description/.test(location.hash);
+  const { data } = await sb.auth.getSession();
+  session = data.session;
+  sb.auth.onAuthStateChange((evt, s) => {
+    session = s;
+    if (evt === "PASSWORD_RECOVERY") { afficherNouveauMdp(); return; }
+    if (evt === "SIGNED_OUT") { dejaEntre = false; Object.keys(db).forEach((k) => (db[k] = [])); afficherConnexion(messageSortie); messageSortie = ""; return; }
+    if (evt === "SIGNED_IN" && !dejaEntre && $("#form-nouveau-mdp").hidden) { dejaEntre = true; setTimeout(entrer, 0); }
+  });
+  if (erreurLien && !session) { history.replaceState(null, "", location.pathname); afficherConnexion("Ce lien a expiré ou a déjà été utilisé. Utilisez « Mot de passe oublié ? » pour en recevoir un nouveau."); return; }
+  if (session && modeMdp) { afficherNouveauMdp(); return; }
+  if (session) { dejaEntre = true; await entrer(); } else afficherConnexion();
+}
+// Données fraîches quand on revient sur l'onglet après quelques minutes
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible" || !session || !dejaEntre || dlg.open || Date.now() - dernierChargement < 120000) return;
+  try { await chargerTout(); rendre(); } catch { /* hors ligne : on garde l'affichage */ }
+});
+demarrer();
+</script>
+</body>
+</html>

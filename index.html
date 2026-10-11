@@ -474,7 +474,7 @@ const ETIQ = {
   typeProjet: { vitrine: "Vitrine", vitrine_reservation: "Vitrine + réservation", pack_visibilite: "Pack visibilité", outil: "Outil sur mesure", autre: "Autre" },
   statutDf: { brouillon: ["Brouillon", "gris"], envoye: ["Envoyé", "bleu"], accepte: ["Accepté", "violet"], facture: ["Facturé", "jaune"], paye: ["Payé", "vert"], annule: ["Annulé", "rouge"] },
   statutTache: { a_faire: ["À faire", "gris"], en_cours: ["En cours", "bleu"], a_valider: ["À valider", "jaune"], fait: ["Fait", "vert"] },
-  typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", autre: "Autre" },
+  typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", presentation: "Présentation", cours: "Cours BTA", administratif: "Administratif", proces_verbal: "Procès-verbal", autre: "Autre" },
   periode: { unique: "Paiement unique", mois: "Par mois", an: "Par an" },
 };
 const STATUTS_DF_PAR_TYPE = { devis: ["brouillon", "envoye", "accepte", "facture", "annule"], facture: ["brouillon", "envoye", "paye", "annule"] };
@@ -828,7 +828,7 @@ const filtres = {
   projets: { q: "", statut: "actifs" },
   devis: { type: "", statut: "", q: "" },
   taches: { vue: "statut", sprint: "", personne: "", projet: "", fait: "1" },
-  documents: { q: "", client: "", projet: "", type: "" },
+  documents: { q: "", client: "", projet: "", type: "", portee: "" },
 };
 function lireRoute() {
   const h = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
@@ -1347,9 +1347,10 @@ function pageEquipe() {
 function pageDocuments() {
   const f = filtres.documents;
   return `
-  <div class="entete"><div><h1>Documents</h1><div class="sous-titre">Fichiers classés par client et par site</div></div>
-    <div class="boutons"><button class="btn primaire" data-action="ajouterDocument">${icone("plus")}Ajouter des fichiers</button></div></div>
+  <div class="entete"><div><h1>Documents</h1><div class="sous-titre">Documents internes, et fichiers classés par client et par site</div></div>
+    <div class="boutons"><button class="btn" data-action="ajouterDocument" data-interne="1">${icone("plus")}Document interne</button><button class="btn primaire" data-action="ajouterDocument">${icone("plus")}Ajouter des fichiers</button></div></div>
   <div class="filtres">
+    <div class="onglets" role="group" aria-label="Classement">${[["", "Tous"], ["interne", "Internes"], ["client", "Clients"]].map(([k, l]) => `<button aria-pressed="${f.portee === k}" data-action="puce" data-filtre="documents.portee" data-valeur="${k}">${l}</button>`).join("")}</div>
     <input type="search" placeholder="Nom du fichier" value="${esc(f.q)}" data-filtre="documents.q" aria-label="Rechercher">
     <select data-filtre="documents.client" aria-label="Client"><option value="">Tous les clients</option>${db.clients.map((c) => `<option value="${c.id}"${f.client === c.id ? " selected" : ""}>${esc(c.nom)}</option>`).join("")}</select>
     <select data-filtre="documents.projet" aria-label="Site"><option value="">Tous les sites</option>${db.projets.map((p) => `<option value="${p.id}"${f.projet === p.id ? " selected" : ""}>${esc(p.nom)}</option>`).join("")}</select>
@@ -1359,11 +1360,21 @@ function pageDocuments() {
 }
 function listeDocuments() {
   const f = filtres.documents, q = f.q.toLowerCase();
-  const l = db.documents.filter((d) => (!q || d.nom.toLowerCase().includes(q)) && (!f.client || d.client_id === f.client) && (!f.projet || d.projet_id === f.projet) && (!f.type || d.type === f.type));
-  if (!l.length) return '<div class="carte vide-liste">Aucun document. Ajoutez des contrats, maquettes, logos ou photos.</div>';
+  const l = db.documents.filter((d) => (!q || d.nom.toLowerCase().includes(q)) && (!f.client || d.client_id === f.client) && (!f.projet || d.projet_id === f.projet) && (!f.type || d.type === f.type)
+    && (!f.portee || (f.portee === "interne") === !!d.interne));
+  if (!l.length) return '<div class="carte vide-liste">Aucun document. Ajoutez des présentations BTA, contrats, maquettes, logos ou photos.</div>';
+  // Documents internes en premier, regroupés par type
+  const internes = l.filter((d) => d.interne);
+  let html = "";
+  if (internes.length) {
+    const parType = new Map();
+    for (const d of internes) { if (!parType.has(d.type)) parType.set(d.type, []); parType.get(d.type).push(d); }
+    html += `<section class="carte groupe-docs"><h3>Documents internes <span class="muted petit">NexusLab, BTA, Vardena · ${internes.length}</span></h3>
+      ${[...parType.entries()].sort((a, b) => libelle("typeDoc", a[0]).localeCompare(libelle("typeDoc", b[0]), "fr")).map(([t, ds]) => `<div class="sous-groupe"><h4>${esc(libelle("typeDoc", t))}</h4>${listeDocs(ds)}</div>`).join("")}</section>`;
+  }
   const groupes = new Map();
-  for (const d of l) { const k = d.client_id || ""; if (!groupes.has(k)) groupes.set(k, []); groupes.get(k).push(d); }
-  return [...groupes.entries()].sort((a, b) => (nomClient(a[0]) || "zzz").localeCompare(nomClient(b[0]) || "zzz", "fr")).map(([cid, docs]) => {
+  for (const d of l) { if (d.interne) continue; const k = d.client_id || ""; if (!groupes.has(k)) groupes.set(k, []); groupes.get(k).push(d); }
+  return html + [...groupes.entries()].sort((a, b) => (nomClient(a[0]) || "zzz").localeCompare(nomClient(b[0]) || "zzz", "fr")).map(([cid, docs]) => {
     const parProjet = new Map();
     for (const d of docs) { const k = d.projet_id || ""; if (!parProjet.has(k)) parProjet.set(k, []); parProjet.get(k).push(d); }
     return `<section class="carte groupe-docs"><h3>${cid ? `<a href="#/clients/${cid}">${esc(nomClient(cid))}</a>` : "Sans client"} <span class="muted petit">${docs.length}</span></h3>
@@ -1372,23 +1383,29 @@ function listeDocuments() {
 }
 function ajouterDocument(defauts = {}) {
   const champs = [
+    { nom: "classement", label: "Classement", type: "select", vide: false, pleine: true, defaut: "client",
+      options: [["client", "Dossier d’un client ou d’un site"], ["interne", "Document interne (NexusLab, BTA, Vardena)"]] },
     { nom: "client_id", label: "Client", type: "select", options: optClients() },
     { nom: "projet_id", label: "Site", type: "select", options: optProjets(), vide: "Général" },
     { nom: "type", label: "Type", type: "select", options: options("typeDoc"), vide: false, defaut: "autre" },
     { nom: "date", label: "Date", type: "date", requis: true },
   ];
   formulaire({
-    titre: "Ajouter des fichiers", champs, texteBouton: "Envoyer",
-    valeurs: { client_id: defauts.client_id || null, projet_id: defauts.projet_id || null, type: "autre", date: aujourdhui() },
+    titre: defauts.interne ? "Ajouter un document interne" : "Ajouter des fichiers", champs, texteBouton: "Envoyer",
+    valeurs: { classement: defauts.interne ? "interne" : "client", client_id: defauts.client_id || null, projet_id: defauts.projet_id || null, type: defauts.interne ? "presentation" : "autre", date: aujourdhui() },
     extra: `<div class="champ pleine" style="margin-top:14px"><label for="f_fichiers">Fichiers <span class="req">*</span></label><input id="f_fichiers" name="fichiers" type="file" multiple required><small>50 Mo maximum par fichier.</small></div>`,
     enregistrer: async (v, form) => {
       const fichiers = [...form.elements.fichiers.files];
       if (!fichiers.length) throw new Error("Choisissez au moins un fichier.");
       const trop = fichiers.find((f) => f.size > 52428800);
       if (trop) throw new Error(`${trop.name} dépasse 50 Mo.`);
+      v.interne = v.classement === "interne";
+      delete v.classement;
+      if (v.interne) { v.client_id = null; v.projet_id = null; }
       if (v.projet_id && !v.client_id) v.client_id = parId("projets", v.projet_id)?.client_id || null;
       for (const f of fichiers) {
-        const chemin = `${v.client_id || "sans-client"}/${v.projet_id || "general"}/${Date.now()}-${nomFichierSur(f.name)}`;
+        const dossier = v.interne ? "interne" : `${v.client_id || "sans-client"}/${v.projet_id || "general"}`;
+        const chemin = `${dossier}/${Date.now()}-${nomFichierSur(f.name)}`;
         const { error } = await sb.storage.from(CONFIG.bucket).upload(chemin, f, { contentType: f.type || undefined, upsert: false });
         if (error) throw error;
         const { error: e2 } = await sb.from("documents").insert({ ...v, nom: f.name, fichier_path: chemin, taille: f.size, mime: f.type || null });
@@ -1397,7 +1414,16 @@ function ajouterDocument(defauts = {}) {
       await charger("documents");
       toast(fichiers.length > 1 ? `${fichiers.length} fichiers ajoutés.` : "Fichier ajouté.");
     },
-    apresOuverture: (form) => form.elements.projet_id.addEventListener("change", (e) => { const p = parId("projets", e.target.value); if (p?.client_id) form.elements.client_id.value = p.client_id; }),
+    apresOuverture: (form) => {
+      form.elements.projet_id.addEventListener("change", (e) => { const p = parId("projets", e.target.value); if (p?.client_id) form.elements.client_id.value = p.client_id; });
+      // Document interne : pas de client ni de site
+      const majClassement = () => {
+        const interne = form.elements.classement.value === "interne";
+        for (const n of ["client_id", "projet_id"]) form.elements[n].closest(".champ").hidden = interne;
+      };
+      form.elements.classement.addEventListener("change", majClassement);
+      majClassement();
+    },
   });
 }
 async function ouvrirDocument(id) {
@@ -1765,7 +1791,7 @@ const ACTIONS = {
   nouveauRetour: (ds) => editerRetour(null, ds.projet),
   modifierRetour: (ds) => editerRetour(ds.id),
   basculerRetour: async (ds) => { const r = parId("retours", ds.id); try { await enregistrer("retours", { traite: !r.traite }, r.id); rendre(); } catch (err) { toast(msgErreur(err), "erreur"); } },
-  ajouterDocument: (ds) => ajouterDocument({ client_id: ds.client || null, projet_id: ds.projet || null }),
+  ajouterDocument: (ds) => ajouterDocument({ client_id: ds.client || null, projet_id: ds.projet || null, interne: ds.interne === "1" }),
   ouvrirDocument: (ds) => ouvrirDocument(ds.id),
   supprimerDocument: (ds) => supprimerDocument(ds.id),
   puce: (ds) => { const [pg, cle] = ds.filtre.split("."); filtres[pg][cle] = ds.valeur; rendre(); },

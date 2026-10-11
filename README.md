@@ -1,6 +1,12 @@
 # Dashboard NexusLab
 
-Poste de commande interne de NexusLab : clients, sites, offres, devis et factures (PDF avec QR-facture), tâches RACI, équipe, documents.
+Poste de commande interne de NexusLab, à l'identité du site nexus-lab.ch (graphite, blanc cassé, corail).
+
+- **Pilotage** : Ma journée, Agenda (tout ce qui a une date), Objectifs et indicateurs (automatiques ou à la main).
+- **Commercial** : Clients et pipeline (glisser-déposer, prochaine action, relances), Offres, Devis et factures (PDF avec QR-facture).
+- **Production** : Projets / Sites, Tâches RACI (avec statut Bloqué), Documents (clients et internes).
+- **Équipe et BTA** : Équipe (charge, heures, compétences), Réunions et registre des décisions (débrief tops / flops), Ressources.
+- Partout : recherche Cmd+K et bouton « Créer ».
 
 ## Ce qu'il y a dans ce dépôt
 
@@ -8,6 +14,7 @@ Poste de commande interne de NexusLab : clients, sites, offres, devis et facture
 - `fonts/` : Manrope, hébergée avec le site.
 - `supabase/001_schema.sql` : tables, règles RLS, stockage. Idempotent, peut être relancé.
 - `supabase/002_donnees_initiales.sql` : membres, offres, clients et sites de départ. Idempotent.
+- `supabase/003_documents_internes.sql`, `supabase/004_pilotage_equipe.sql` : évolutions, à exécuter dans l'ordre. Idempotentes.
 - `_headers` : en-têtes de sécurité Netlify (page non indexée, CSP).
 
 ## Fonctionnement

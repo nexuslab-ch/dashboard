@@ -12,7 +12,8 @@
 <style>
 /* ==========================================================================
    NexusLab, dashboard interne. Tout le style est ici.
-   Couleurs centralisées dans les variables ci-dessous (mode jour et mode nuit).
+   Identité reprise du site nexus-lab.ch : graphite, blanc cassé, corail,
+   boutons en pilule, verre dépoli, ombres douces. Mode jour et mode nuit.
    ========================================================================== */
 @font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800; font-display: swap;
   src: url("fonts/manrope-latin.woff2") format("woff2");
@@ -22,141 +23,202 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
 :root {
-  --navy: #14213D; --navy-deep: #0D1730; --navy-soft: #1D2D52;
-  --creme: #F6F2EC; --creme-2: #EFE9E0; --carte: #FFFDFA;
-  --corail: #FF6B57; --corail-fonce: #B5402D; --corail-doux: #FFE9E4;
-  --texte: #14213D; --texte-2: #4A5568; --texte-3: #6B7280;
-  --ligne: #E4DDD2; --ligne-forte: #CFC6B8;
-  --fond: var(--creme); --champ: #FFFFFF;
-  --sur-navy: #F6F2EC; --sur-navy-2: #C9D1E0;
-  --ombre: 0 1px 2px rgba(20,33,61,.05), 0 6px 20px rgba(20,33,61,.05);
-  --rayon: 16px; --rayon-s: 10px;
-  --t-gris: #4A5568;   --t-gris-bg: #EDEEF0;
+  --graphite: #1D1D1F; --graphite-2: #2C2C2E; --sur-graphite: #FAF9F7; --sur-graphite-2: #C7C7CC;
+  --fond: #F4F3F0; --fond-2: #ECEAE5; --carte: #FFFFFF; --carte-haut: #FFFEFC; --champ: #FFFFFF;
+  --texte: #1D1D1F; --texte-2: #515154; --texte-3: #6E6E73;
+  --ligne: #E6E3DE; --ligne-forte: #D1CDC6;
+  --corail: #FF5F57; --corail-fonce: #C43A32; --corail-doux: #FFE3E1; --corail-texte: #C43A32;
+  --verre: rgba(255, 255, 255, 0.74); --verre-bord: rgba(29, 29, 31, 0.09);
+  --lueur: rgba(255, 95, 87, 0.10);
+  --ombre-s: 0 1px 2px rgba(29, 29, 31, 0.05), 0 8px 24px -12px rgba(29, 29, 31, 0.14);
+  --ombre: 0 2px 4px rgba(29, 29, 31, 0.04), 0 12px 24px -8px rgba(29, 29, 31, 0.10), 0 32px 64px -24px rgba(29, 29, 31, 0.18);
+  --ombre-verre: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(29, 29, 31, 0.05), 0 12px 32px -12px rgba(29, 29, 31, 0.22);
+  --rayon: 20px; --rayon-s: 12px; --pilule: 999px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-gris: #515154;   --t-gris-bg: #EDEEF0;
   --t-bleu: #34548A;   --t-bleu-bg: #E7EDF7;
   --t-vert: #2F6544;   --t-vert-bg: #E4EFE7;
   --t-jaune: #80560A;  --t-jaune-bg: #FAF0DA;
   --t-violet: #5A4699; --t-violet-bg: #EEEAF8;
-  --t-corail: #B5402D; --t-corail-bg: #FFE9E4;
+  --t-corail: #C43A32; --t-corail-bg: #FFE3E1;
   --t-rouge: #A3241A;  --t-rouge-bg: #FBE1DD;
-  --barre: #FF6B57;
 }
 :root[data-theme="nuit"] {
-  --fond: #0D1730; --carte: #16244A; --creme-2: #1A2950; --champ: #111D3D;
-  --texte: #F6F2EC; --texte-2: #C9D1E0; --texte-3: #9AA6BF;
-  --ligne: #26365E; --ligne-forte: #36497A;
-  --ombre: 0 1px 2px rgba(0,0,0,.25), 0 6px 20px rgba(0,0,0,.2);
-  --corail-doux: rgba(255,107,87,.16);
-  --t-gris: #C9D1E0;   --t-gris-bg: rgba(201,209,224,.12);
-  --t-bleu: #A9C1EC;   --t-bleu-bg: rgba(91,127,184,.22);
-  --t-vert: #9FD0AE;   --t-vert-bg: rgba(110,156,126,.22);
-  --t-jaune: #F2C670;  --t-jaune-bg: rgba(217,162,58,.2);
-  --t-violet: #C6B8F0; --t-violet-bg: rgba(143,123,200,.24);
-  --t-corail: #FFB0A3; --t-corail-bg: rgba(255,107,87,.2);
-  --t-rouge: #FF9B8F;  --t-rouge-bg: rgba(218,41,28,.22);
+  --graphite: #F5F5F7; --graphite-2: #E5E5EA; --sur-graphite: #1D1D1F; --sur-graphite-2: #3A3A3C;
+  --fond: #0E0E10; --fond-2: #1A1A1D; --carte: #18181B; --carte-haut: #1C1C1F; --champ: #111113;
+  --texte: #F5F5F7; --texte-2: #C7C7CC; --texte-3: #98989D;
+  --ligne: #2C2C2E; --ligne-forte: #3A3A3C;
+  --corail-doux: rgba(255, 95, 87, 0.16); --corail-texte: #FF8A84;
+  --verre: rgba(24, 24, 27, 0.78); --verre-bord: rgba(255, 255, 255, 0.08);
+  --lueur: rgba(255, 95, 87, 0.08);
+  --ombre-s: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  --ombre: 0 2px 4px rgba(0, 0, 0, 0.3), 0 12px 24px -8px rgba(0, 0, 0, 0.4), 0 32px 64px -24px rgba(0, 0, 0, 0.5);
+  --ombre-verre: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --t-gris: #C7C7CC;   --t-gris-bg: rgba(199, 199, 204, 0.12);
+  --t-bleu: #A9C1EC;   --t-bleu-bg: rgba(91, 127, 184, 0.22);
+  --t-vert: #9FD0AE;   --t-vert-bg: rgba(110, 156, 126, 0.22);
+  --t-jaune: #F2C670;  --t-jaune-bg: rgba(217, 162, 58, 0.2);
+  --t-violet: #C6B8F0; --t-violet-bg: rgba(143, 123, 200, 0.24);
+  --t-corail: #FF8A84; --t-corail-bg: rgba(255, 95, 87, 0.2);
+  --t-rouge: #FF9B8F;  --t-rouge-bg: rgba(218, 41, 28, 0.22);
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { font-family: "Manrope", system-ui, sans-serif; background: var(--fond); color: var(--texte); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.5;
+  color: var(--texte); background: var(--fond); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  background-image: radial-gradient(900px 520px at 100% -10%, var(--lueur), transparent 70%), radial-gradient(700px 420px at -10% 110%, var(--lueur), transparent 70%);
+  background-attachment: fixed;
+}
 button, input, select, textarea { font: inherit; color: inherit; }
 a { color: inherit; }
-h1, h2, h3 { margin: 0; letter-spacing: -0.02em; line-height: 1.2; }
-h1 { font-size: 1.75rem; font-weight: 800; }
+h1, h2, h3, h4 { margin: 0; letter-spacing: -0.02em; line-height: 1.2; }
+h1 { font-size: clamp(1.6rem, 2.6vw, 2.15rem); font-weight: 800; letter-spacing: -0.035em; }
 h2 { font-size: 1.05rem; font-weight: 800; }
 h3 { font-size: .95rem; font-weight: 700; }
 [hidden] { display: none !important; }
 .muted { color: var(--texte-3); }
 .petit { font-size: .82rem; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.retard { color: var(--t-rouge); font-weight: 700; }
 :focus-visible { outline: 2px solid var(--corail); outline-offset: 2px; }
+::selection { background: var(--corail-doux); }
+
+/* Étiquette de section, comme sur le site : point corail + capitales */
+.tag { display: inline-flex; align-items: center; gap: 8px; font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--corail-texte); }
+.tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--corail); box-shadow: 0 0 0 4px var(--corail-doux); }
 
 /* ---------- Logo ---------- */
-.logo { display: inline-flex; align-items: center; gap: 11px; color: var(--sur-navy); text-decoration: none; }
-.logo-mark { width: 42px; height: 19px; flex: none; }
+.logo { display: inline-flex; align-items: center; gap: 11px; color: var(--texte); text-decoration: none; }
+.logo-mark { width: 40px; height: 18px; flex: none; }
 .logo-mark .dot-a, .logo-mark .link { fill: currentColor; }
 .logo-mark .dot-b { fill: var(--corail); }
-.logo-word { font-weight: 800; font-size: 1.35rem; letter-spacing: -0.035em; line-height: 1; }
+.logo-word { font-weight: 800; font-size: 1.3rem; letter-spacing: -0.035em; line-height: 1; }
 
-/* ---------- Écrans de connexion ---------- */
-.ecran-auth { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--navy); }
-.carte-auth { width: 100%; max-width: 400px; background: var(--carte); color: var(--texte); border-radius: 20px; padding: 32px 28px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
-.carte-auth .logo { color: var(--texte); margin-bottom: 18px; }
-.carte-auth p.signature { color: var(--texte-2); margin: 0 0 22px; }
+/* ---------- Connexion ---------- */
+.ecran-auth { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.carte-auth { width: 100%; max-width: 410px; background: var(--verre); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--verre-bord); border-radius: 28px; padding: 34px 30px; box-shadow: var(--ombre); }
+.carte-auth .logo { margin-bottom: 26px; }
+.carte-auth h1 { font-size: 1.75rem; }
+.carte-auth p.signature { color: var(--texte-2); margin: 8px 0 22px; }
 .carte-auth form { display: grid; gap: 14px; }
+.carte-auth label { font-size: .85rem; font-weight: 700; color: var(--texte-2); display: grid; gap: 6px; }
 .carte-auth .lien { background: none; border: 0; padding: 0; color: var(--texte-2); text-decoration: underline; cursor: pointer; font-size: .88rem; justify-self: start; }
-.message { padding: 10px 12px; border-radius: var(--rayon-s); font-size: .9rem; }
+.message { padding: 11px 14px; border-radius: var(--rayon-s); font-size: .9rem; }
 .message.erreur { background: var(--t-rouge-bg); color: var(--t-rouge); }
 .message.ok { background: var(--t-vert-bg); color: var(--t-vert); }
+.message.info { background: var(--fond-2); color: var(--texte-2); }
 
-/* ---------- Structure : barre latérale + contenu ---------- */
-.app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
-.barre { background: var(--navy); color: var(--sur-navy); display: flex; flex-direction: column; padding: 22px 14px; position: sticky; top: 0; height: 100vh; }
-.barre .logo { padding: 0 10px 4px; }
-.barre .sous-logo { color: var(--sur-navy-2); font-size: .78rem; padding: 0 10px; margin: 6px 0 22px; opacity: .8; }
-.nav { display: grid; gap: 2px; }
-.nav a { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 10px; text-decoration: none; color: var(--sur-navy-2); font-weight: 600; font-size: .93rem; }
-.nav a svg { width: 19px; height: 19px; flex: none; }
-.nav a:hover { background: var(--navy-soft); color: var(--sur-navy); }
-.nav a[aria-current="page"] { background: var(--navy-soft); color: #fff; box-shadow: inset 3px 0 0 var(--corail); }
-.nav a .compteur { margin-left: auto; background: var(--corail); color: var(--navy); font-size: .72rem; font-weight: 800; border-radius: 99px; padding: 1px 7px; }
-.barre-pied { margin-top: auto; border-top: 1px solid var(--navy-soft); padding-top: 14px; display: grid; gap: 8px; }
-.utilisateur { display: flex; align-items: center; gap: 10px; padding: 0 8px; font-size: .88rem; }
-.utilisateur .avatar { width: 30px; height: 30px; }
-.barre-pied .actions { display: flex; gap: 6px; padding: 0 4px; }
-.barre-btn { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 1px solid var(--navy-soft); color: var(--sur-navy-2); border-radius: 10px; padding: 7px 10px; cursor: pointer; font-size: .82rem; font-weight: 600; }
-.barre-btn:hover { background: var(--navy-soft); color: #fff; }
-.barre-btn svg { width: 16px; height: 16px; }
-.haut-mobile { display: none; }
+/* ---------- Structure : barre latérale flottante + contenu ---------- */
+.app { display: grid; grid-template-columns: 268px minmax(0, 1fr); min-height: 100vh; }
+.barre { position: sticky; top: 12px; margin: 12px 0 12px 12px; height: calc(100vh - 24px); display: flex; flex-direction: column;
+  background: var(--verre); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--verre-bord); border-radius: 24px; box-shadow: var(--ombre-verre); padding: 20px 12px 14px; overflow: hidden; }
+.barre > .logo { padding: 2px 12px 18px; }
+.nav { display: grid; gap: 1px; overflow-y: auto; padding: 0 2px; margin: 0 -2px; flex: 1; align-content: start; scrollbar-width: thin; }
+.nav-groupe { font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--texte-3); padding: 14px 12px 6px; }
+.nav a { position: relative; display: flex; align-items: center; gap: 11px; padding: 8px 12px; border-radius: 12px; text-decoration: none; color: var(--texte-2); font-weight: 600; font-size: .92rem; transition: background .2s, color .2s; }
+.nav a svg { width: 18px; height: 18px; flex: none; opacity: .85; }
+.nav a:hover { background: rgba(29, 29, 31, 0.06); color: var(--texte); }
+:root[data-theme="nuit"] .nav a:hover { background: rgba(255, 255, 255, 0.06); }
+.nav a[aria-current="page"] { background: var(--graphite); color: var(--sur-graphite); box-shadow: 0 8px 20px -10px rgba(29, 29, 31, 0.5); }
+.nav a[aria-current="page"] svg { opacity: 1; }
+.nav a[aria-current="page"]::after { content: ""; position: absolute; right: 12px; width: 7px; height: 7px; border-radius: 50%; background: var(--corail); }
+.nav a .compteur { margin-left: auto; background: var(--corail); color: #1D1D1F; font-size: .7rem; font-weight: 800; border-radius: var(--pilule); padding: 1px 7px; }
+.nav a[aria-current="page"] .compteur { margin-right: 14px; }
+.barre-pied { border-top: 1px solid var(--ligne); padding: 12px 4px 0; margin-top: 8px; }
+.utilisateur { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 14px; text-decoration: none; }
+.utilisateur:hover { background: rgba(29, 29, 31, 0.05); }
+.utilisateur .nom { font-weight: 700; font-size: .9rem; }
+.utilisateur .role { font-size: .74rem; color: var(--texte-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
 
-main#contenu { padding: 32px 36px 64px; min-width: 0; max-width: 1400px; width: 100%; }
+.colonne-principale { min-width: 0; display: flex; flex-direction: column; }
+.haut { position: sticky; top: 12px; z-index: 40; margin: 12px 12px 0 18px; display: flex; align-items: center; gap: 10px; min-height: 58px; padding: 8px 8px 8px 10px;
+  background: var(--verre); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid var(--verre-bord); border-radius: var(--pilule); box-shadow: var(--ombre-verre); }
+.haut .menu-mobile { display: none; }
+.recherche-btn { flex: 1; min-width: 0; max-width: 460px; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 8px 0 16px; border-radius: var(--pilule);
+  border: 1px solid var(--ligne); background: var(--champ); color: var(--texte-3); cursor: pointer; font-size: .9rem; text-align: left; }
+.recherche-btn:hover { border-color: var(--ligne-forte); color: var(--texte-2); }
+.recherche-btn svg { width: 17px; height: 17px; flex: none; }
+.recherche-btn span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+kbd { font-family: inherit; font-size: .72rem; font-weight: 700; border: 1px solid var(--ligne); border-bottom-width: 2px; border-radius: 7px; padding: 1px 7px; background: var(--fond); color: var(--texte-3); }
+.haut .espace { flex: 1; }
+.rond-btn { width: 42px; height: 42px; flex: none; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--ligne); background: var(--champ); color: var(--texte-2); cursor: pointer; }
+.rond-btn:hover { color: var(--texte); border-color: var(--ligne-forte); }
+.rond-btn svg { width: 18px; height: 18px; }
+.menu-creer { position: relative; }
+.menu-liste { position: absolute; right: 0; top: calc(100% + 10px); min-width: 230px; padding: 6px; border-radius: 18px; background: var(--carte); border: 1px solid var(--ligne); box-shadow: var(--ombre); display: grid; gap: 1px; z-index: 60; }
+.menu-liste button { display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; padding: 9px 12px; border: 0; background: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: .9rem; color: var(--texte); }
+.menu-liste button:hover, .menu-liste button:focus-visible { background: var(--fond); }
+.menu-liste button svg { width: 17px; height: 17px; color: var(--texte-3); }
+
+main#contenu { padding: 30px 32px 72px 38px; min-width: 0; max-width: 1440px; width: 100%; }
 main#contenu:focus { outline: none; }
-.app > div { min-width: 0; }
-.entete { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
-.entete .sous-titre { color: var(--texte-2); margin-top: 6px; }
-.entete .boutons { display: flex; gap: 8px; flex-wrap: wrap; }
-.fil { font-size: .85rem; margin-bottom: 8px; }
+.entete { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.entete .tag { margin-bottom: 10px; }
+.entete .sous-titre { color: var(--texte-2); margin-top: 8px; max-width: 70ch; }
+.entete .boutons { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.fil { font-size: .85rem; margin-bottom: 10px; color: var(--texte-3); }
 .fil a { color: var(--texte-2); text-decoration: none; }
-.fil a:hover { color: var(--corail-fonce); }
+.fil a:hover { color: var(--corail-texte); }
 
-/* ---------- Boutons ---------- */
-.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ligne-forte); background: var(--carte); color: var(--texte); border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: .88rem; cursor: pointer; text-decoration: none; white-space: nowrap; }
-.btn:hover { border-color: var(--texte-3); }
-.btn svg { width: 16px; height: 16px; }
-.btn.primaire { background: var(--corail); border-color: var(--corail); color: var(--navy); }
-.btn.primaire:hover { background: var(--corail-fonce); border-color: var(--corail-fonce); color: #fff; }
+/* ---------- Boutons (pilules, comme le site) ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--ligne-forte); background: var(--carte); color: var(--texte);
+  border-radius: var(--pilule); padding: 9px 16px; font-weight: 700; font-size: .88rem; line-height: 1.1; cursor: pointer; text-decoration: none; white-space: nowrap;
+  transition: transform .25s var(--ease), background .2s, color .2s, box-shadow .25s, border-color .2s; }
+.btn:hover { border-color: var(--graphite); transform: translateY(-1px); }
+.btn svg { width: 16px; height: 16px; flex: none; }
+.btn.primaire { background: var(--graphite); border-color: var(--graphite); color: var(--sur-graphite); box-shadow: 0 10px 24px -10px rgba(29, 29, 31, 0.45); }
+.btn.primaire:hover { box-shadow: 0 14px 30px -10px rgba(29, 29, 31, 0.55); }
+.btn.corail { background: var(--corail); border-color: var(--corail); color: #1D1D1F; }
+.btn.corail:hover { background: #FF7A73; border-color: #FF7A73; }
 .btn.danger { color: var(--t-rouge); border-color: transparent; background: transparent; }
-.btn.danger:hover { background: var(--t-rouge-bg); }
-.btn.discret { border-color: transparent; background: transparent; color: var(--texte-2); padding: 6px 10px; }
-.btn.discret:hover { background: var(--creme-2); color: var(--texte); }
-.btn.mini { padding: 4px 9px; font-size: .8rem; border-radius: 8px; }
-.btn[disabled] { opacity: .55; cursor: progress; }
-.btn.large { width: 100%; justify-content: center; padding: 11px 14px; font-size: .95rem; }
-.icone-btn { background: none; border: 0; cursor: pointer; color: var(--texte-2); font-size: 1.4rem; line-height: 1; padding: 4px 8px; border-radius: 8px; }
-.icone-btn:hover { background: var(--creme-2); color: var(--texte); }
+.btn.danger:hover { background: var(--t-rouge-bg); transform: none; }
+.btn.discret { border-color: transparent; background: transparent; color: var(--texte-2); padding: 7px 11px; }
+.btn.discret:hover { background: var(--fond-2); color: var(--texte); transform: none; }
+.btn.mini { padding: 5px 11px; font-size: .8rem; border-width: 1px; }
+.btn[disabled] { opacity: .55; cursor: progress; transform: none; }
+.btn.large { width: 100%; padding: 13px 16px; font-size: .95rem; }
+.icone-btn { background: none; border: 0; cursor: pointer; color: var(--texte-2); font-size: 1.4rem; line-height: 1; padding: 4px 8px; border-radius: 10px; }
+.icone-btn:hover { background: var(--fond-2); color: var(--texte); }
 
 /* ---------- Cartes et grilles ---------- */
-.carte { background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--rayon); padding: 20px 22px; box-shadow: var(--ombre); min-width: 0; }
-.carte > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
-.carte.sans-marge { padding: 0; }
+.carte { background: linear-gradient(180deg, var(--carte-haut) 0%, var(--carte) 100%); border: 1px solid var(--ligne); border-radius: var(--rayon);
+  padding: 20px 22px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), var(--ombre-s); min-width: 0; }
+.carte > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.carte > header .actions-carte { display: flex; gap: 6px; flex-wrap: wrap; }
+.carte.sans-marge { padding: 0; overflow: hidden; }
 .carte.sans-marge > header { padding: 18px 22px 0; }
+.carte.sombre { background: var(--graphite); color: var(--sur-graphite); border-color: transparent; box-shadow: var(--ombre); position: relative; overflow: hidden; }
+.carte.sombre::after { content: ""; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 95, 87, 0.45), transparent 70%); pointer-events: none; }
+.carte.sombre .muted, .carte.sombre .sous { color: var(--sur-graphite-2); }
+:root[data-theme="nuit"] .carte.sombre { background: linear-gradient(135deg, #26262A 0%, #18181B 100%); color: var(--texte); border: 1px solid var(--ligne-forte); }
+:root[data-theme="nuit"] .carte.sombre .muted, :root[data-theme="nuit"] .carte.sombre .sous { color: var(--texte-2); }
+:root[data-theme="nuit"] .carte.sombre .anneau { background: radial-gradient(closest-side, #222225 76%, transparent 78%), conic-gradient(var(--corail) calc(var(--p) * 1%), rgba(255, 255, 255, 0.12) 0); }
 .grille { display: grid; gap: 18px; }
-.g2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-.g3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
-.g-fiche { grid-template-columns: minmax(0,1fr) minmax(0,2fr); align-items: start; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g-fiche { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); align-items: start; }
+.g-accueil { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
 .pile { display: grid; gap: 18px; align-content: start; min-width: 0; }
+.deco-reseau { position: absolute; right: 18px; bottom: 14px; width: 150px; opacity: .55; pointer-events: none; }
 
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
-.kpi { background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--rayon); padding: 16px 18px; box-shadow: var(--ombre); text-decoration: none; display: block; }
-.kpi:hover { border-color: var(--ligne-forte); }
-.kpi .label { color: var(--texte-2); font-size: .82rem; font-weight: 600; }
-.kpi .valeur { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em; margin-top: 4px; font-variant-numeric: tabular-nums; }
-.kpi .detail { font-size: .8rem; color: var(--texte-3); margin-top: 2px; }
-.kpi.alerte .valeur { color: var(--corail-fonce); }
-:root[data-theme="nuit"] .kpi.alerte .valeur { color: var(--corail); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpi { position: relative; background: linear-gradient(180deg, var(--carte-haut), var(--carte)); border: 1px solid var(--ligne); border-radius: var(--rayon); padding: 16px 18px;
+  box-shadow: var(--ombre-s); text-decoration: none; display: block; transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+.kpi:hover { transform: translateY(-3px); box-shadow: var(--ombre); }
+.kpi .label { color: var(--texte-2); font-size: .8rem; font-weight: 700; }
+.kpi .valeur { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.035em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.kpi .detail { font-size: .78rem; color: var(--texte-3); margin-top: 2px; }
+.kpi.alerte .valeur { color: var(--corail-texte); }
+.kpi.alerte::before { content: ""; position: absolute; top: 16px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--corail); box-shadow: 0 0 0 4px var(--corail-doux); }
 
 /* ---------- Badges, avatars ---------- */
-.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 99px; font-size: .76rem; font-weight: 700; white-space: nowrap; }
-.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .8; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: var(--pilule); font-size: .74rem; font-weight: 700; white-space: nowrap; }
+.badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .85; }
 .badge.sans-point::before { display: none; }
 .t-gris { color: var(--t-gris); background: var(--t-gris-bg); }
 .t-bleu { color: var(--t-bleu); background: var(--t-bleu-bg); }
@@ -165,42 +227,44 @@ main#contenu:focus { outline: none; }
 .t-violet { color: var(--t-violet); background: var(--t-violet-bg); }
 .t-corail { color: var(--t-corail); background: var(--t-corail-bg); }
 .t-rouge { color: var(--t-rouge); background: var(--t-rouge-bg); }
-.avatar { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: .68rem; font-weight: 800; flex: none; letter-spacing: 0; }
-.avatar.vide { background: var(--creme-2); color: var(--texte-3); }
-.avatar.grand { width: 52px; height: 52px; font-size: 1.05rem; }
-.raci { display: inline-flex; align-items: center; gap: 4px; font-size: .74rem; color: var(--texte-3); font-weight: 700; }
+.avatar { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-size: .68rem; font-weight: 800; flex: none; letter-spacing: 0; box-shadow: 0 0 0 2px var(--carte); }
+.avatar.vide { background: var(--fond-2); color: var(--texte-3); }
+.avatar.grand { width: 54px; height: 54px; font-size: 1.05rem; }
+.avatars { display: inline-flex; }
+.avatars .avatar + .avatar { margin-left: -7px; }
+.raci { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--texte-3); font-weight: 800; }
 
 /* ---------- Tableaux ---------- */
 .table-wrap { overflow-x: auto; }
 table.liste { width: 100%; border-collapse: collapse; font-size: .9rem; }
-table.liste th { text-align: left; font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-3); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--ligne); white-space: nowrap; }
-table.liste td { padding: 11px 14px; border-bottom: 1px solid var(--ligne); vertical-align: middle; }
+table.liste th { text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--texte-3); font-weight: 800; padding: 12px 16px; border-bottom: 1px solid var(--ligne); white-space: nowrap; }
+table.liste td { padding: 12px 16px; border-bottom: 1px solid var(--ligne); vertical-align: middle; }
 table.liste tr:last-child td { border-bottom: 0; }
-table.liste tr[data-href] { cursor: pointer; }
-table.liste tr[data-href]:hover td { background: var(--creme-2); }
+table.liste tr[data-href], table.liste tr[data-action] { cursor: pointer; transition: background .15s; }
+table.liste tr[data-href]:hover td, table.liste tr[data-action]:hover td { background: var(--fond); }
 table.liste td.fort { font-weight: 700; }
-table.liste .num { text-align: right; }
-.vide-liste { padding: 26px 22px; color: var(--texte-3); text-align: center; font-size: .92rem; }
+.vide-liste { padding: 28px 22px; color: var(--texte-3); text-align: center; font-size: .92rem; }
+.vide-liste .btn { margin-top: 12px; }
 
 /* ---------- Filtres ---------- */
-.filtres { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
-.filtres input[type="search"], .filtres select { border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 10px; padding: 8px 12px; min-width: 0; }
-.filtres input[type="search"] { width: 260px; max-width: 100%; }
+.filtres { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.filtres input[type="search"], .filtres select { border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: var(--pilule); padding: 8px 14px; min-width: 0; height: 40px; }
+.filtres input[type="search"] { width: 270px; max-width: 100%; }
 .puces { display: flex; gap: 6px; flex-wrap: wrap; }
-.puce { border: 1px solid var(--ligne-forte); background: var(--carte); border-radius: 99px; padding: 5px 12px; font-size: .82rem; font-weight: 700; cursor: pointer; color: var(--texte-2); }
-.puce[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: var(--sur-navy); }
-:root[data-theme="nuit"] .puce[aria-pressed="true"] { background: var(--corail); border-color: var(--corail); color: var(--navy); }
-.puce .n { opacity: .7; margin-left: 4px; }
-.onglets { display: inline-flex; background: var(--creme-2); border-radius: 12px; padding: 3px; gap: 2px; }
-.onglets button { border: 0; background: transparent; padding: 6px 14px; border-radius: 9px; font-weight: 700; font-size: .85rem; cursor: pointer; color: var(--texte-2); }
-.onglets button[aria-pressed="true"] { background: var(--carte); color: var(--texte); box-shadow: var(--ombre); }
+.puce { border: 1px solid var(--ligne-forte); background: var(--carte); border-radius: var(--pilule); padding: 6px 13px; font-size: .82rem; font-weight: 700; cursor: pointer; color: var(--texte-2); }
+.puce:hover { border-color: var(--graphite); }
+.puce[aria-pressed="true"] { background: var(--graphite); border-color: var(--graphite); color: var(--sur-graphite); }
+.puce .n { opacity: .65; margin-left: 5px; }
+.onglets { display: inline-flex; background: var(--fond-2); border-radius: var(--pilule); padding: 4px; gap: 2px; }
+.onglets button { border: 0; background: transparent; padding: 7px 15px; border-radius: var(--pilule); font-weight: 700; font-size: .84rem; cursor: pointer; color: var(--texte-2); }
+.onglets button[aria-pressed="true"] { background: var(--carte); color: var(--texte); box-shadow: var(--ombre-s); }
 
-/* ---------- Fiches (détails) ---------- */
-dl.infos { display: grid; grid-template-columns: max-content minmax(0,1fr); gap: 9px 16px; margin: 0; font-size: .9rem; }
+/* ---------- Fiches ---------- */
+dl.infos { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 18px; margin: 0; font-size: .9rem; }
 dl.infos dt { color: var(--texte-3); font-weight: 600; }
 dl.infos dd { margin: 0; overflow-wrap: anywhere; }
 dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-underline-offset: 3px; }
-.statut-rapide { border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 10px; padding: 6px 10px; font-weight: 700; font-size: .85rem; }
+.statut-rapide { border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: var(--pilule); padding: 8px 14px; font-weight: 700; font-size: .85rem; height: 40px; }
 .texte-libre { white-space: pre-wrap; font-size: .9rem; color: var(--texte-2); margin: 0; }
 .ligne-item { display: flex; align-items: flex-start; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--ligne); }
 .ligne-item:last-child { border-bottom: 0; }
@@ -208,100 +272,181 @@ dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-und
 .ligne-item .titre { font-weight: 700; font-size: .92rem; }
 .ligne-item .meta { color: var(--texte-3); font-size: .8rem; }
 .ligne-item.cliquable { cursor: pointer; }
-.ligne-item.cliquable:hover .titre { color: var(--corail-fonce); }
-:root[data-theme="nuit"] .ligne-item.cliquable:hover .titre { color: var(--corail); }
+.ligne-item.cliquable:hover .titre { color: var(--corail-texte); }
 .ligne-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--corail); margin-top: 2px; }
 .fait .titre { text-decoration: line-through; color: var(--texte-3); }
-.retard { color: var(--t-rouge); font-weight: 700; }
 .chrono { list-style: none; margin: 0; padding: 0; }
 .chrono li { position: relative; padding: 0 0 14px 22px; font-size: .88rem; }
 .chrono li::before { content: ""; position: absolute; left: 4px; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--corail); }
 .chrono li::after { content: ""; position: absolute; left: 7.5px; top: 18px; bottom: 0; width: 1px; background: var(--ligne); }
 .chrono li:last-child::after { display: none; }
 .chrono .quand { color: var(--texte-3); font-size: .78rem; }
+.date-pastille { flex: none; width: 46px; text-align: center; border-radius: 12px; background: var(--fond-2); padding: 5px 0 4px; line-height: 1.05; }
+.date-pastille b { display: block; font-size: 1.05rem; font-weight: 800; }
+.date-pastille small { font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--texte-3); }
+.date-pastille.aujourdhui { background: var(--corail); color: #1D1D1F; }
+.date-pastille.aujourdhui small { color: #1D1D1F; }
 
-/* ---------- Accueil ---------- */
+/* ---------- Barres et progression ---------- */
 .barres { display: grid; gap: 10px; }
 .barre-ligne { display: grid; grid-template-columns: 120px 1fr 32px; align-items: center; gap: 10px; font-size: .86rem; text-decoration: none; }
-.barre-ligne .piste { height: 10px; background: var(--creme-2); border-radius: 99px; overflow: hidden; }
-.barre-ligne .rempli { height: 100%; background: var(--barre); border-radius: 99px; min-width: 2px; }
+.piste { height: 8px; background: var(--fond-2); border-radius: var(--pilule); overflow: hidden; display: block; }
+.rempli { display: block; height: 100%; background: var(--corail); border-radius: var(--pilule); min-width: 2px; transition: width .6s var(--ease); }
+.rempli.atteint { background: var(--t-vert); }
 .barre-ligne:hover .rempli { background: var(--corail-fonce); }
+.progression { display: grid; gap: 6px; }
+.progression .ligne-haut { display: flex; justify-content: space-between; gap: 10px; font-size: .88rem; }
+.progression .ligne-haut b { font-variant-numeric: tabular-nums; }
+.anneau { --p: 0; width: 64px; height: 64px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 800; font-size: .95rem;
+  background: radial-gradient(closest-side, var(--carte) 76%, transparent 78%), conic-gradient(var(--corail) calc(var(--p) * 1%), var(--fond-2) 0); }
+.carte.sombre .anneau { background: radial-gradient(closest-side, var(--graphite) 76%, transparent 78%), conic-gradient(var(--corail) calc(var(--p) * 1%), rgba(255, 255, 255, 0.12) 0); }
 
 /* ---------- Offres ---------- */
 .offres { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
-.offre { display: flex; flex-direction: column; gap: 10px; }
-.offre .prix { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+.offre { display: flex; flex-direction: column; gap: 10px; transition: transform .45s var(--ease), box-shadow .45s var(--ease); }
+.offre:hover { transform: translateY(-4px); box-shadow: var(--ombre); }
+.offre .prix { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.03em; color: var(--corail-texte); }
 .offre .prix small { font-size: .85rem; font-weight: 600; color: var(--texte-3); letter-spacing: 0; }
-.offre ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: .9rem; }
-.offre li { display: flex; gap: 8px; }
-.offre li::before { content: ""; width: 7px; height: 7px; margin-top: 8px; border-radius: 50%; background: var(--corail); flex: none; }
-.offre.inactive { opacity: .6; }
-.offre footer { margin-top: auto; display: flex; gap: 8px; align-items: center; padding-top: 8px; border-top: 1px solid var(--ligne); }
+.offre ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font-size: .9rem; font-weight: 600; }
+.offre li { display: flex; gap: 9px; }
+.offre li::before { content: "✓"; flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--corail-doux); color: var(--corail-texte); font-size: .7rem; font-weight: 800; display: grid; place-items: center; margin-top: 2px; }
+.offre.inactive { opacity: .55; }
+.offre footer { margin-top: auto; display: flex; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid var(--ligne); }
 
-/* ---------- Tâches (tableau) ---------- */
-.kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
-.colonne { background: var(--creme-2); border-radius: var(--rayon); padding: 12px; min-height: 120px; }
-.colonne > header { display: flex; align-items: center; justify-content: space-between; margin: 2px 4px 10px; }
+/* ---------- Tableaux de cartes (tâches, pipeline) ---------- */
+.kanban { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 14px; overflow-x: auto; padding-bottom: 10px; align-items: start; }
+.colonne { background: var(--fond-2); border-radius: 18px; padding: 12px; min-height: 140px; }
+.colonne > header { display: flex; align-items: center; justify-content: space-between; margin: 2px 4px 10px; gap: 8px; }
+.colonne > header h3 { display: flex; align-items: center; gap: 8px; }
+.colonne > header h3::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--point, var(--texte-3)); }
 .colonne.survol { outline: 2px dashed var(--corail); outline-offset: -2px; }
 .cartes { display: grid; gap: 9px; }
-.tache { background: var(--carte); border: 1px solid var(--ligne); border-radius: 12px; padding: 11px 12px; cursor: pointer; display: grid; gap: 7px; box-shadow: var(--ombre); }
-.tache:hover { border-color: var(--ligne-forte); }
+.tache { background: var(--carte); border: 1px solid var(--ligne); border-radius: 14px; padding: 12px 13px; cursor: pointer; display: grid; gap: 7px; box-shadow: var(--ombre-s); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+.tache:hover { transform: translateY(-2px); box-shadow: var(--ombre); }
 .tache.glisse { opacity: .5; }
+.tache.bloquee { border-color: var(--t-rouge); box-shadow: inset 3px 0 0 var(--t-rouge), var(--ombre-s); }
 .tache .titre { font-weight: 700; font-size: .9rem; line-height: 1.35; }
-.tache .projet { font-size: .77rem; color: var(--texte-3); }
-.tache .bas { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .77rem; color: var(--texte-2); }
+.tache .projet { font-size: .75rem; color: var(--texte-3); font-weight: 600; }
+.tache .bas { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .76rem; color: var(--texte-2); }
 .tache .bas .droite { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; }
+.tache .relance { font-size: .76rem; font-weight: 700; color: var(--texte-2); }
+.tache .relance.retard { color: var(--t-rouge); }
 .resume-heures { display: flex; gap: 18px; flex-wrap: wrap; font-size: .86rem; color: var(--texte-2); margin-bottom: 14px; }
 .resume-heures strong { color: var(--texte); }
 
+/* ---------- Agenda ---------- */
+.agenda-tete { display: flex; align-items: center; gap: 8px; }
+.agenda-tete h2 { font-size: 1.25rem; min-width: 170px; text-transform: capitalize; }
+.calendrier { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--ligne); border-radius: var(--rayon); overflow: hidden; background: var(--carte); box-shadow: var(--ombre-s); }
+.calendrier .jour-nom { padding: 10px 10px 8px; font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--texte-3); border-bottom: 1px solid var(--ligne); background: var(--carte-haut); }
+.calendrier .case { min-height: 116px; padding: 8px; border-right: 1px solid var(--ligne); border-bottom: 1px solid var(--ligne); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.calendrier .case:nth-child(7n) { border-right: 0; }
+.calendrier .case.hors { background: var(--fond); }
+.calendrier .case.hors .n { color: var(--texte-3); opacity: .6; }
+.calendrier .case .n { font-size: .8rem; font-weight: 800; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; }
+.calendrier .case.auj .n { background: var(--corail); color: #1D1D1F; }
+.evt { display: block; width: 100%; text-align: left; border: 0; cursor: pointer; font-size: .74rem; font-weight: 700; padding: 3px 7px; border-radius: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.evt.plus { background: none; color: var(--texte-3); padding: 0 4px; }
+.legende { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--texte-2); margin-top: 12px; }
+.legende span { display: inline-flex; align-items: center; gap: 6px; }
+.legende i { width: 10px; height: 10px; border-radius: 4px; display: inline-block; }
+.agenda-liste { display: none; }
+
+/* ---------- Objectifs, réunions, ressources, compétences ---------- */
+.objectif { display: grid; gap: 16px; }
+.objectif .tete { display: flex; align-items: center; gap: 18px; }
+.objectif .indics { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 22px; }
+.source-auto { font-size: .7rem; font-weight: 700; color: var(--texte-3); }
+.tops-flops { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tops-flops > div { border-radius: 14px; padding: 12px 14px; font-size: .88rem; white-space: pre-wrap; }
+.tops-flops .tops { background: var(--t-vert-bg); }
+.tops-flops .flops { background: var(--t-corail-bg); }
+.tops-flops b { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+.ressources { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.ressource { display: flex; gap: 12px; align-items: flex-start; text-decoration: none; transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+.ressource:hover { transform: translateY(-3px); box-shadow: var(--ombre); }
+.ressource .ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none; font-weight: 800; }
+.ressource .ico svg { width: 19px; height: 19px; }
+.ressource .titre { font-weight: 800; }
+.ressource .desc { font-size: .84rem; color: var(--texte-2); }
+.ressource .domaine { font-size: .74rem; color: var(--texte-3); margin-top: 4px; word-break: break-all; }
+.niveau { display: inline-flex; gap: 4px; }
+.niveau i { width: 10px; height: 10px; border-radius: 50%; background: var(--fond-2); border: 1px solid var(--ligne-forte); }
+.niveau i.on { background: var(--corail); border-color: var(--corail); }
+.niveau i.cible { border: 2px solid var(--corail); }
+
 /* ---------- Équipe ---------- */
-.membres { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; margin-bottom: 18px; }
-.membre-tete { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+.membres { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-bottom: 18px; }
+.membre-tete { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
-.stat { background: var(--creme-2); border-radius: 10px; padding: 8px 10px; }
+.stat { background: var(--fond); border-radius: 12px; padding: 9px 11px; }
 .stat .v { font-weight: 800; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
-.stat .l { font-size: .72rem; color: var(--texte-3); font-weight: 600; }
-.charge { height: 8px; background: var(--creme-2); border-radius: 99px; overflow: hidden; }
-.charge > div { height: 100%; background: var(--corail); border-radius: 99px; }
+.stat .l { font-size: .7rem; color: var(--texte-3); font-weight: 700; }
+.charge { height: 8px; background: var(--fond-2); border-radius: var(--pilule); overflow: hidden; }
+.charge > div { height: 100%; background: var(--corail); border-radius: var(--pilule); }
+.competences-liste { display: grid; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--ligne); }
+.competence { display: flex; align-items: center; gap: 10px; font-size: .86rem; cursor: pointer; border-radius: 8px; }
+.competence:hover .nom { color: var(--corail-texte); }
+.competence .nom { flex: 1; font-weight: 600; }
 
 /* ---------- Documents ---------- */
 .groupe-docs + .groupe-docs { margin-top: 18px; }
 .groupe-docs h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .sous-groupe { margin: 10px 0 0 0; }
-.sous-groupe h4 { margin: 0 0 2px; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-3); }
-.icone-doc { width: 34px; height: 34px; border-radius: 9px; background: var(--corail-doux); color: var(--corail-fonce); display: grid; place-items: center; font-size: .66rem; font-weight: 800; flex: none; text-transform: uppercase; }
-:root[data-theme="nuit"] .icone-doc { color: var(--corail); }
+.sous-groupe h4 { margin: 0 0 2px; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--texte-3); }
+.icone-doc { width: 36px; height: 36px; border-radius: 11px; background: var(--corail-doux); color: var(--corail-texte); display: grid; place-items: center; font-size: .64rem; font-weight: 800; flex: none; text-transform: uppercase; }
 
 /* ---------- Formulaires ---------- */
-.grille-form { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 16px; }
-.champ { display: grid; gap: 5px; min-width: 0; }
+.grille-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.champ { display: grid; gap: 6px; min-width: 0; align-content: start; }
 .champ.pleine { grid-column: 1 / -1; }
-.champ label { font-size: .82rem; font-weight: 700; color: var(--texte-2); }
-.champ .req { color: var(--corail-fonce); }
-.champ small { color: var(--texte-3); font-size: .78rem; }
+.champ label, .champ > .label { font-size: .8rem; font-weight: 700; color: var(--texte-2); }
+.champ .req { color: var(--corail-texte); }
+.champ small { color: var(--texte-3); font-size: .76rem; }
 .champ input, .champ select, .champ textarea, .carte-auth input, .lignes input {
-  width: 100%; border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 10px; padding: 9px 11px; min-width: 0; }
+  width: 100%; border: 1px solid var(--ligne-forte); background: var(--champ); border-radius: 12px; padding: 10px 12px; min-width: 0; transition: border-color .2s, box-shadow .2s; }
 .champ textarea { resize: vertical; }
-.champ input:focus, .champ select:focus, .champ textarea:focus, .carte-auth input:focus, .lignes input:focus { outline: 2px solid var(--corail); outline-offset: 0; border-color: transparent; }
-.champ.case { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .9rem; color: var(--texte); align-self: end; padding-bottom: 8px; }
+.champ input:focus, .champ select:focus, .champ textarea:focus, .carte-auth input:focus, .lignes input:focus { outline: none; border-color: var(--graphite); box-shadow: 0 0 0 4px var(--corail-doux); }
+.champ.case { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .9rem; color: var(--texte); align-self: end; padding-bottom: 9px; }
 .champ.case input { width: 18px; height: 18px; accent-color: var(--corail); }
-.carte-auth label { font-size: .85rem; font-weight: 700; color: var(--texte-2); display: grid; gap: 5px; }
+.choix-multiples { display: flex; flex-wrap: wrap; gap: 6px; }
+.choix-multiples label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--ligne-forte); border-radius: var(--pilule); font-size: .84rem; font-weight: 600; color: var(--texte); cursor: pointer; }
+.choix-multiples input { accent-color: var(--corail); }
+.choix-multiples label:has(input:checked) { background: var(--graphite); color: var(--sur-graphite); border-color: var(--graphite); }
 
-/* ---------- Fenêtre modale ---------- */
-dialog { border: 0; padding: 0; border-radius: 20px; background: var(--carte); color: var(--texte); width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 0 24px 80px rgba(13,23,48,.35); }
-dialog.large { width: min(920px, calc(100vw - 32px)); }
-dialog::backdrop { background: rgba(13,23,48,.55); }
+/* ---------- Fenêtres ---------- */
+dialog { border: 0; padding: 0; border-radius: 26px; background: var(--carte); color: var(--texte); width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 32px); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35); }
+dialog.large { width: min(940px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(17, 17, 19, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+dialog[open] { animation: apparait .25s var(--ease); }
+@keyframes apparait { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
 .modale-form { display: flex; flex-direction: column; max-height: calc(100vh - 32px); }
-.modale-form > header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 10px; }
-.modale-form > .corps { padding: 8px 22px 18px; overflow-y: auto; }
-.modale-form > footer { display: flex; gap: 8px; align-items: center; padding: 14px 22px; border-top: 1px solid var(--ligne); flex-wrap: wrap; }
+.modale-form > header { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px 10px; }
+.modale-form > header h2 { font-size: 1.2rem; letter-spacing: -0.025em; }
+.modale-form > .corps { padding: 8px 24px 20px; overflow-y: auto; }
+.modale-form > footer { display: flex; gap: 8px; align-items: center; padding: 14px 24px; border-top: 1px solid var(--ligne); flex-wrap: wrap; }
 .espace { flex: 1; }
-#confirmation { width: min(420px, calc(100vw - 32px)); }
-#confirmation .corps { padding: 22px 22px 6px; }
+#confirmation { width: min(440px, calc(100vw - 32px)); }
+#confirmation .corps { padding: 26px 24px 6px; }
+
+/* Palette de recherche (Cmd+K) */
+#palette { width: min(640px, calc(100vw - 32px)); margin-top: 12vh; padding: 0; }
+.palette-champ { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--ligne); }
+.palette-champ svg { width: 20px; height: 20px; color: var(--texte-3); flex: none; }
+.palette-champ input { flex: 1; border: 0; background: transparent; font-size: 1.05rem; outline: none; }
+.palette-resultats { max-height: 56vh; overflow-y: auto; padding: 8px; }
+.palette-groupe { font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--texte-3); padding: 10px 12px 4px; }
+.palette-item { display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 12px; cursor: pointer; text-decoration: none; }
+.palette-item[aria-selected="true"] { background: var(--fond); }
+.palette-item .ico { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--fond-2); flex: none; }
+.palette-item .ico svg { width: 16px; height: 16px; }
+.palette-item .t { font-weight: 700; font-size: .92rem; }
+.palette-item .m { font-size: .78rem; color: var(--texte-3); }
+.palette-pied { display: flex; gap: 14px; padding: 10px 18px; border-top: 1px solid var(--ligne); font-size: .76rem; color: var(--texte-3); }
 
 /* Lignes de devis */
 .lignes { width: 100%; border-collapse: collapse; margin-top: 4px; }
-.lignes th { font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texte-3); text-align: left; padding: 6px 4px; }
+.lignes th { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--texte-3); text-align: left; padding: 6px 4px; }
 .lignes td { padding: 4px; vertical-align: top; }
 .lignes td.total { padding-top: 13px; font-weight: 700; }
 .lignes .c-q { width: 90px; } .lignes .c-p { width: 130px; } .lignes .c-t { width: 120px; } .lignes .c-x { width: 36px; }
@@ -310,36 +455,46 @@ dialog::backdrop { background: rgba(13,23,48,.55); }
 .totaux .ttc { font-weight: 800; font-size: 1.05rem; border-top: 2px solid var(--corail); padding-top: 6px; margin-top: 4px; }
 .separateur { grid-column: 1 / -1; border-top: 1px solid var(--ligne); margin: 4px 0; }
 
-/* ---------- Notifications ---------- */
+/* ---------- Notifications, chargement ---------- */
 #toasts { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 1000; }
-.toast { background: var(--navy); color: var(--sur-navy); padding: 11px 16px; border-radius: 12px; font-size: .9rem; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: 360px; border-left: 4px solid var(--corail); }
-.toast.erreur { background: #7A1D14; border-left-color: #FFB0A3; }
+.toast { background: #1D1D1F; color: #FAF9F7; padding: 12px 18px; border-radius: var(--pilule); font-size: .9rem; font-weight: 600; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28); max-width: 380px; display: flex; gap: 10px; align-items: center; animation: apparait .3s var(--ease); }
+.toast::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--corail); flex: none; }
+.toast.erreur { background: #7A1D14; border-radius: 16px; }
+.toast.erreur::before { background: #FFB0A3; }
 .chargement { display: grid; place-items: center; min-height: 50vh; color: var(--texte-3); }
 .pointille { display: inline-block; width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--ligne); border-top-color: var(--corail); animation: tourne .8s linear infinite; }
 @keyframes tourne { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .pointille { animation-duration: 3s; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
-/* ---------- Téléphone et tablette ---------- */
-@media (max-width: 1100px) {
-  .g3 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .g-fiche { grid-template-columns: 1fr; }
+/* ---------- Tablette et téléphone ---------- */
+@media (max-width: 1180px) {
+  .g3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g-fiche, .g-accueil { grid-template-columns: 1fr; }
 }
-@media (max-width: 860px) {
-  .app { grid-template-columns: 1fr; }
-  .barre { position: fixed; inset: 0 auto 0 0; width: 260px; z-index: 60; transform: translateX(-100%); transition: transform .2s ease; }
-  .app.menu-ouvert .barre { transform: none; box-shadow: 0 0 0 100vmax rgba(13,23,48,.5); }
-  .haut-mobile { display: flex; align-items: center; justify-content: space-between; background: var(--navy); padding: 12px 16px; position: sticky; top: 0; z-index: 50; }
-  .haut-mobile .icone-btn { color: var(--sur-navy); }
-  main#contenu { padding: 20px 16px 48px; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .barre { position: fixed; inset: 10px auto 10px 10px; height: auto; width: 272px; margin: 0; z-index: 70; transform: translateX(calc(-100% - 20px)); transition: transform .3s var(--ease); background: var(--carte); }
+  .app.menu-ouvert .barre { transform: none; box-shadow: 0 0 0 100vmax rgba(17, 17, 19, 0.45), var(--ombre); }
+  .haut { margin: 10px 10px 0; }
+  .haut .menu-mobile { display: grid; }
+  .recherche-btn kbd { display: none; }
+  main#contenu { padding: 22px 16px 56px; }
   .g2, .g3 { grid-template-columns: 1fr; }
   .grille-form { grid-template-columns: 1fr; }
-  h1 { font-size: 1.45rem; }
   .filtres input[type="search"] { width: 100%; }
   .masquer-mobile { display: none; }
   .barre-ligne { grid-template-columns: 100px 1fr 28px; }
+  .calendrier { display: none; }
+  .agenda-liste { display: grid; gap: 0; }
+  .tops-flops { grid-template-columns: 1fr; }
+  .creer-libelle { display: none; }
+}
+@media (max-width: 480px) {
+  .recherche-btn { flex: 0 0 42px; padding: 0; justify-content: center; }
+  .recherche-btn span { display: none; }
 }
 @media print {
-  .barre, .haut-mobile, .entete .boutons, .filtres { display: none !important; }
+  .barre, .haut, .entete .boutons, .filtres { display: none !important; }
   .app { display: block; }
   body { background: #fff; }
 }
@@ -354,6 +509,7 @@ dialog::backdrop { background: rgba(13,23,48,.55); }
       <svg class="logo-mark" viewBox="0 0 48 22" aria-hidden="true"><rect class="link" x="18" y="7.9" width="10" height="6.2" rx="1"/><circle class="dot-a" cx="11" cy="11" r="10.5"/><circle class="dot-b" cx="36.5" cy="11" r="10.5"/></svg>
       <span class="logo-word">nexus</span>
     </span>
+    <div class="tag" style="margin-bottom:10px">Poste de commande</div>
     <h1 id="auth-titre">Connexion</h1>
     <p class="signature" id="auth-sous-titre">Le lien entre votre métier et le digital. Espace réservé à l’équipe.</p>
     <div id="auth-message" class="message" hidden></div>
@@ -378,29 +534,30 @@ dialog::backdrop { background: rgba(13,23,48,.55); }
       <svg class="logo-mark" viewBox="0 0 48 22" aria-hidden="true"><rect class="link" x="18" y="7.9" width="10" height="6.2" rx="1"/><circle class="dot-a" cx="11" cy="11" r="10.5"/><circle class="dot-b" cx="36.5" cy="11" r="10.5"/></svg>
       <span class="logo-word">nexus</span>
     </a>
-    <div class="sous-logo">Poste de commande</div>
     <nav class="nav" id="nav"></nav>
-    <div class="barre-pied">
-      <div class="utilisateur" id="utilisateur"></div>
-      <div class="actions">
-        <button class="barre-btn" type="button" data-action="theme" id="btn-theme"></button>
-        <button class="barre-btn" type="button" data-action="deconnexion" title="Se déconnecter">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg>
-          Sortir
-        </button>
-      </div>
-    </div>
+    <div class="barre-pied"><a class="utilisateur" id="utilisateur" href="#/reglages" title="Mon compte et réglages"></a></div>
   </aside>
-  <div>
-    <div class="haut-mobile">
-      <a class="logo" href="#/accueil" aria-label="NexusLab, accueil">
-        <svg class="logo-mark" viewBox="0 0 48 22" aria-hidden="true"><rect class="link" x="18" y="7.9" width="10" height="6.2" rx="1"/><circle class="dot-a" cx="11" cy="11" r="10.5"/><circle class="dot-b" cx="36.5" cy="11" r="10.5"/></svg>
-        <span class="logo-word">nexus</span>
-      </a>
-      <button class="icone-btn" type="button" data-action="menu" aria-label="Ouvrir le menu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  <div class="colonne-principale">
+    <header class="haut">
+      <button class="rond-btn menu-mobile" type="button" data-action="menu" aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-    </div>
+      <button class="recherche-btn" type="button" data-action="palette" aria-label="Rechercher">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <span>Rechercher un client, un site, une tâche...</span><kbd id="raccourci-k">⌘K</kbd>
+      </button>
+      <span class="espace"></span>
+      <div class="menu-creer">
+        <button class="btn primaire" type="button" data-action="menuCreer" aria-haspopup="true" aria-expanded="false" id="btn-creer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="creer-libelle">Créer</span>
+        </button>
+        <div class="menu-liste" id="menu-creer" role="menu" hidden></div>
+      </div>
+      <button class="rond-btn" type="button" data-action="theme" id="btn-theme"></button>
+      <button class="rond-btn" type="button" data-action="deconnexion" title="Se déconnecter" aria-label="Se déconnecter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg>
+      </button>
+    </header>
     <main id="contenu" tabindex="-1"></main>
   </div>
 </div>
@@ -411,6 +568,15 @@ dialog::backdrop { background: rgba(13,23,48,.55); }
     <div class="corps"><h2 id="confirmation-texte"></h2></div>
     <footer><span class="espace"></span><button class="btn" value="non">Annuler</button><button class="btn primaire" value="oui" id="confirmation-oui">Confirmer</button></footer>
   </form>
+</dialog>
+<dialog id="palette" aria-label="Recherche">
+  <div class="palette-champ">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="palette-q" type="text" placeholder="Rechercher ou lancer une action..." autocomplete="off" aria-label="Rechercher" aria-controls="palette-resultats">
+    <kbd>Échap</kbd>
+  </div>
+  <div class="palette-resultats" id="palette-resultats" role="listbox"></div>
+  <div class="palette-pied"><span><kbd>↑</kbd> <kbd>↓</kbd> naviguer</span><span><kbd>Entrée</kbd> ouvrir</span></div>
 </dialog>
 <div id="toasts" aria-live="polite"></div>
 
@@ -473,7 +639,11 @@ const ETIQ = {
   statutProjet: { brief: ["Brief", "gris"], design: ["Design", "violet"], developpement: ["Développement", "bleu"], revue_client: ["Revue client", "jaune"], en_ligne: ["En ligne", "vert"], maintenance: ["Maintenance", "corail"], termine: ["Terminé", "gris"] },
   typeProjet: { vitrine: "Vitrine", vitrine_reservation: "Vitrine + réservation", pack_visibilite: "Pack visibilité", outil: "Outil sur mesure", autre: "Autre" },
   statutDf: { brouillon: ["Brouillon", "gris"], envoye: ["Envoyé", "bleu"], accepte: ["Accepté", "violet"], facture: ["Facturé", "jaune"], paye: ["Payé", "vert"], annule: ["Annulé", "rouge"] },
-  statutTache: { a_faire: ["À faire", "gris"], en_cours: ["En cours", "bleu"], a_valider: ["À valider", "jaune"], fait: ["Fait", "vert"] },
+  statutTache: { a_faire: ["À faire", "gris"], en_cours: ["En cours", "bleu"], bloque: ["Bloqué", "rouge"], a_valider: ["À valider", "jaune"], fait: ["Fait", "vert"] },
+  typeReunion: { seance: ["Séance d’équipe", "violet"], debrief: ["Débrief", "corail"], client: ["Rendez-vous client", "jaune"], atelier: ["Atelier", "bleu"], autre: ["Autre", "gris"] },
+  statutDecision: { adoptee: ["Adoptée", "vert"], refusee: ["Refusée", "rouge"], reportee: ["Reportée", "jaune"], a_discuter: ["À discuter", "gris"] },
+  categorieRessource: { outil: ["Outil", "gris"], bta: ["Business Team Academy", "violet"], vardena: ["Vardena", "bleu"], modele: ["Modèle", "jaune"], guide: ["Guide", "vert"], client: ["Client", "corail"], autre: ["Autre", "gris"] },
+  sourceIndicateur: { manuel: "Saisie à la main", clients_contactes: "Auto : PME contactées", rendez_vous: "Auto : rendez-vous obtenus", devis_envoyes: "Auto : devis envoyés", mandats_signes: "Auto : mandats signés", ca_facture: "Auto : CA facturé (CHF)", ca_encaisse: "Auto : CA encaissé (CHF)", taches_faites: "Auto : tâches terminées" },
   typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", presentation: "Présentation", cours: "Cours BTA", administratif: "Administratif", proces_verbal: "Procès-verbal", autre: "Autre" },
   periode: { unique: "Paiement unique", mois: "Par mois", an: "Par an" },
 };
@@ -499,6 +669,19 @@ const ICONES = {
   lune: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   soleil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
   crayon: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  agenda: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2"/>',
+  objectifs: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  reunions: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  ressources: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  pipeline: '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/>',
+  liste: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  fleche: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  gauche: '<path d="M15 6l-6 6 6 6"/>',
+  droite: '<path d="M9 6l6 6-6 6"/>',
+  externe: '<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  epingle: '<path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/>',
+  etoile: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
+  eclair: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
 };
 const icone = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
 
@@ -516,6 +699,12 @@ const TABLES = {
   versions: { ordre: ["date", false] },
   retours: { ordre: ["date", false] },
   parametres: { ordre: ["id", true] },
+  objectifs: { ordre: ["ordre", true] },
+  indicateurs: { ordre: ["ordre", true] },
+  reunions: { ordre: ["date", false] },
+  decisions: { ordre: ["date", false] },
+  ressources: { ordre: ["titre", true] },
+  competences: { ordre: ["nom", true] },
 };
 const db = Object.fromEntries(Object.keys(TABLES).map((t) => [t, []]));
 let session = null;
@@ -597,6 +786,7 @@ function champHtml(c, v) {
   const req = c.requis ? " required" : "";
   const cls = "champ" + (c.pleine ? " pleine" : "");
   if (c.type === "separateur") return '<div class="separateur"></div>';
+  if (c.type === "multi") return `<div class="${cls}"><span class="label">${esc(c.label)}</span><div class="choix-multiples">${c.options.map(([k, l]) => `<label><input type="checkbox" name="${c.nom}" value="${esc(k)}"${(v || []).includes(k) ? " checked" : ""}> ${esc(l)}</label>`).join("")}</div></div>`;
   if (c.type === "checkbox") return `<label class="${cls} case"><input type="checkbox" name="${c.nom}"${v ? " checked" : ""}> <span>${esc(c.label)}</span></label>`;
   let input;
   if (c.type === "textarea") input = `<textarea id="${id}" name="${c.nom}" rows="${c.rows || 3}"${req}>${esc(v ?? "")}</textarea>`;
@@ -614,6 +804,7 @@ function lireForm(form, champs) {
   const o = {};
   for (const c of champs) {
     if (c.type === "separateur" || c.lectureSeule) continue;
+    if (c.type === "multi") { o[c.nom] = $$(`input[name="${c.nom}"]:checked`, form).map((x) => x.value); continue; }
     const el = form.elements[c.nom];
     if (!el) continue;
     if (c.type === "checkbox") o[c.nom] = el.checked;
@@ -663,6 +854,8 @@ const champsClient = () => [
   { nom: "email", label: "E-mail", type: "email" },
   { nom: "telephone", label: "Téléphone", type: "tel" },
   { nom: "source", label: "Source", placeholder: "Appel, réseau, site, visite..." },
+  { nom: "prochaine_action", label: "Prochaine action", placeholder: "Rappeler pour fixer un rendez-vous", pleine: true },
+  { nom: "date_relance", label: "Date de relance", type: "date" },
   { nom: "adresse", label: "Rue et numéro", aide: "Utile pour l’adresse des factures." },
   { nom: "npa", label: "NPA" },
   { nom: "localite", label: "Localité" },
@@ -744,7 +937,7 @@ function editerTache(id, defauts = {}) {
     titre: t ? "Modifier la tâche" : "Nouvelle tâche", champs: champsTache(),
     valeurs: t || { statut: "a_faire", responsable_id: moi()?.id, ...defauts },
     extra: `<datalist id="liste-sprints">${sprints().map((s) => `<option value="${esc(s)}">`).join("")}</datalist>`,
-    enregistrer: async (v) => { await enregistrer("taches", v, id); toast("Tâche enregistrée."); },
+    enregistrer: async (v) => { if (!id && defauts.reunion_id) v.reunion_id = defauts.reunion_id; await enregistrer("taches", v, id); toast("Tâche enregistrée."); },
     supprimer: t ? () => supprimerLigne("taches", id) : null,
   });
 }
@@ -813,18 +1006,25 @@ function editerRetour(id, projetId) {
    Navigation
    ========================================================================== */
 const PAGES = {
-  accueil: { titre: "Accueil", icone: "accueil", rendre: pageAccueil },
-  clients: { titre: "Clients", icone: "clients", rendre: pageClients },
-  projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets },
-  offres: { titre: "Offres", icone: "offres", rendre: pageOffres },
-  devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis },
-  taches: { titre: "Tâches", icone: "taches", rendre: pageTaches },
-  equipe: { titre: "Équipe", icone: "equipe", rendre: pageEquipe },
-  documents: { titre: "Documents", icone: "documents", rendre: pageDocuments },
-  reglages: { titre: "Réglages", icone: "reglages", rendre: pageReglages },
+  accueil: { titre: "Ma journée", icone: "accueil", rendre: pageAccueil, groupe: "Pilotage" },
+  agenda: { titre: "Agenda", icone: "agenda", rendre: pageAgenda, groupe: "Pilotage" },
+  objectifs: { titre: "Objectifs", icone: "objectifs", rendre: pageObjectifs, groupe: "Pilotage" },
+  clients: { titre: "Clients et pipeline", icone: "clients", rendre: pageClients, groupe: "Commercial" },
+  offres: { titre: "Offres", icone: "offres", rendre: pageOffres, groupe: "Commercial" },
+  devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis, groupe: "Commercial" },
+  projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets, groupe: "Production" },
+  taches: { titre: "Tâches", icone: "taches", rendre: pageTaches, groupe: "Production" },
+  documents: { titre: "Documents", icone: "documents", rendre: pageDocuments, groupe: "Production" },
+  equipe: { titre: "Équipe", icone: "equipe", rendre: pageEquipe, groupe: "Équipe et BTA" },
+  reunions: { titre: "Réunions et décisions", icone: "reunions", rendre: pageReunions, groupe: "Équipe et BTA" },
+  ressources: { titre: "Ressources", icone: "ressources", rendre: pageRessources, groupe: "Équipe et BTA" },
+  reglages: { titre: "Réglages", icone: "reglages", rendre: pageReglages, groupe: "Équipe et BTA" },
 };
 const filtres = {
-  clients: { q: "", statut: "" },
+  clients: { q: "", statut: "", vue: "pipeline", fini: "" },
+  agenda: { mois: "", moi: "" },
+  reunions: { onglet: "reunions", type: "", q: "" },
+  ressources: { q: "", categorie: "" },
   projets: { q: "", statut: "actifs" },
   devis: { type: "", statut: "", q: "" },
   taches: { vue: "statut", sprint: "", personne: "", projet: "", fait: "1" },
@@ -837,8 +1037,14 @@ function lireRoute() {
 }
 function rendreNav(page) {
   const mesTaches = moi() ? db.taches.filter((t) => t.statut !== "fait" && (t.responsable_id === moi().id || (t.valideur_id === moi().id && t.statut === "a_valider"))).length : 0;
-  $("#nav").innerHTML = Object.entries(PAGES).map(([k, p]) =>
-    `<a href="#/${k}"${k === page ? ' aria-current="page"' : ""}>${icone(p.icone)}<span>${esc(p.titre)}</span>${k === "taches" && mesTaches ? `<span class="compteur" title="Mes tâches ouvertes">${mesTaches}</span>` : ""}</a>`).join("");
+  const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= aujourdhui() && !["termine", "perdu", "livre"].includes(c.statut)).length;
+  const compteurs = { taches: [mesTaches, "Mes tâches ouvertes"], clients: [relances, "Relances à faire"] };
+  let groupe = "";
+  $("#nav").innerHTML = Object.entries(PAGES).map(([k, p]) => {
+    const tete = p.groupe !== groupe ? `<div class="nav-groupe">${esc((groupe = p.groupe))}</div>` : "";
+    const [n, titre] = compteurs[k] || [0, ""];
+    return `${tete}<a href="#/${k}"${k === page ? ' aria-current="page"' : ""}>${icone(p.icone)}<span>${esc(p.titre)}</span>${n ? `<span class="compteur" title="${titre}">${n}</span>` : ""}</a>`;
+  }).join("");
 }
 function rendre() {
   if (!session) return;
@@ -847,11 +1053,13 @@ function rendre() {
   const main = $("#contenu");
   try { main.innerHTML = PAGES[page].rendre(id); }
   catch (err) { console.error(err); main.innerHTML = `<div class="message erreur">Erreur d’affichage : ${esc(err.message)}</div>`; }
+  const tete = $(".entete > div:first-child", main);
+  if (tete && !$(".tag", tete)) tete.insertAdjacentHTML("afterbegin", `<div class="tag">${esc(PAGES[page].groupe)}</div>`);
   document.title = PAGES[page].titre + ", NexusLab";
   $("#app").classList.remove("menu-ouvert");
   apresRendu(page);
 }
-function apresRendu(page) { if (page === "taches") brancherGlisser(); }
+function apresRendu(page) { if (page === "taches") brancherGlisser(); if (page === "clients") brancherGlisserPipeline(); }
 window.addEventListener("hashchange", () => {
   if (/access_token|error_description/.test(location.hash)) return;
   rendre();
@@ -877,28 +1085,49 @@ function pageAccueil() {
   const tachesRetard = db.taches.filter(enRetard);
   const somme = (l) => l.reduce((s, d) => s + Number(d.montant_ttc || 0), 0);
   const m = moi();
-
-  const semaine = [];
-  for (const t of db.taches) if (t.statut !== "fait" && t.echeance && t.echeance <= dans7)
-    semaine.push({ date: t.echeance, titre: t.titre, meta: "Tâche" + (t.projet_id ? " · " + nomProjet(t.projet_id) : ""), href: "#/taches", retard: t.echeance < auj, av: t.responsable_id });
-  for (const d of aEncaisser) if (d.echeance && d.echeance <= dans7)
-    semaine.push({ date: d.echeance, titre: `Facture ${d.numero} · ${chf(d.montant_ttc)}`, meta: "Paiement attendu · " + nomClient(d.client_id), href: "#/devis", retard: d.echeance < auj });
-  for (const d of devisAttente) if (d.echeance && d.echeance <= dans7)
-    semaine.push({ date: d.echeance, titre: `Devis ${d.numero} expire`, meta: nomClient(d.client_id), href: "#/devis", retard: d.echeance < auj });
-  for (const p of db.projets) if (p.date_mise_en_ligne && p.date_mise_en_ligne >= auj && p.date_mise_en_ligne <= dans7 && p.statut !== "en_ligne")
-    semaine.push({ date: p.date_mise_en_ligne, titre: `Mise en ligne : ${p.nom}`, meta: nomClient(p.client_id), href: "#/projets/" + p.id });
-  semaine.sort((a, b) => a.date.localeCompare(b.date));
-
-  const parStatut = Object.keys(ETIQ.statutClient).map((k) => [k, db.clients.filter((c) => c.statut === k).length]);
-  const max = Math.max(1, ...parStatut.map((x) => x[1]));
-  const mesTaches = m ? db.taches.filter((t) => t.responsable_id === m.id && t.statut !== "fait").sort((a, b) => (a.echeance || "9").localeCompare(b.echeance || "9")) : [];
-  const aValider = m ? db.taches.filter((t) => t.valideur_id === m.id && t.statut === "a_valider") : [];
   const prenom = m ? m.nom.split(" ")[0] : "";
 
+  const mesTaches = m ? db.taches.filter((t) => t.responsable_id === m.id && t.statut !== "fait") : [];
+  const urgentes = mesTaches.filter((t) => t.echeance && t.echeance <= auj).sort((a, b) => a.echeance.localeCompare(b.echeance));
+  const aValider = m ? db.taches.filter((t) => t.valideur_id === m.id && t.statut === "a_valider") : [];
+  const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= auj && !["termine", "perdu", "livre"].includes(c.statut));
+  const reunionsAuj = db.reunions.filter((r) => r.date === auj);
+  const bloquees = db.taches.filter((t) => t.statut === "bloque");
+  const prochainsJours = evenements(ajouterJours(auj, 1), dans7, m && filtres.agenda.moi ? m.id : "");
+  const obj = objectifCourant();
+  const pct = obj ? progressionObjectif(obj) : 0;
+
+  const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? "s" : ""}`;
+  const resume = [
+    urgentes.length ? pluriel(urgentes.length, "tâche") + " à boucler" : "aucune tâche urgente",
+    relances.length ? pluriel(relances.length, "relance") + " client" : "",
+    reunionsAuj.length ? pluriel(reunionsAuj.length, "réunion") + " aujourd’hui" : "",
+  ].filter(Boolean).join(", ");
+
+  const lignesJour = [
+    ...urgentes.map((t) => ({ html: ligneTache(t) })),
+    ...aValider.map((t) => ({ html: ligneTache(t).replace('<div class="corps">', '<div class="corps"><span class="badge t-jaune sans-point" style="margin-bottom:3px">À valider par toi</span>') })),
+    ...relances.map((c) => ({ html: `<div class="ligne-item cliquable" data-href="#/clients/${c.id}"><span class="date-pastille"><small>${esc(new Date(c.date_relance + "T12:00:00").toLocaleDateString("fr-CH", { month: "short" }).replace(".", ""))}</small><b>${new Date(c.date_relance + "T12:00:00").getDate()}</b></span><div class="corps"><div class="titre">Relancer ${esc(c.nom)}</div><div class="meta">${esc(c.prochaine_action || "Prochaine action à définir")}${c.contact ? " · " + esc(c.contact) : ""}</div></div>${badge("statutClient", c.statut)}</div>` })),
+    ...reunionsAuj.map((r) => ({ html: `<div class="ligne-item cliquable" data-href="#/reunions/${r.id}"><span class="date-pastille aujourdhui"><small>Auj.</small><b>${esc(r.heure || "·")}</b></span><div class="corps"><div class="titre">${esc(r.titre)}</div><div class="meta">${esc([libelle("typeReunion", r.type), r.lieu].filter(Boolean).join(" · "))}</div></div>${avatarsMembres(r.participants)}</div>` })),
+  ];
+
   return `
-  <div class="entete"><div><h1>Bonjour${prenom ? " " + esc(prenom) : ""}</h1>
-    <div class="sous-titre">${esc(new Date().toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</div></div>
-    <div class="boutons"><button class="btn" data-action="nouvelleTache">${icone("plus")}Tâche</button><button class="btn" data-action="nouveauClient">${icone("plus")}Client</button><button class="btn primaire" data-action="nouveauDf" data-type="devis">${icone("plus")}Devis</button></div></div>
+  <section class="carte sombre" style="margin-bottom:18px;padding:26px 28px">
+    <div style="display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap;position:relative;z-index:1">
+      <div style="min-width:0;max-width:640px">
+        <div class="tag" style="margin-bottom:12px">${esc(new Date().toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long" }))}</div>
+        <h1>Bonjour${prenom ? " " + esc(prenom) : ""}.</h1>
+        <p class="sous" style="margin:10px 0 18px;font-size:1.02rem">Aujourd’hui : ${esc(resume)}.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn corail" data-action="debriefDuJour">${icone("eclair")}Débrief du jour</button>
+          <a class="btn" href="#/agenda" style="background:transparent;color:inherit;border-color:rgba(255,255,255,.28)">${icone("agenda")}Voir l’agenda</a>
+        </div>
+      </div>
+      ${obj ? `<a href="#/objectifs" style="display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit">
+        <span class="anneau" style="--p:${pct};width:84px;height:84px;font-size:1.15rem">${pct}%</span>
+        <span><span class="muted petit" style="display:block">Objectif en cours</span><b style="font-size:1.1rem">${esc(obj.titre)}</b>${obj.fin ? `<span class="muted petit" style="display:block">jusqu’au ${dateFr(obj.fin)}</span>` : ""}</span></a>` : ""}
+    </div>
+  </section>
   <div class="kpis">
     ${kpi("Projets en cours", projetsEnCours.length, `${db.projets.filter((p) => p.statut === "en_ligne" || p.statut === "maintenance").length} en ligne`, "#/projets")}
     ${kpi("Devis en attente", devisAttente.length, devisAttente.length ? chf(somme(devisAttente)) : "Aucun devis envoyé", "#/devis")}
@@ -907,22 +1136,34 @@ function pageAccueil() {
     ${kpi("Factures en retard", facturesRetard.length, facturesRetard.length ? chf(somme(facturesRetard)) : "Tout est à jour", "#/devis", facturesRetard.length > 0)}
     ${kpi("Tâches en retard", tachesRetard.length, `${db.taches.filter((t) => t.statut !== "fait").length} tâches ouvertes`, "#/taches", tachesRetard.length > 0)}
   </div>
-  <div class="grille g2">
-    <section class="carte"><header><h2>Cette semaine</h2><span class="muted petit">jusqu’au ${dateFr(dans7)}</span></header>
-      ${semaine.length ? semaine.map((e) => `<div class="ligne-item cliquable" data-href="${e.href}">${e.av !== undefined ? avatar(e.av, "Responsable") : ""}<div class="corps"><div class="titre">${esc(e.titre)}</div><div class="meta">${esc(e.meta)}</div></div><span class="petit ${e.retard ? "retard" : "muted"}">${e.retard ? "En retard · " : ""}${dateCourte(e.date)}</span></div>`).join("") : '<div class="vide-liste">Rien de prévu dans les 7 prochains jours.</div>'}
-    </section>
-    <section class="carte"><header><h2>Clients par statut</h2><a class="btn discret mini" href="#/clients">Voir tout</a></header>
-      <div class="barres">${parStatut.map(([k, n]) => `<a class="barre-ligne" href="#/clients" data-action="filtrerClients" data-statut="${k}"><span>${esc(libelle("statutClient", k))}</span><span class="piste"><span class="rempli" style="display:block;width:${(n / max) * 100}%${n ? "" : ";min-width:0"}"></span></span><span class="num fort">${n}</span></a>`).join("")}</div>
-    </section>
-    <section class="carte"><header><h2>Mes tâches</h2><a class="btn discret mini" href="#/taches" data-action="filtrerTachesMoi">Tableau</a></header>
-      ${m ? (mesTaches.length ? mesTaches.slice(0, 8).map(ligneTache).join("") : '<div class="vide-liste">Aucune tâche ouverte. Bravo.</div>') : '<div class="vide-liste">Votre e-mail n’est relié à aucun membre.</div>'}
-      ${aValider.length ? `<h3 style="margin:16px 0 4px">À valider par moi</h3>${aValider.map(ligneTache).join("")}` : ""}
-    </section>
-    <section class="carte"><header><h2>Sites en cours</h2><a class="btn discret mini" href="#/projets">Voir tout</a></header>
-      ${projetsEnCours.length ? projetsEnCours.map((p) => `<div class="ligne-item cliquable" data-href="#/projets/${p.id}">${avatar(p.responsable_id, "Responsable")}<div class="corps"><div class="titre">${esc(p.nom)}</div><div class="meta">${esc(p.prochaine_etape || "Prochaine étape à définir")}</div></div>${badge("statutProjet", p.statut)}</div>`).join("") : '<div class="vide-liste">Aucun site en cours.</div>'}
-    </section>
+  <div class="grille g-accueil">
+    <div class="pile">
+      <section class="carte"><header><h2>À faire aujourd’hui</h2><span class="muted petit">${lignesJour.length} élément${lignesJour.length > 1 ? "s" : ""}</span></header>
+        ${m ? (lignesJour.length ? lignesJour.map((l) => l.html).join("") : '<div class="vide-liste">Rien d’urgent aujourd’hui. Profites-en pour avancer un site.</div>') : '<div class="vide-liste">Ton e-mail n’est relié à aucun membre.</div>'}
+      </section>
+      <section class="carte"><header><h2>Les 7 prochains jours</h2><a class="btn discret mini" href="#/agenda">Agenda</a></header>
+        ${prochainsJours.length ? prochainsJours.slice(0, 12).map(ligneEvenement).join("") : '<div class="vide-liste">Rien de prévu cette semaine.</div>'}
+      </section>
+    </div>
+    <div class="pile">
+      ${bloquees.length ? `<section class="carte" style="border-color:var(--t-rouge)"><header><h2>Bloqué</h2><span class="badge t-rouge">${bloquees.length}</span></header>${bloquees.map(ligneTache).join("")}</section>` : ""}
+      ${obj ? carteObjectif(obj, true) : `<section class="carte"><header><h2>Objectifs</h2></header><div class="vide-liste">Aucun objectif en cours.<br><button class="btn mini" data-action="nouvelObjectif">${icone("plus")}Fixer un objectif</button></div></section>`}
+      <section class="carte"><header><h2>Pipeline commercial</h2><a class="btn discret mini" href="#/clients">Ouvrir</a></header>
+        ${barresPipeline()}
+      </section>
+      <section class="carte"><header><h2>Sites en cours</h2><a class="btn discret mini" href="#/projets">Voir tout</a></header>
+        ${projetsEnCours.length ? projetsEnCours.map((p) => `<div class="ligne-item cliquable" data-href="#/projets/${p.id}">${avatar(p.responsable_id, "Responsable")}<div class="corps"><div class="titre">${esc(p.nom)}</div><div class="meta">${esc(p.prochaine_etape || "Prochaine étape à définir")}</div></div>${badge("statutProjet", p.statut)}</div>`).join("") : '<div class="vide-liste">Aucun site en cours.</div>'}
+      </section>
+    </div>
   </div>`;
 }
+function barresPipeline() {
+  const etapes = ["prospect", "contacte", "rendez_vous", "offre_envoyee", "mandat_signe"];
+  const parStatut = etapes.map((k) => [k, db.clients.filter((c) => c.statut === k && !estInterne(c)).length]);
+  const max = Math.max(1, ...parStatut.map((x) => x[1]));
+  return `<div class="barres">${parStatut.map(([k, n]) => `<a class="barre-ligne" href="#/clients" data-action="filtrerClients" data-statut="${k}"><span>${esc(libelle("statutClient", k))}</span><span class="piste"><span class="rempli" style="width:${(n / max) * 100}%${n ? "" : ";min-width:0"}"></span></span><span class="num" style="font-weight:800">${n}</span></a>`).join("")}</div>`;
+}
+function avatarsMembres(ids) { return `<span class="avatars">${(ids || []).map((id) => avatar(id, "")).join("")}</span>`; }
 function ligneTache(t) {
   return `<div class="ligne-item cliquable${t.statut === "fait" ? " fait" : ""}" data-action="modifierTache" data-id="${t.id}">
     ${avatar(t.responsable_id, "Responsable (R)")}
@@ -936,23 +1177,69 @@ function ligneTache(t) {
 function pageClients(id) {
   if (id) return ficheClient(id);
   const f = filtres.clients;
+  const externes = db.clients.filter((c) => !estInterne(c));
+  const relances = externes.filter((c) => c.date_relance && c.date_relance <= aujourdhui() && !["termine", "perdu", "livre"].includes(c.statut)).length;
   return `
-  <div class="entete"><div><h1>Clients</h1><div class="sous-titre">${db.clients.length} PME et indépendants suivis</div></div>
+  <div class="entete"><div><div class="tag">Commercial</div><h1>Clients et pipeline</h1>
+      <div class="sous-titre">${externes.length} PME et indépendants suivis${relances ? ` · <b class="retard">${relances} relance${relances > 1 ? "s" : ""} à faire</b>` : ""}</div></div>
     <div class="boutons"><button class="btn primaire" data-action="nouveauClient">${icone("plus")}Nouveau client</button></div></div>
   <div class="filtres">
+    <div class="onglets" role="group" aria-label="Vue">${[["pipeline", "Pipeline"], ["liste", "Liste"]].map(([k, l]) => `<button aria-pressed="${f.vue === k}" data-action="puce" data-filtre="clients.vue" data-valeur="${k}">${l}</button>`).join("")}</div>
     <input type="search" placeholder="Rechercher un nom, un contact, une localité" value="${esc(f.q)}" data-filtre="clients.q" aria-label="Rechercher">
-    <div class="puces">${[["", "Tous", db.clients.length], ...Object.keys(ETIQ.statutClient).map((k) => [k, libelle("statutClient", k), db.clients.filter((c) => c.statut === k).length])].filter((x) => x[0] === "" || x[2] > 0 || f.statut === x[0])
-      .map(([k, l, n]) => `<button class="puce" aria-pressed="${f.statut === k}" data-action="puce" data-filtre="clients.statut" data-valeur="${k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div>
+    ${f.vue === "liste" ? `<div class="puces">${[["", "Tous", db.clients.length], ...Object.keys(ETIQ.statutClient).map((k) => [k, libelle("statutClient", k), db.clients.filter((c) => c.statut === k).length])].filter((x) => x[0] === "" || x[2] > 0 || f.statut === x[0])
+      .map(([k, l, n]) => `<button class="puce" aria-pressed="${f.statut === k}" data-action="puce" data-filtre="clients.statut" data-valeur="${k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div>`
+      : `<label class="petit" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-filtre="clients.fini" ${f.fini === "1" ? "checked" : ""}> Afficher livrés, terminés et internes</label>`}
   </div>
-  <section class="carte sans-marge"><div class="table-wrap" id="liste-clients">${listeClients()}</div></section>`;
+  <div id="liste-clients">${listeClients()}</div>`;
 }
+const estInterne = (c) => c.source === "Interne" || c.secteur === "Interne";
+const ETAPES_PIPELINE = ["prospect", "contacte", "rendez_vous", "offre_envoyee", "mandat_signe", "perdu"];
 function listeClients() {
   const f = filtres.clients, q = f.q.toLowerCase();
-  const l = db.clients.filter((c) => (!f.statut || c.statut === f.statut) && (!q || [c.nom, c.contact, c.localite, c.secteur, c.email].join(" ").toLowerCase().includes(q)));
-  if (!l.length) return '<div class="vide-liste">Aucun client ne correspond.</div>';
-  return `<table class="liste"><thead><tr><th>Nom</th><th class="masquer-mobile">Secteur</th><th class="masquer-mobile">Contact</th><th class="masquer-mobile">Localité</th><th>Statut</th><th class="num">Sites</th></tr></thead><tbody>
-    ${l.map((c) => `<tr data-href="#/clients/${c.id}"><td class="fort">${esc(c.nom)}</td><td class="masquer-mobile">${esc(c.secteur || "")}</td><td class="masquer-mobile">${esc(c.contact || "")}</td><td class="masquer-mobile">${esc(c.localite || "")}</td><td>${badge("statutClient", c.statut)}</td><td class="num">${db.projets.filter((p) => p.client_id === c.id).length}</td></tr>`).join("")}
-  </tbody></table>`;
+  const cherche = (c) => !q || [c.nom, c.contact, c.localite, c.secteur, c.email, c.prochaine_action].join(" ").toLowerCase().includes(q);
+  if (f.vue === "pipeline") {
+    const etapes = f.fini === "1" ? Object.keys(ETIQ.statutClient) : ETAPES_PIPELINE;
+    const l = db.clients.filter((c) => cherche(c) && (f.fini === "1" || !estInterne(c)));
+    return `<div class="kanban">${etapes.map((k) => {
+      const cs = l.filter((c) => c.statut === k).sort((a, b) => (a.date_relance || "9").localeCompare(b.date_relance || "9"));
+      return `<section class="colonne" data-statut-client="${k}" style="--point:var(--t-${ETIQ.statutClient[k][1]})"><header><h3>${esc(libelle("statutClient", k))}</h3><span class="muted petit">${cs.length}</span></header>
+        <div class="cartes">${cs.map(carteClient).join("") || '<div class="muted petit" style="padding:8px 4px">Glisse une PME ici.</div>'}</div></section>`;
+    }).join("")}</div>
+    <p class="muted petit" style="margin-top:6px">Glisse une carte d’une colonne à l’autre pour changer son statut. Les dates de relance passées apparaissent en rouge.</p>`;
+  }
+  const l = db.clients.filter((c) => (!f.statut || c.statut === f.statut) && cherche(c));
+  if (!l.length) return '<section class="carte"><div class="vide-liste">Aucun client ne correspond.</div></section>';
+  return `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Nom</th><th class="masquer-mobile">Secteur</th><th class="masquer-mobile">Contact</th><th class="masquer-mobile">Prochaine action</th><th>Relance</th><th>Statut</th><th class="num">Sites</th></tr></thead><tbody>
+    ${l.map((c) => `<tr data-href="#/clients/${c.id}"><td class="fort">${esc(c.nom)}<div class="muted petit" style="font-weight:500">${esc(c.localite || "")}</div></td><td class="masquer-mobile">${esc(c.secteur || "")}</td><td class="masquer-mobile">${esc(c.contact || "")}</td><td class="masquer-mobile">${esc(c.prochaine_action || "")}</td><td>${c.date_relance ? `<span class="${c.date_relance <= aujourdhui() ? "retard" : ""}">${dateCourte(c.date_relance)}</span>` : vide}</td><td>${badge("statutClient", c.statut)}</td><td class="num">${db.projets.filter((p) => p.client_id === c.id).length}</td></tr>`).join("")}
+  </tbody></table></div></section>`;
+}
+function carteClient(c) {
+  const due = c.date_relance && c.date_relance <= aujourdhui();
+  return `<article class="tache" draggable="true" data-client="${c.id}" data-href="#/clients/${c.id}" tabindex="0">
+    <div class="projet">${esc([c.secteur, c.localite].filter(Boolean).join(" · ") || "PME")}</div>
+    <div class="titre">${esc(c.nom)}</div>
+    ${c.prochaine_action ? `<div class="petit" style="color:var(--texte-2)">${icone("fleche").replace("<svg", '<svg style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"')}${esc(c.prochaine_action)}</div>` : ""}
+    <div class="bas">${c.contact ? `<span>${esc(c.contact)}</span>` : ""}<span class="droite">${c.date_relance ? `<span class="relance ${due ? "retard" : ""}">Relance ${dateCourte(c.date_relance)}</span>` : ""}</span></div>
+  </article>`;
+}
+function brancherGlisserPipeline() {
+  if (filtres.clients.vue !== "pipeline" || lireRoute().id) return;
+  let glisse = null;
+  for (const c of $$("[data-client]")) {
+    c.addEventListener("dragstart", (e) => { glisse = c.dataset.client; c.classList.add("glisse"); e.dataTransfer.effectAllowed = "move"; });
+    c.addEventListener("dragend", () => c.classList.remove("glisse"));
+  }
+  for (const col of $$("[data-statut-client]")) {
+    col.addEventListener("dragover", (e) => { e.preventDefault(); col.classList.add("survol"); });
+    col.addEventListener("dragleave", () => col.classList.remove("survol"));
+    col.addEventListener("drop", async (e) => {
+      e.preventDefault(); col.classList.remove("survol");
+      const c = parId("clients", glisse);
+      if (!c || c.statut === col.dataset.statutClient) return;
+      try { await enregistrer("clients", { statut: col.dataset.statutClient }, c.id); toast(`${c.nom} : ${libelle("statutClient", col.dataset.statutClient)}`); rendre(); }
+      catch (err) { toast(msgErreur(err), "erreur"); }
+    });
+  }
 }
 function selectStatut(table, id, dict, valeur, cles) {
   return `<select class="statut-rapide" data-maj="${table}" data-id="${id}" data-champ="statut" aria-label="Changer le statut">${options(dict, cles).map(([k, l]) => `<option value="${k}"${k === valeur ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
@@ -995,6 +1282,8 @@ function ficheClient(id) {
         <dt>Téléphone</dt><dd>${c.telephone ? `<a href="tel:${esc(c.telephone.replace(/\s/g, ""))}">${esc(c.telephone)}</a>` : vide}</dd>
         <dt>Adresse</dt><dd>${esc(adresse) || vide}</dd>
         <dt>Source</dt><dd>${esc(c.source || "") || vide}</dd>
+        <dt>Prochaine action</dt><dd>${esc(c.prochaine_action || "") || vide}</dd>
+        <dt>Relance</dt><dd>${c.date_relance ? `<span class="${c.date_relance <= aujourdhui() ? "retard" : ""}">${dateFr(c.date_relance)}</span>` : vide}</dd>
         <dt>Suivi depuis</dt><dd>${dateFr(c.cree_le)}</dd></dl></section>
       <section class="carte"><header><h2>Notes</h2></header>${c.notes ? `<p class="texte-libre">${esc(c.notes)}</p>` : '<p class="muted petit" style="margin:0">Pas de note.</p>'}</section>
       <section class="carte"><header><h2>Historique</h2></header><ul class="chrono">${evts.slice(0, 25).map((e) => `<li><div>${esc(e.t)}</div><div class="quand">${dateFr(e.q)}</div></li>`).join("")}</ul></section>
@@ -1267,7 +1556,7 @@ function tachesFiltrees() {
 }
 function carteTache(t) {
   const h = t.heures_estimees != null || t.heures_reelles != null ? `<span title="Heures réelles / estimées">${(Number(t.heures_reelles) || 0).toLocaleString("fr-CH")} / ${(Number(t.heures_estimees) || 0).toLocaleString("fr-CH")} h</span>` : "";
-  return `<article class="tache" draggable="true" data-id="${t.id}" data-action="modifierTache" tabindex="0">
+  return `<article class="tache${t.statut === "bloque" ? " bloquee" : ""}" draggable="true" data-id="${t.id}" data-action="modifierTache" tabindex="0">
     ${t.projet_id ? `<div class="projet">${esc(nomProjet(t.projet_id))}</div>` : ""}
     <div class="titre">${esc(t.titre)}</div>
     <div class="bas"><span class="raci">R ${avatar(t.responsable_id, "Responsable (R)")}</span><span class="raci">A ${avatar(t.valideur_id, "Valideur (A)")}</span>
@@ -1283,7 +1572,7 @@ function listeTaches() {
   else if (f.vue === "sprint") { const s = sprints().filter((x) => !f.sprint || x === f.sprint); cols = [...s.map((x) => [x, x, l.filter((t) => t.sprint === x)]), ["", "Sans sprint", l.filter((t) => !t.sprint)]].filter((c) => c[0] !== "" || c[2].length); }
   else cols = Object.keys(ETIQ.statutTache).filter((k) => k !== "fait" || f.fait === "1").map((k) => [k, libelle("statutTache", k), l.filter((t) => t.statut === k)]);
   return `<div class="resume-heures"><span><strong>${l.filter((t) => t.statut !== "fait").length}</strong> ouvertes</span><span><strong>${l.filter(enRetard).length}</strong> en retard</span><span>Heures estimées <strong>${heures(est)}</strong></span><span>Heures réelles <strong>${heures(reel)}</strong></span></div>
-  <div class="kanban">${cols.map(([k, titre, ts]) => `<section class="colonne"${f.vue === "statut" ? ` data-statut="${k}"` : ""}><header><h3>${esc(titre)}</h3><span class="muted petit">${ts.length}</span></header><div class="cartes">${ts.map(carteTache).join("") || '<div class="muted petit" style="padding:8px 4px">Rien ici.</div>'}</div></section>`).join("")}</div>`;
+  <div class="kanban">${cols.map(([k, titre, ts]) => `<section class="colonne"${f.vue === "statut" ? ` data-statut="${k}" style="--point:var(--t-${ETIQ.statutTache[k][1]})"` : ""}><header><h3>${esc(titre)}</h3><span class="muted petit">${ts.length}</span></header><div class="cartes">${ts.map(carteTache).join("") || '<div class="muted petit" style="padding:8px 4px">Rien ici.</div>'}</div></section>`).join("")}</div>`;
 }
 function brancherGlisser() {
   if (filtres.taches.vue !== "statut") return;
@@ -1315,7 +1604,7 @@ function pageEquipe() {
   const sp = sprints();
   const actifs = membresActifs();
   return `
-  <div class="entete"><div><h1>Équipe</h1><div class="sous-titre">Rôles, charge de travail et heures</div></div>
+  <div class="entete"><div><h1>Équipe</h1><div class="sous-titre">Rôles, charge de travail, heures et progression de chacun</div></div>
     <div class="boutons"><button class="btn" data-action="nouveauMembre">${icone("plus")}Membre</button></div></div>
   <div class="membres">${db.membres.map((m, i) => {
     const r = db.taches.filter((t) => t.responsable_id === m.id);
@@ -1331,6 +1620,10 @@ function pageEquipe() {
       <div class="petit" style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Charge restante</span><strong>${heures(charges[i])}</strong></div>
       <div class="charge"><div style="width:${(charges[i] / maxCharge) * 100}%"></div></div>
       <div class="petit muted" style="margin-top:10px">${heures(reel)} réalisées au total${projets.length ? " · responsable de " + projets.map((p) => esc(p.nom)).join(", ") : ""}</div>
+      <div class="competences-liste">
+        <div style="display:flex;justify-content:space-between;align-items:center"><h3>Compétences</h3><button class="btn discret mini" data-action="nouvelleCompetence" data-membre="${m.id}">${icone("plus")}Ajouter</button></div>
+        ${db.competences.filter((c) => c.membre_id === m.id).sort((a, b) => b.niveau - a.niveau).map((c) => `<div class="competence" data-action="modifierCompetence" data-id="${c.id}" title="${esc(c.notes || "")}"><span class="nom">${esc(c.nom)}</span>${niveauPoints(c.niveau, c.objectif)}</div>`).join("") || '<div class="muted petit">Aucune compétence notée. Ajoute ce que tu maîtrises et ce que tu veux apprendre.</div>'}
+      </div>
     </article>`;
   }).join("")}</div>
   <section class="carte sans-marge"><header><h2>Heures par sprint</h2><span class="muted petit">réelles / estimées</span></header>
@@ -1561,7 +1854,7 @@ async function genererPdf(d) {
   const estFacture = d.type === "facture";
   const avecQr = estFacture && ibanValide(p.iban) && d.statut !== "annule";
   const mm = (v) => (v * 72) / 25.4, W = 595.28, H = 841.89, M = mm(20);
-  const C = { navy: rgb(20 / 255, 33 / 255, 61 / 255), corail: rgb(1, 107 / 255, 87 / 255), gris: rgb(74 / 255, 85 / 255, 104 / 255), ligne: rgb(228 / 255, 221 / 255, 210 / 255), creme: rgb(246 / 255, 242 / 255, 236 / 255), noir: rgb(0, 0, 0), blanc: rgb(1, 1, 1) };
+  const C = { navy: rgb(29 / 255, 29 / 255, 31 / 255), corail: rgb(1, 95 / 255, 87 / 255), gris: rgb(81 / 255, 81 / 255, 84 / 255), ligne: rgb(228 / 255, 221 / 255, 210 / 255), creme: rgb(246 / 255, 242 / 255, 236 / 255), noir: rgb(0, 0, 0), blanc: rgb(1, 1, 1) };
   const pdf = await PDFDocument.create();
   const titreDoc = `${estFacture ? "Facture" : "Devis"} ${d.numero}`;
   pdf.setTitle(titreDoc); pdf.setAuthor(p.raison_sociale || "NexusLab"); pdf.setCreator("Dashboard NexusLab"); pdf.setLanguage("fr-CH");
@@ -1767,12 +2060,449 @@ async function telechargerPdf(id) {
 }
 
 /* ==========================================================================
+   Fenêtre simple (lecture) : liste d'éléments, liens, actions
+   ========================================================================== */
+function fenetre(titre, corps, large) {
+  dlg.className = large ? "large" : "";
+  dlg.innerHTML = `<div class="modale-form"><header><h2>${esc(titre)}</h2><button type="button" class="icone-btn" data-fermer aria-label="Fermer">×</button></header><div class="corps">${corps}</div></div>`;
+  dlg.showModal();
+}
+dlg.addEventListener("click", (e) => {
+  if (e.target.closest("form")) return;
+  const a = e.target.closest("[data-action]");
+  if (a) { e.preventDefault(); fermerModale(); const fn = ACTIONS[a.dataset.action]; if (fn) fn(a.dataset, a); return; }
+  if (e.target.closest("[data-href], a[href^='#/']")) fermerModale();
+});
+
+/* ==========================================================================
+   Agenda : tout ce qui a une date, au même endroit
+   ========================================================================== */
+const TYPES_EVT = {
+  tache: ["Tâche", "bleu"], reunion: ["Réunion", "violet"], relance: ["Relance client", "jaune"], facture: ["Paiement attendu", "corail"],
+  devis: ["Fin de validité d’un devis", "gris"], mise_en_ligne: ["Mise en ligne", "vert"], objectif: ["Objectif", "rouge"],
+};
+function evenements(debut, fin, membreId) {
+  const dans = (d) => d && d >= debut && d <= fin;
+  const ev = [];
+  for (const t of db.taches) if (t.statut !== "fait" && dans(t.echeance) && (!membreId || t.responsable_id === membreId || t.valideur_id === membreId))
+    ev.push({ date: t.echeance, type: "tache", titre: t.titre, meta: [t.projet_id && nomProjet(t.projet_id), libelle("statutTache", t.statut), parId("membres", t.responsable_id)?.nom].filter(Boolean).join(" · "), action: "modifierTache", id: t.id });
+  for (const r of db.reunions) if (dans(r.date) && (!membreId || !(r.participants || []).length || r.participants.includes(membreId)))
+    ev.push({ date: r.date, type: "reunion", titre: r.titre, meta: [r.heure, libelle("typeReunion", r.type), r.lieu].filter(Boolean).join(" · "), href: "#/reunions/" + r.id });
+  if (!membreId) {
+    for (const c of db.clients) if (dans(c.date_relance) && !["termine", "perdu", "livre"].includes(c.statut))
+      ev.push({ date: c.date_relance, type: "relance", titre: "Relancer " + c.nom, meta: c.prochaine_action || c.contact || "", href: "#/clients/" + c.id });
+    for (const d of db.devis_factures) {
+      if (d.type === "facture" && d.statut === "envoye" && dans(d.echeance)) ev.push({ date: d.echeance, type: "facture", titre: `Facture ${d.numero}`, meta: nomClient(d.client_id) + " · " + chf(d.montant_ttc), action: "modifierDf", id: d.id });
+      if (d.type === "devis" && d.statut === "envoye" && dans(d.echeance)) ev.push({ date: d.echeance, type: "devis", titre: `Devis ${d.numero} expire`, meta: nomClient(d.client_id), action: "modifierDf", id: d.id });
+    }
+    for (const p of db.projets) if (dans(p.date_mise_en_ligne)) ev.push({ date: p.date_mise_en_ligne, type: "mise_en_ligne", titre: "Mise en ligne : " + p.nom, meta: nomClient(p.client_id), href: "#/projets/" + p.id });
+    for (const o of db.objectifs) {
+      if (dans(o.debut)) ev.push({ date: o.debut, type: "objectif", titre: "Début : " + o.titre, meta: "Objectif", href: "#/objectifs" });
+      if (dans(o.fin)) ev.push({ date: o.fin, type: "objectif", titre: "Fin : " + o.titre, meta: "Objectif", href: "#/objectifs" });
+    }
+  }
+  return ev.sort((a, b) => a.date.localeCompare(b.date) || a.type.localeCompare(b.type));
+}
+const attrsEvt = (e) => (e.href ? `data-href="${e.href}"` : `data-action="${e.action}" data-id="${e.id}"`);
+function ligneEvenement(e) {
+  const d = new Date(e.date + "T12:00:00");
+  return `<div class="ligne-item cliquable" ${attrsEvt(e)}><span class="date-pastille${e.date === aujourdhui() ? " aujourdhui" : ""}"><small>${esc(d.toLocaleDateString("fr-CH", { weekday: "short" }).replace(".", ""))}</small><b>${d.getDate()}</b></span>
+    <div class="corps"><div class="titre">${esc(e.titre)}</div><div class="meta">${esc(e.meta || "")}</div></div><span class="badge t-${TYPES_EVT[e.type][1]} masquer-mobile">${esc(TYPES_EVT[e.type][0])}</span></div>`;
+}
+function puceEvenement(e) {
+  const cls = `evt t-${TYPES_EVT[e.type][1]}`, titre = esc(e.titre + (e.meta ? " · " + e.meta : ""));
+  return e.href ? `<a class="${cls}" href="${e.href}" title="${titre}">${esc(e.titre)}</a>` : `<button type="button" class="${cls}" data-action="${e.action}" data-id="${e.id}" title="${titre}">${esc(e.titre)}</button>`;
+}
+function pageAgenda() {
+  const f = filtres.agenda, m = moi(), auj = aujourdhui();
+  const base = f.mois || auj.slice(0, 7);
+  const [an, mo] = base.split("-").map(Number);
+  const premier = new Date(an, mo - 1, 1, 12);
+  const decalage = (premier.getDay() + 6) % 7;
+  const jours = [];
+  for (let i = 0; i < 42; i++) jours.push(isoLocal(new Date(an, mo - 1, 1 - decalage + i, 12)));
+  if (jours[35].slice(0, 7) !== base) jours.length = 35;
+  const membre = f.moi && m ? m.id : "";
+  const ev = evenements(jours[0], jours[jours.length - 1], membre);
+  const parJour = {};
+  for (const e of ev) (parJour[e.date] = parJour[e.date] || []).push(e);
+  const prec = isoLocal(new Date(an, mo - 2, 1, 12)).slice(0, 7), suiv = isoLocal(new Date(an, mo, 1, 12)).slice(0, 7);
+  const aVenir = evenements(auj, ajouterJours(auj, 30), membre);
+  return `
+  <div class="entete"><div><h1>Agenda</h1><div class="sous-titre">Échéances, réunions, relances, paiements et mises en ligne, au même endroit.</div></div>
+    <div class="boutons"><button class="btn" data-action="nouvelleReunion">${icone("plus")}Réunion</button><button class="btn primaire" data-action="nouvelleTache">${icone("plus")}Tâche</button></div></div>
+  <div class="filtres" style="justify-content:space-between">
+    <div class="agenda-tete"><button class="rond-btn" data-action="moisAgenda" data-mois="${prec}" aria-label="Mois précédent">${icone("gauche")}</button><h2>${esc(premier.toLocaleDateString("fr-CH", { month: "long", year: "numeric" }))}</h2><button class="rond-btn" data-action="moisAgenda" data-mois="${suiv}" aria-label="Mois suivant">${icone("droite")}</button>
+      ${base !== auj.slice(0, 7) ? `<button class="btn mini" data-action="moisAgenda" data-mois="">Aujourd’hui</button>` : ""}</div>
+    <div class="onglets" role="group" aria-label="Portée">${[["", "Toute l’équipe"], ["1", "Mes éléments"]].map(([k, l]) => `<button aria-pressed="${f.moi === k}" data-action="puce" data-filtre="agenda.moi" data-valeur="${k}">${l}</button>`).join("")}</div>
+  </div>
+  <div class="calendrier">${["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((j) => `<div class="jour-nom">${j}</div>`).join("")}
+    ${jours.map((j) => { const es = parJour[j] || []; return `<div class="case${j.slice(0, 7) !== base ? " hors" : ""}${j === auj ? " auj" : ""}"><span class="n">${Number(j.slice(8))}</span>${es.slice(0, 3).map(puceEvenement).join("")}${es.length > 3 ? `<button type="button" class="evt plus" data-action="jourAgenda" data-jour="${j}">+ ${es.length - 3} autre${es.length - 3 > 1 ? "s" : ""}</button>` : ""}</div>`; }).join("")}
+  </div>
+  <div class="legende">${Object.values(TYPES_EVT).map(([l, t]) => `<span><i style="background:var(--t-${t})"></i>${esc(l)}</span>`).join("")}</div>
+  <section class="carte agenda-liste"><header><h2>Les 30 prochains jours</h2></header>${aVenir.length ? aVenir.map(ligneEvenement).join("") : '<div class="vide-liste">Rien de prévu.</div>'}</section>`;
+}
+
+/* ==========================================================================
+   Objectifs et indicateurs
+   ========================================================================== */
+function objectifCourant() {
+  const auj = aujourdhui();
+  return db.objectifs.filter((o) => o.actif && (!o.fin || o.fin >= auj)).sort((a, b) => (a.fin || "9").localeCompare(b.fin || "9") || a.ordre - b.ordre)[0] || null;
+}
+function dansPeriode(d, o) { if (!d) return false; const j = String(d).slice(0, 10); return (!o.debut || j >= o.debut) && (!o.fin || j <= o.fin); }
+function valeurIndicateur(i) {
+  const o = parId("objectifs", i.objectif_id) || {};
+  const pme = db.clients.filter((c) => !estInterne(c) && dansPeriode(c.cree_le, o));
+  const somme = (l) => arrondi(l.reduce((s, d) => s + Number(d.montant_ttc || 0), 0));
+  switch (i.source) {
+    case "clients_contactes": return pme.filter((c) => c.statut !== "prospect").length;
+    case "rendez_vous": return pme.filter((c) => ["rendez_vous", "offre_envoyee", "mandat_signe", "livre", "termine"].includes(c.statut)).length;
+    case "mandats_signes": return pme.filter((c) => ["mandat_signe", "livre", "termine"].includes(c.statut)).length;
+    case "devis_envoyes": return db.devis_factures.filter((d) => d.type === "devis" && ["envoye", "accepte", "facture"].includes(d.statut) && dansPeriode(d.date_emission, o)).length;
+    case "ca_facture": return somme(db.devis_factures.filter((d) => d.type === "facture" && ["envoye", "paye"].includes(d.statut) && dansPeriode(d.date_emission, o)));
+    case "ca_encaisse": return somme(db.devis_factures.filter((d) => d.type === "facture" && d.statut === "paye" && dansPeriode(d.date_paiement || d.date_emission, o)));
+    case "taches_faites": return db.taches.filter((t) => t.statut === "fait" && dansPeriode(t.modifie_le, o)).length;
+    default: return Number(i.valeur || 0);
+  }
+}
+function progressionObjectif(o) {
+  const is = db.indicateurs.filter((i) => i.objectif_id === o.id && Number(i.cible) > 0);
+  if (!is.length) return 0;
+  return Math.round((100 * is.reduce((s, i) => s + Math.min(1, valeurIndicateur(i) / Number(i.cible)), 0)) / is.length);
+}
+function carteObjectif(o, compact) {
+  const is = db.indicateurs.filter((i) => i.objectif_id === o.id);
+  const pct = progressionObjectif(o);
+  const jours = o.fin ? Math.round((new Date(o.fin + "T12:00:00") - new Date(aujourdhui() + "T12:00:00")) / 86400000) : null;
+  const restant = jours == null ? "" : jours > 1 ? `encore ${jours} jours` : jours === 1 ? "dernier jour demain" : jours === 0 ? "dernier jour" : "terminé";
+  const periode = [o.debut && "du " + dateFr(o.debut), o.fin && "au " + dateFr(o.fin)].filter(Boolean).join(" ");
+  const indic = (i) => {
+    const v = valeurIndicateur(i), c = Number(i.cible) || 0, p = c ? Math.min(100, Math.round((v / c) * 100)) : 0;
+    const fmt = (n) => (i.source.startsWith("ca_") ? chfCourt(n) : (Number(n) || 0).toLocaleString("fr-CH"));
+    return `<div class="progression"><div class="ligne-haut"><span>${esc(i.libelle)}</span><b>${fmt(v)} / ${fmt(c)}${i.unite ? " " + esc(i.unite) : ""}</b></div>
+      <span class="piste"><span class="rempli${c && v >= c ? " atteint" : ""}" style="width:${p}%${p ? "" : ";min-width:0"}"></span></span>
+      ${compact ? "" : `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="source-auto">${esc(libelle("sourceIndicateur", i.source))}</span><span style="display:flex;gap:4px">
+        ${i.source === "manuel" ? `<button class="btn mini" data-action="ajusterIndicateur" data-id="${i.id}" data-pas="-1" aria-label="Enlever un">−</button><button class="btn mini" data-action="ajusterIndicateur" data-id="${i.id}" data-pas="1" aria-label="Ajouter un">+</button>` : ""}
+        <button class="btn discret mini" data-action="modifierIndicateur" data-id="${i.id}" aria-label="Modifier l’indicateur ${esc(i.libelle)}">${icone("crayon")}</button></span></div>`}</div>`;
+  };
+  return `<section class="carte objectif">
+    <div class="tete">${compact ? "" : `<span class="anneau" style="--p:${pct}">${pct}%</span>`}
+      <div style="flex:1;min-width:0">${compact ? '<div class="muted petit">Objectif en cours</div>' : ""}<h2${compact ? "" : ' style="font-size:1.3rem"'}>${esc(o.titre)}</h2><div class="muted petit">${esc([periode, restant].filter(Boolean).join(" · "))}</div></div>
+      ${compact ? `<a class="btn discret mini" href="#/objectifs">${pct}%</a>` : `<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn mini" data-action="nouvelIndicateur" data-objectif="${o.id}">${icone("plus")}Indicateur</button><button class="btn discret mini" data-action="modifierObjectif" data-id="${o.id}" aria-label="Modifier l’objectif">${icone("crayon")}</button></div>`}
+    </div>
+    ${!compact && o.description ? `<p class="texte-libre">${esc(o.description)}</p>` : ""}
+    <div class="${compact ? "barres" : "indics"}"${compact ? ' style="gap:12px"' : ""}>${is.map(indic).join("") || '<div class="muted petit">Aucun indicateur. Ajoute ce que tu veux mesurer.</div>'}</div>
+  </section>`;
+}
+function pageObjectifs() {
+  const auj = aujourdhui();
+  const enCours = db.objectifs.filter((o) => o.actif && (!o.fin || o.fin >= auj));
+  const passes = db.objectifs.filter((o) => !(o.actif && (!o.fin || o.fin >= auj)));
+  return `
+  <div class="entete"><div><h1>Objectifs</h1><div class="sous-titre">Des objectifs SMART, avec leurs indicateurs. Les indicateurs « Auto » se calculent seuls à partir du pipeline, des devis et des factures, sur la période de l’objectif.</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouvelObjectif">${icone("plus")}Nouvel objectif</button></div></div>
+  <div class="pile">${enCours.map((o) => carteObjectif(o)).join("") || `<section class="carte"><div class="vide-liste">Aucun objectif en cours.<br><button class="btn" data-action="nouvelObjectif">${icone("plus")}Fixer un objectif</button></div></section>`}</div>
+  ${passes.length ? `<h2 style="margin:28px 0 12px">Objectifs passés</h2><div class="grille g2">${passes.map((o) => carteObjectif(o, true)).join("")}</div>` : ""}`;
+}
+const champsObjectif = () => [
+  { nom: "titre", label: "Objectif", requis: true, pleine: true, placeholder: "Rocket Week, Premier mandat, Semestre d’automne..." },
+  { nom: "debut", label: "Début", type: "date" },
+  { nom: "fin", label: "Fin", type: "date" },
+  { nom: "description", label: "Formulation SMART", type: "textarea", pleine: true, rows: 4, placeholder: "Spécifique, mesurable, atteignable, réaliste, temporel." },
+  { nom: "actif", label: "Objectif actif", type: "checkbox" },
+  { nom: "ordre", label: "Ordre d’affichage", type: "number", step: "1", defaut: 0 },
+];
+function editerObjectif(id) {
+  const o = parId("objectifs", id);
+  formulaire({
+    titre: o ? "Modifier l’objectif" : "Nouvel objectif", champs: champsObjectif(), valeurs: o || { actif: true, debut: aujourdhui(), ordre: db.objectifs.length + 1 },
+    enregistrer: async (v) => { const r = await enregistrer("objectifs", v, id); if (!id) { toast("Objectif créé. Ajoute maintenant ses indicateurs."); setTimeout(() => editerIndicateur(null, r.id), 50); } else toast("Objectif enregistré."); },
+    supprimer: o ? async () => { await supprimerLigne("objectifs", id); await charger("indicateurs"); } : null,
+  });
+}
+const champsIndicateur = () => [
+  { nom: "libelle", label: "Indicateur", requis: true, pleine: true, placeholder: "PME rencontrées" },
+  { nom: "cible", label: "Cible", type: "number", step: "1", min: 0, requis: true, defaut: 0 },
+  { nom: "unite", label: "Unité", placeholder: "PME, CHF, %..." },
+  { nom: "source", label: "Calcul", type: "select", options: options("sourceIndicateur"), vide: false, defaut: "manuel", pleine: true, aide: "« Auto » se met à jour tout seul. « Saisie à la main » se règle avec les boutons + et −." },
+  { nom: "valeur", label: "Valeur actuelle (si saisie à la main)", type: "number", step: "1", min: 0, defaut: 0 },
+  { nom: "ordre", label: "Ordre", type: "number", step: "1", defaut: 0 },
+];
+function editerIndicateur(id, objectifId) {
+  const i = parId("indicateurs", id);
+  formulaire({
+    titre: i ? "Modifier l’indicateur" : "Nouvel indicateur", champs: champsIndicateur(),
+    valeurs: i || { source: "manuel", valeur: 0, ordre: db.indicateurs.filter((x) => x.objectif_id === objectifId).length + 1 },
+    enregistrer: async (v) => { if (!id) v.objectif_id = objectifId; await enregistrer("indicateurs", v, id); toast("Indicateur enregistré."); },
+    supprimer: i ? () => supprimerLigne("indicateurs", id) : null,
+  });
+}
+
+/* ==========================================================================
+   Réunions, débriefs et registre des décisions
+   ========================================================================== */
+const champsReunion = () => [
+  { nom: "titre", label: "Titre", requis: true, pleine: true },
+  { nom: "type", label: "Type", type: "select", options: options("typeReunion"), vide: false, defaut: "seance" },
+  { nom: "date", label: "Date", type: "date", requis: true },
+  { nom: "heure", label: "Heure", placeholder: "16h30" },
+  { nom: "lieu", label: "Lieu", placeholder: "Salle BTA, Teams, chez le client..." },
+  { nom: "participants", label: "Participants", type: "multi", options: optMembres(), pleine: true },
+  { nom: "client_id", label: "Client concerné", type: "select", options: optClients() },
+  { nom: "projet_id", label: "Site concerné", type: "select", options: optProjets() },
+  { nom: "ordre_du_jour", label: "Ordre du jour", type: "textarea", pleine: true, rows: 3 },
+  { nom: "notes", label: "Notes et compte rendu", type: "textarea", pleine: true, rows: 5 },
+  { nom: "tops", label: "Tops (ce qui a marché)", type: "textarea", rows: 3 },
+  { nom: "flops", label: "Flops (ce qui est à améliorer)", type: "textarea", rows: 3 },
+];
+function editerReunion(id, defauts = {}) {
+  const r = parId("reunions", id);
+  formulaire({
+    titre: r ? "Modifier la réunion" : defauts.type === "debrief" ? "Débrief du jour" : "Nouvelle réunion", champs: champsReunion(), large: true,
+    valeurs: r || { type: "seance", date: aujourdhui(), participants: membresActifs().map((m) => m.id), ...defauts },
+    enregistrer: async (v) => { const x = await enregistrer("reunions", v, id); if (!id) location.hash = "#/reunions/" + x.id; toast("Réunion enregistrée."); },
+    supprimer: r ? async () => { await supprimerLigne("reunions", id); await Promise.all([charger("decisions"), charger("taches")]); location.hash = "#/reunions"; } : null,
+  });
+}
+function debriefDuJour() {
+  const auj = aujourdhui();
+  const existant = db.reunions.find((r) => r.type === "debrief" && r.date === auj);
+  if (existant) { location.hash = "#/reunions/" + existant.id; return; }
+  editerReunion(null, { type: "debrief", titre: `Débrief du ${dateFr(auj)}`, heure: "16h30", ordre_du_jour: "3 tops, 3 flops, objectifs du lendemain, suivi à jour." });
+}
+const champsDecision = () => [
+  { nom: "texte", label: "Décision", type: "textarea", requis: true, pleine: true, rows: 3 },
+  { nom: "date", label: "Date", type: "date", requis: true },
+  { nom: "statut", label: "Statut", type: "select", options: options("statutDecision"), vide: false, defaut: "adoptee" },
+  { nom: "vote", label: "Vote", placeholder: "3 pour, 0 contre" },
+  { nom: "reunion_id", label: "Réunion", type: "select", options: db.reunions.map((r) => [r.id, `${dateFr(r.date)} · ${r.titre}`]) },
+];
+function editerDecision(id, defauts = {}) {
+  const d = parId("decisions", id);
+  formulaire({
+    titre: d ? "Modifier la décision" : "Nouvelle décision", champs: champsDecision(), valeurs: d || { date: aujourdhui(), statut: "adoptee", ...defauts },
+    enregistrer: async (v) => { await enregistrer("decisions", v, id); toast("Décision enregistrée."); },
+    supprimer: d ? () => supprimerLigne("decisions", id) : null,
+  });
+}
+function pageReunions(id) {
+  if (id) return ficheReunion(id);
+  const f = filtres.reunions;
+  return `
+  <div class="entete"><div><h1>Réunions et décisions</h1><div class="sous-titre">Séances d’équipe, débriefs quotidiens, rendez-vous clients. Chaque décision est tracée, chaque action devient une tâche.</div></div>
+    <div class="boutons"><button class="btn" data-action="debriefDuJour">${icone("eclair")}Débrief du jour</button>${f.onglet === "decisions" ? `<button class="btn primaire" data-action="nouvelleDecision">${icone("plus")}Décision</button>` : `<button class="btn primaire" data-action="nouvelleReunion">${icone("plus")}Réunion</button>`}</div></div>
+  <div class="filtres">
+    <div class="onglets" role="group" aria-label="Vue">${[["reunions", "Réunions"], ["decisions", "Registre des décisions"]].map(([k, l]) => `<button aria-pressed="${f.onglet === k}" data-action="puce" data-filtre="reunions.onglet" data-valeur="${k}">${l}</button>`).join("")}</div>
+    <input type="search" placeholder="Rechercher" value="${esc(f.q)}" data-filtre="reunions.q" aria-label="Rechercher">
+    ${f.onglet === "reunions" ? `<select data-filtre="reunions.type" aria-label="Type"><option value="">Tous les types</option>${options("typeReunion").map(([k, l]) => `<option value="${k}"${f.type === k ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>` : ""}
+  </div>
+  <div id="liste-reunions">${listeReunions()}</div>`;
+}
+function listeReunions() {
+  const f = filtres.reunions, q = f.q.toLowerCase();
+  if (f.onglet === "decisions") {
+    const l = db.decisions.filter((d) => !q || [d.texte, d.vote].join(" ").toLowerCase().includes(q));
+    if (!l.length) return `<section class="carte"><div class="vide-liste">Aucune décision enregistrée.<br><button class="btn" data-action="nouvelleDecision">${icone("plus")}Ajouter une décision</button></div></section>`;
+    return `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Date</th><th>Décision</th><th>Statut</th><th class="masquer-mobile">Vote</th><th class="masquer-mobile">Réunion</th></tr></thead><tbody>
+      ${l.map((d) => { const r = parId("reunions", d.reunion_id); return `<tr data-action="modifierDecision" data-id="${d.id}"><td style="white-space:nowrap">${dateFr(d.date)}</td><td style="white-space:pre-wrap;font-weight:600">${esc(d.texte)}</td><td>${badge("statutDecision", d.statut)}</td><td class="masquer-mobile">${esc(d.vote || "")}</td><td class="masquer-mobile">${r ? `<a href="#/reunions/${r.id}">${esc(r.titre)}</a>` : vide}</td></tr>`; }).join("")}
+    </tbody></table></div></section>`;
+  }
+  const auj = aujourdhui();
+  const l = db.reunions.filter((r) => (!f.type || r.type === f.type) && (!q || [r.titre, r.notes, r.ordre_du_jour, r.tops, r.flops, r.lieu].join(" ").toLowerCase().includes(q)));
+  const aVenir = l.filter((r) => r.date >= auj).sort((a, b) => a.date.localeCompare(b.date));
+  const passees = l.filter((r) => r.date < auj);
+  const ligne = (r) => {
+    const d = new Date(r.date + "T12:00:00");
+    const nbDec = db.decisions.filter((x) => x.reunion_id === r.id).length, nbAct = db.taches.filter((t) => t.reunion_id === r.id).length;
+    return `<div class="ligne-item cliquable" data-href="#/reunions/${r.id}"><span class="date-pastille${r.date === auj ? " aujourdhui" : ""}"><small>${esc(d.toLocaleDateString("fr-CH", { month: "short" }).replace(".", ""))}</small><b>${d.getDate()}</b></span>
+      <div class="corps"><div class="titre">${esc(r.titre)}</div><div class="meta">${esc([r.heure, r.lieu, r.client_id && nomClient(r.client_id), nbDec && `${nbDec} décision${nbDec > 1 ? "s" : ""}`, nbAct && `${nbAct} action${nbAct > 1 ? "s" : ""}`].filter(Boolean).join(" · "))}</div></div>
+      <span style="display:grid;justify-items:end;gap:6px">${badge("typeReunion", r.type)}${avatarsMembres(r.participants)}</span></div>`;
+  };
+  if (!l.length) return `<section class="carte"><div class="vide-liste">Aucune réunion pour l’instant.<br><button class="btn" data-action="debriefDuJour">${icone("eclair")}Faire le débrief du jour</button></div></section>`;
+  return `<div class="grille g2">
+    <section class="carte"><header><h2>À venir</h2><span class="muted petit">${aVenir.length}</span></header>${aVenir.map(ligne).join("") || '<div class="vide-liste">Rien de planifié.</div>'}</section>
+    <section class="carte"><header><h2>Passées</h2><span class="muted petit">${passees.length}</span></header>${passees.slice(0, 30).map(ligne).join("") || '<div class="vide-liste">Aucune réunion passée.</div>'}</section>
+  </div>`;
+}
+function ficheReunion(id) {
+  const r = parId("reunions", id);
+  if (!r) return '<div class="vide-liste">Réunion introuvable. <a href="#/reunions">Retour à la liste</a></div>';
+  const decisions = db.decisions.filter((d) => d.reunion_id === id);
+  const actions = db.taches.filter((t) => t.reunion_id === id);
+  const noms = (r.participants || []).map((p) => parId("membres", p)?.nom).filter(Boolean).join(", ");
+  return `
+  <div class="fil"><a href="#/reunions">Réunions et décisions</a></div>
+  <div class="entete"><div><div class="tag">${esc(libelle("typeReunion", r.type))}</div><h1>${esc(r.titre)}</h1><div class="sous-titre">${esc([new Date(r.date + "T12:00:00").toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long", year: "numeric" }), r.heure, r.lieu].filter(Boolean).join(" · "))}</div></div>
+    <div class="boutons"><button class="btn" data-action="modifierReunion" data-id="${r.id}">${icone("crayon")}Modifier</button></div></div>
+  <div class="grille g-fiche">
+    <div class="pile">
+      <section class="carte"><header><h2>Infos</h2></header><dl class="infos">
+        <dt>Participants</dt><dd>${noms ? `${avatarsMembres(r.participants)} <span class="petit" style="margin-left:6px">${esc(noms)}</span>` : vide}</dd>
+        <dt>Client</dt><dd>${r.client_id ? `<a href="#/clients/${r.client_id}">${esc(nomClient(r.client_id))}</a>` : vide}</dd>
+        <dt>Site</dt><dd>${r.projet_id ? `<a href="#/projets/${r.projet_id}">${esc(nomProjet(r.projet_id))}</a>` : vide}</dd></dl></section>
+      <section class="carte"><header><h2>Ordre du jour</h2></header>${r.ordre_du_jour ? `<p class="texte-libre">${esc(r.ordre_du_jour)}</p>` : '<p class="muted petit" style="margin:0">Pas d’ordre du jour.</p>'}</section>
+    </div>
+    <div class="pile">
+      ${r.tops || r.flops ? `<section class="carte"><header><h2>Tops et flops</h2></header><div class="tops-flops"><div class="tops"><b>Tops</b>${esc(r.tops || "")}</div><div class="flops"><b>Flops</b>${esc(r.flops || "")}</div></div></section>` : ""}
+      <section class="carte"><header><h2>Compte rendu</h2></header>${r.notes ? `<p class="texte-libre">${esc(r.notes)}</p>` : `<p class="muted petit" style="margin:0">Pas encore de notes. <button class="btn discret mini" data-action="modifierReunion" data-id="${r.id}">Écrire le compte rendu</button></p>`}</section>
+      <section class="carte"><header><h2>Décisions <span class="muted petit">${decisions.length}</span></h2><button class="btn mini" data-action="nouvelleDecision" data-reunion="${r.id}">${icone("plus")}Décision</button></header>
+        ${decisions.map((d) => `<div class="ligne-item cliquable" data-action="modifierDecision" data-id="${d.id}"><div class="corps"><div class="titre" style="white-space:pre-wrap">${esc(d.texte)}</div>${d.vote ? `<div class="meta">Vote : ${esc(d.vote)}</div>` : ""}</div>${badge("statutDecision", d.statut)}</div>`).join("") || '<div class="vide-liste">Aucune décision.</div>'}</section>
+      <section class="carte"><header><h2>Actions <span class="muted petit">${actions.filter((t) => t.statut !== "fait").length} ouvertes</span></h2><button class="btn mini" data-action="tacheReunion" data-reunion="${r.id}">${icone("plus")}Action</button></header>
+        ${actions.map(ligneTache).join("") || '<div class="vide-liste">Une action sans responsable ni échéance n’existe pas : ajoute-la ici.</div>'}</section>
+    </div>
+  </div>`;
+}
+
+/* ==========================================================================
+   Ressources et liens utiles
+   ========================================================================== */
+const champsRessource = () => [
+  { nom: "titre", label: "Titre", requis: true },
+  { nom: "categorie", label: "Catégorie", type: "select", options: options("categorieRessource"), vide: false, defaut: "outil" },
+  { nom: "url", label: "Lien", pleine: true, placeholder: "https://..." },
+  { nom: "description", label: "À quoi ça sert", type: "textarea", pleine: true, rows: 2 },
+  { nom: "epingle", label: "Épingler en haut de la page", type: "checkbox", pleine: true },
+];
+function editerRessource(id) {
+  const r = parId("ressources", id);
+  formulaire({
+    titre: r ? "Modifier la ressource" : "Nouvelle ressource", champs: champsRessource(), valeurs: r || { categorie: "outil" },
+    enregistrer: async (v) => { if (v.url && !/^https?:\/\//i.test(v.url)) v.url = "https://" + v.url; await enregistrer("ressources", v, id); toast("Ressource enregistrée."); },
+    supprimer: r ? () => supprimerLigne("ressources", id) : null,
+  });
+}
+function carteRessource(r) {
+  const [, teinte] = ETIQ.categorieRessource[r.categorie] || ["", "gris"];
+  const domaine = r.url ? r.url.replace(/^https?:\/\//i, "").split("/")[0] : "";
+  return `<article class="carte ressource">
+    <span class="ico t-${teinte}">${icone(r.epingle ? "epingle" : "ressources")}</span>
+    <div style="flex:1;min-width:0">${r.url ? `<a class="titre" href="${esc(r.url)}" target="_blank" rel="noopener" style="text-decoration:none">${esc(r.titre)} ${icone("externe").replace("<svg", '<svg style="width:13px;height:13px;vertical-align:-1px;opacity:.6"')}</a>` : `<div class="titre">${esc(r.titre)}</div>`}
+      ${r.description ? `<div class="desc">${esc(r.description)}</div>` : ""}${domaine ? `<div class="domaine">${esc(domaine)}</div>` : ""}</div>
+    <button class="btn discret mini" data-action="modifierRessource" data-id="${r.id}" aria-label="Modifier ${esc(r.titre)}">${icone("crayon")}</button>
+  </article>`;
+}
+function pageRessources() {
+  const f = filtres.ressources;
+  return `
+  <div class="entete"><div><h1>Ressources</h1><div class="sous-titre">Les liens et documents de référence de l’équipe : outils, Business Team Academy, Vardena, modèles et guides.</div></div>
+    <div class="boutons"><a class="btn" href="#/documents">${icone("documents")}Documents</a><button class="btn primaire" data-action="nouvelleRessource">${icone("plus")}Nouvelle ressource</button></div></div>
+  <div class="filtres">
+    <input type="search" placeholder="Rechercher un outil, un guide..." value="${esc(f.q)}" data-filtre="ressources.q" aria-label="Rechercher">
+    <div class="puces">${[["", "Toutes"], ...options("categorieRessource")].filter(([k]) => !k || db.ressources.some((r) => r.categorie === k)).map(([k, l]) => `<button class="puce" aria-pressed="${f.categorie === k}" data-action="puce" data-filtre="ressources.categorie" data-valeur="${k}">${esc(l)}</button>`).join("")}</div>
+  </div>
+  <div id="liste-ressources">${listeRessources()}</div>`;
+}
+function listeRessources() {
+  const f = filtres.ressources, q = f.q.toLowerCase();
+  const l = db.ressources.filter((r) => (!f.categorie || r.categorie === f.categorie) && (!q || [r.titre, r.description, r.url].join(" ").toLowerCase().includes(q)));
+  if (!l.length) return `<section class="carte"><div class="vide-liste">Aucune ressource.<br><button class="btn" data-action="nouvelleRessource">${icone("plus")}Ajouter un lien utile</button></div></section>`;
+  const epinglees = l.filter((r) => r.epingle);
+  const groupes = Object.keys(ETIQ.categorieRessource).map((k) => [k, l.filter((r) => r.categorie === k && !r.epingle)]).filter(([, rs]) => rs.length);
+  return `${epinglees.length ? `<h2 style="margin:4px 0 12px">Épinglées</h2><div class="ressources" style="margin-bottom:26px">${epinglees.map(carteRessource).join("")}</div>` : ""}
+    ${groupes.map(([k, rs]) => `<h2 style="margin:4px 0 12px">${esc(libelle("categorieRessource", k))}</h2><div class="ressources" style="margin-bottom:26px">${rs.map(carteRessource).join("")}</div>`).join("")}`;
+}
+
+/* ==========================================================================
+   Compétences (page Équipe)
+   ========================================================================== */
+const NIVEAUX = [["1", "1 · Débutant"], ["2", "2 · Notions"], ["3", "3 · Autonome"], ["4", "4 · Confirmé"], ["5", "5 · Expert"]];
+function niveauPoints(n, cible) {
+  return `<span class="niveau" title="Niveau ${n} sur 5${cible ? `, objectif ${cible}` : ""}">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? "on" : i === Number(cible) ? "cible" : ""}"></i>`).join("")}</span>`;
+}
+function editerCompetence(id, membreId) {
+  const c = parId("competences", id);
+  const noms = [...new Set(db.competences.map((x) => x.nom))];
+  formulaire({
+    titre: c ? "Modifier la compétence" : "Nouvelle compétence",
+    champs: [
+      { nom: "membre_id", label: "Membre", type: "select", options: optMembres(true), vide: false, requis: true },
+      { nom: "nom", label: "Compétence", requis: true, liste: "liste-competences", placeholder: "Vente, design, HTML, gestion de projet..." },
+      { nom: "niveau", label: "Niveau actuel", type: "select", options: NIVEAUX, vide: false, defaut: "1" },
+      { nom: "objectif", label: "Niveau visé", type: "select", options: NIVEAUX, vide: "Pas d’objectif" },
+      { nom: "notes", label: "Comment progresser", type: "textarea", pleine: true, rows: 2 },
+    ],
+    valeurs: c ? { ...c, niveau: String(c.niveau), objectif: c.objectif ? String(c.objectif) : "" } : { membre_id: membreId || moi()?.id, niveau: "1" },
+    extra: `<datalist id="liste-competences">${noms.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`,
+    enregistrer: async (v) => { v.niveau = Number(v.niveau); v.objectif = v.objectif ? Number(v.objectif) : null; await enregistrer("competences", v, id); toast("Compétence enregistrée."); },
+    supprimer: c ? () => supprimerLigne("competences", id) : null,
+  });
+}
+
+/* ==========================================================================
+   Menu « Créer » et palette de recherche (Cmd+K)
+   ========================================================================== */
+const CREER = [
+  ["Client", "clients", "nouveauClient"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
+  ["Devis", "devis", "nouveauDf", "devis"], ["Facture", "devis", "nouveauDf", "facture"], ["Réunion", "reunions", "nouvelleReunion"],
+  ["Débrief du jour", "eclair", "debriefDuJour"], ["Document", "documents", "ajouterDocument"], ["Ressource", "ressources", "nouvelleRessource"], ["Objectif", "objectifs", "nouvelObjectif"],
+];
+function basculerMenuCreer(ouvrir) {
+  const m = $("#menu-creer"), b = $("#btn-creer");
+  const ouvert = ouvrir ?? m.hidden;
+  if (ouvert && !m.innerHTML) m.innerHTML = CREER.map(([l, ic, act, type]) => `<button type="button" role="menuitem" data-action="${act}"${type ? ` data-type="${type}"` : ""}>${icone(ic)}${esc(l)}</button>`).join("");
+  m.hidden = !ouvert; b.setAttribute("aria-expanded", String(ouvert));
+  if (ouvert) $("button", m).focus();
+}
+const palette = $("#palette");
+let paletteItems = [], paletteSel = 0;
+const sansAccent = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function resultatsPalette(q) {
+  const n = sansAccent(q.trim());
+  const ok = (...champs) => !n || sansAccent(champs.join(" ")).includes(n);
+  const items = [];
+  const ajoute = (groupe, liste, max) => items.push(...liste.slice(0, max).map((x) => ({ groupe, ...x })));
+  ajoute("Actions", CREER.filter(([l]) => ok("créer nouveau ajouter " + l)).map(([l, ic, act, type]) => ({ titre: l === "Débrief du jour" ? l : "Créer : " + l, icone: ic, faire: () => ACTIONS[act]({ type }) })), n ? 4 : 3);
+  ajoute("Pages", Object.entries(PAGES).filter(([, p]) => ok(p.titre, p.groupe)).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), n ? 5 : 13);
+  if (n) {
+    ajoute("Clients", db.clients.filter((c) => ok(c.nom, c.contact, c.localite, c.secteur, c.email)).map((c) => ({ titre: c.nom, meta: [libelle("statutClient", c.statut), c.localite].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + c.id) })), 6);
+    ajoute("Sites", db.projets.filter((p) => ok(p.nom, p.domaine, nomClient(p.client_id))).map((p) => ({ titre: p.nom, meta: [nomClient(p.client_id), libelle("statutProjet", p.statut)].filter(Boolean).join(" · "), icone: "projets", faire: () => (location.hash = "#/projets/" + p.id) })), 5);
+    ajoute("Tâches", db.taches.filter((t) => ok(t.titre, t.description, t.sprint)).map((t) => ({ titre: t.titre, meta: [libelle("statutTache", t.statut), t.echeance && dateCourte(t.echeance)].filter(Boolean).join(" · "), icone: "taches", faire: () => editerTache(t.id) })), 6);
+    ajoute("Devis et factures", db.devis_factures.filter((d) => ok(d.numero, d.objet, nomClient(d.client_id))).map((d) => ({ titre: `${d.numero} · ${nomClient(d.client_id)}`, meta: [chf(d.montant_ttc), libelle("statutDf", d.statut)].join(" · "), icone: "devis", faire: () => editeurDf(d.id) })), 5);
+    ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu)).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
+    ajoute("Documents", db.documents.filter((d) => ok(d.nom)).map((d) => ({ titre: d.nom, meta: d.interne ? "Document interne" : nomClient(d.client_id), icone: "documents", faire: () => ouvrirDocument(d.id) })), 5);
+    ajoute("Ressources", db.ressources.filter((r) => ok(r.titre, r.description, r.url)).map((r) => ({ titre: r.titre, meta: r.url || "", icone: "ressources", faire: () => (r.url ? window.open(r.url, "_blank", "noopener") : editerRessource(r.id)) })), 5);
+  }
+  return items;
+}
+function rendrePalette() {
+  paletteItems = resultatsPalette($("#palette-q").value);
+  paletteSel = Math.min(paletteSel, Math.max(0, paletteItems.length - 1));
+  let groupe = "";
+  $("#palette-resultats").innerHTML = paletteItems.map((it, i) => {
+    const tete = it.groupe !== groupe ? `<div class="palette-groupe">${esc((groupe = it.groupe))}</div>` : "";
+    return `${tete}<div class="palette-item" role="option" id="pal-${i}" data-i="${i}" aria-selected="${i === paletteSel}"><span class="ico">${icone(it.icone)}</span><span style="min-width:0"><div class="t">${esc(it.titre)}</div>${it.meta ? `<div class="m">${esc(it.meta)}</div>` : ""}</span></div>`;
+  }).join("") || '<div class="vide-liste">Aucun résultat.</div>';
+  $("#palette-q").setAttribute("aria-activedescendant", paletteItems.length ? "pal-" + paletteSel : "");
+  $(`#pal-${paletteSel}`)?.scrollIntoView({ block: "nearest" });
+}
+function ouvrirPalette() {
+  if (palette.open) return;
+  fermerModale(); basculerMenuCreer(false);
+  $("#palette-q").value = ""; paletteSel = 0; rendrePalette();
+  palette.showModal(); $("#palette-q").focus();
+}
+function lancerPalette(i) { const it = paletteItems[i]; if (!it) return; palette.close(); it.faire(); }
+$("#palette-q").addEventListener("input", () => { paletteSel = 0; rendrePalette(); });
+$("#palette-q").addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown") { e.preventDefault(); paletteSel = Math.min(paletteItems.length - 1, paletteSel + 1); rendrePalette(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); paletteSel = Math.max(0, paletteSel - 1); rendrePalette(); }
+  else if (e.key === "Enter") { e.preventDefault(); lancerPalette(paletteSel); }
+});
+$("#palette-resultats").addEventListener("click", (e) => { const it = e.target.closest("[data-i]"); if (it) lancerPalette(Number(it.dataset.i)); });
+palette.addEventListener("click", (e) => { if (e.target === palette) palette.close(); });
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k" && session && !$("#app").hidden) { e.preventDefault(); palette.open ? palette.close() : ouvrirPalette(); }
+  if (e.key === "Escape" && !$("#menu-creer").hidden) { basculerMenuCreer(false); $("#btn-creer").focus(); }
+});
+
+/* ==========================================================================
    Actions (boutons) et filtres : délégation d'événements
    ========================================================================== */
 const ACTIONS = {
   nouveauClient: () => editerClient(),
   modifierClient: (ds) => editerClient(ds.id),
-  filtrerClients: (ds) => { filtres.clients.statut = ds.statut; location.hash = "#/clients"; },
+  filtrerClients: (ds) => { filtres.clients.statut = ds.statut; filtres.clients.vue = "liste"; location.hash = "#/clients"; if (lireRoute().page === "clients") rendre(); },
   nouveauProjet: (ds) => editerProjet(null, { client_id: ds.client || null }),
   modifierProjet: (ds) => editerProjet(ds.id),
   nouvelleOffre: () => editerOffre(),
@@ -1798,6 +2528,25 @@ const ACTIONS = {
   theme: () => { appliquerTheme(document.documentElement.dataset.theme === "nuit" ? "jour" : "nuit", true); if (lireRoute().page === "reglages") rendre(); },
   deconnexion: async () => { await sb.auth.signOut(); },
   menu: () => $("#app").classList.toggle("menu-ouvert"),
+  palette: () => ouvrirPalette(),
+  menuCreer: () => basculerMenuCreer(),
+  moisAgenda: (ds) => { filtres.agenda.mois = ds.mois; rendre(); },
+  jourAgenda: (ds) => fenetre(new Date(ds.jour + "T12:00:00").toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long" }), evenements(ds.jour, ds.jour, filtres.agenda.moi && moi() ? moi().id : "").map(ligneEvenement).join("")),
+  nouvelObjectif: () => editerObjectif(),
+  modifierObjectif: (ds) => editerObjectif(ds.id),
+  nouvelIndicateur: (ds) => editerIndicateur(null, ds.objectif),
+  modifierIndicateur: (ds) => editerIndicateur(ds.id),
+  ajusterIndicateur: async (ds) => { const i = parId("indicateurs", ds.id); try { await enregistrer("indicateurs", { valeur: Math.max(0, Number(i.valeur || 0) + Number(ds.pas)) }, i.id); rendre(); } catch (err) { toast(msgErreur(err), "erreur"); } },
+  nouvelleReunion: () => editerReunion(),
+  modifierReunion: (ds) => editerReunion(ds.id),
+  debriefDuJour: () => debriefDuJour(),
+  nouvelleDecision: (ds) => editerDecision(null, { reunion_id: ds.reunion || (lireRoute().page === "reunions" ? lireRoute().id : null) }),
+  modifierDecision: (ds) => editerDecision(ds.id),
+  tacheReunion: (ds) => { const r = parId("reunions", ds.reunion); editerTache(null, { reunion_id: ds.reunion, projet_id: r?.projet_id || null, echeance: ajouterJours(aujourdhui(), 7) }); },
+  nouvelleRessource: () => editerRessource(),
+  modifierRessource: (ds) => editerRessource(ds.id),
+  nouvelleCompetence: (ds) => editerCompetence(null, ds.membre),
+  modifierCompetence: (ds) => editerCompetence(ds.id),
 };
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-fermer]")) { fermerModale(); return; }
@@ -1812,10 +2561,12 @@ document.addEventListener("click", (e) => {
   if (l && !e.target.closest("a, button, input, select, label")) location.hash = l.dataset.href;
   if ($("#app").classList.contains("menu-ouvert") && !e.target.closest(".barre, [data-action=menu]")) $("#app").classList.remove("menu-ouvert");
 });
+// Ferme le menu « Créer » après un choix ou un clic ailleurs
+document.addEventListener("click", (e) => { if (!$("#menu-creer").hidden && !e.target.closest("[data-action=menuCreer]")) basculerMenuCreer(false); }, true);
 document.addEventListener("keydown", (e) => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches("article.tache[data-action]")) { e.preventDefault(); ACTIONS.modifierTache(e.target.dataset); }
 });
-const LISTES = { clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
+const LISTES = { reunions: ["#liste-reunions", listeReunions], ressources: ["#liste-ressources", listeRessources], clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
 function majFiltre(el) {
   const [pg, cle] = el.dataset.filtre.split(".");
   filtres[pg][cle] = el.type === "checkbox" ? (el.checked ? "1" : "") : el.value;
@@ -1840,8 +2591,9 @@ function appliquerTheme(t, memoriser) {
   document.documentElement.dataset.theme = t;
   if (memoriser) ecrireStockage("nexus-theme", t);
   const nuit = t === "nuit";
-  $("#btn-theme").innerHTML = icone(nuit ? "soleil" : "lune") + (nuit ? "Jour" : "Nuit");
+  $("#btn-theme").innerHTML = icone(nuit ? "soleil" : "lune");
   $("#btn-theme").title = nuit ? "Passer en mode jour" : "Passer en mode nuit";
+  $("#btn-theme").setAttribute("aria-label", $("#btn-theme").title);
 }
 appliquerTheme(lireStockage("nexus-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "nuit" : "jour"));
 
@@ -1874,7 +2626,8 @@ async function entrer() {
     afficherConnexion(`Le compte ${session?.user?.email || ""} n’est relié à aucun membre actif de NexusLab. Demandez à un membre de l’ajouter dans Équipe.`);
     return;
   }
-  $("#utilisateur").innerHTML = `${avatar(m.id, "")}<div><div style="font-weight:700;color:#fff">${esc(m.nom)}</div><div style="font-size:.75rem;opacity:.75">${esc(m.role || "")}</div></div>`;
+  $("#utilisateur").innerHTML = `${avatar(m.id, "")}<div style="min-width:0"><div class="nom">${esc(m.nom)}</div><div class="role">${esc(m.role || "")}</div></div>`;
+  $("#raccourci-k").textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K";
   if (!location.hash || /access_token|type=/.test(location.hash)) history.replaceState(null, "", location.pathname + "#/accueil");
   rendre();
 }

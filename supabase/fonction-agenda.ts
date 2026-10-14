@@ -4,12 +4,15 @@
 // la sécurité repose sur le jeton personnel de 64 caractères (table jetons_agenda).
 
 const BASE = Deno.env.get("SUPABASE_URL")!;
-const CLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Clé serveur : ancienne clé service_role (JWT) ou nouvelle clé secrète (sb_secret_...), selon le projet.
+const SECRETS = (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}"); } catch { return {}; } })();
+const CLE: string = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || SECRETS.default || Object.values(SECRETS)[0] as string;
+const ENTETES: Record<string, string> = CLE.startsWith("eyJ") ? { apikey: CLE, Authorization: `Bearer ${CLE}` } : { apikey: CLE };
 const DASH = "https://dashboard-nexuslab.netlify.app/";
 const TZ = "Europe/Zurich";
 
 async function q(chemin: string) {
-  const r = await fetch(`${BASE}/rest/v1/${chemin}`, { headers: { apikey: CLE, Authorization: `Bearer ${CLE}` } });
+  const r = await fetch(`${BASE}/rest/v1/${chemin}`, { headers: ENTETES });
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
   return await r.json();
 }

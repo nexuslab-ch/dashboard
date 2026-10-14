@@ -347,6 +347,23 @@ dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-und
 .calendrier .case.auj .n { background: var(--corail); color: #1D1D1F; }
 .evt { display: block; width: 100%; text-align: left; border: 0; cursor: pointer; font-size: .74rem; font-weight: 700; padding: 3px 7px; border-radius: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
 .evt.plus { background: none; color: var(--texte-3); padding: 0 4px; }
+/* Vue semaine, façon Outlook : réunions placées sur la grille des heures, le reste en haut (journée entière) */
+.semaine { border: 1px solid var(--ligne); border-radius: var(--rayon); overflow: hidden; background: var(--carte); box-shadow: var(--ombre-s); }
+.semaine .sem-tete, .semaine .sem-jour-entier, .semaine .sem-corps { display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr)); }
+.semaine .sem-tete > div { padding: 10px 8px 8px; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-3); border-bottom: 1px solid var(--ligne); background: var(--carte-haut); }
+.semaine .sem-tete > div.auj { color: var(--texte); }
+.semaine .sem-tete b { display: block; font-size: 1.05rem; letter-spacing: 0; color: var(--texte); }
+.semaine .sem-tete .auj b { color: #C43A32; }
+.semaine .sem-jour-entier > div { padding: 6px; border-bottom: 1px solid var(--ligne); border-right: 1px solid var(--ligne); display: flex; flex-direction: column; gap: 3px; min-width: 0; min-height: 34px; }
+.semaine .sem-jour-entier > div:first-child { font-size: .65rem; color: var(--texte-3); font-weight: 700; justify-content: center; }
+.semaine .sem-corps { position: relative; max-height: 620px; overflow-y: auto; }
+.semaine .sem-heures div, .semaine .sem-col .ligne-h { height: 48px; border-bottom: 1px solid var(--ligne); }
+.semaine .sem-heures div { font-size: .65rem; color: var(--texte-3); text-align: right; padding: 2px 6px 0 0; font-weight: 700; }
+.semaine .sem-col { position: relative; border-left: 1px solid var(--ligne); }
+.semaine .sem-col.auj { background: color-mix(in srgb, var(--corail) 5%, transparent); }
+.semaine .bloc { position: absolute; left: 3px; right: 3px; border-radius: 8px; padding: 4px 6px; font-size: .72rem; font-weight: 700; overflow: hidden; text-decoration: none; border-left: 3px solid currentColor; box-shadow: var(--ombre-s); }
+.semaine .bloc small { display: block; font-weight: 600; opacity: .8; }
+.semaine .maintenant { position: absolute; left: 0; right: 0; height: 2px; background: #C43A32; z-index: 2; pointer-events: none; }
 .legende { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--texte-2); margin-top: 12px; }
 .legende span { display: inline-flex; align-items: center; gap: 6px; }
 .legende i { width: 10px; height: 10px; border-radius: 4px; display: inline-block; }
@@ -513,7 +530,7 @@ dialog[open] { animation: apparait .25s var(--ease); }
   .filtres input[type="search"] { width: 100%; }
   .masquer-mobile { display: none; }
   .barre-ligne { grid-template-columns: 100px 1fr 28px; }
-  .calendrier { display: none; }
+  .calendrier, .semaine { display: none; }
   .agenda-liste { display: grid; gap: 0; }
   .tops-flops { grid-template-columns: 1fr; }
   .creer-libelle { display: none; }
@@ -527,6 +544,36 @@ dialog[open] { animation: apparait .25s var(--ease); }
   .app { display: block; }
   body { background: #fff; }
 }
+/* ---------- Version 3 : wiki, situations, commentaires ---------- */
+.md { font-size: .95rem; line-height: 1.6; color: var(--texte); overflow-wrap: anywhere; }
+.md h1 { font-size: 1.45rem; margin: 0 0 12px; letter-spacing: -0.02em; }
+.md h2 { font-size: 1.15rem; margin: 22px 0 8px; }
+.md h3 { font-size: 1rem; margin: 18px 0 6px; }
+.md p { margin: 0 0 12px; }
+.md ul, .md ol { margin: 0 0 12px; padding-left: 22px; }
+.md li { margin: 3px 0; }
+.md a { color: var(--texte); text-decoration-color: var(--corail); text-underline-offset: 3px; }
+.md code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85em; background: var(--fond); border: 1px solid var(--ligne); border-radius: 6px; padding: 1px 5px; }
+.md blockquote { margin: 0 0 12px; padding: 8px 14px; border-left: 3px solid var(--corail); background: var(--fond); border-radius: 0 8px 8px 0; color: var(--texte-2); }
+.md hr { border: 0; border-top: 1px solid var(--ligne); margin: 18px 0; }
+.comp-num { display: inline-grid; place-items: center; min-width: 24px; height: 22px; padding: 0 6px; margin: 1px 3px 1px 0; border-radius: var(--pilule); border: 1px solid var(--ligne-forte); font-size: .72rem; font-weight: 800; color: var(--texte-2); }
+.couverture { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.couverture button { display: flex; align-items: center; gap: 8px; text-align: left; border: 1px solid var(--ligne); background: var(--carte); border-radius: 12px; padding: 8px 10px; font: inherit; font-size: .8rem; color: var(--texte-2); cursor: pointer; }
+.couverture button[aria-pressed="true"] { border-color: var(--corail); color: var(--texte); }
+.couverture button b { font-size: .95rem; color: var(--texte); min-width: 18px; }
+.couverture button.zero b { color: var(--texte-3); }
+.commentaires { margin-top: 18px; border-top: 1px solid var(--ligne); padding-top: 14px; }
+.commentaires h3 { font-size: .9rem; margin: 0 0 10px; }
+.com { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--ligne); }
+.com:last-child { border-bottom: 0; }
+.com .corps { flex: 1; min-width: 0; font-size: .88rem; }
+.com .meta { color: var(--texte-3); font-size: .75rem; }
+.com .texte { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ajout-com { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
+.ajout-com textarea { flex: 1; border: 1px solid var(--ligne-forte); border-radius: 12px; background: var(--carte); padding: 10px 12px; resize: vertical; }
+.ajout-com textarea:focus { outline: none; border-color: var(--graphite); box-shadow: 0 0 0 4px var(--corail-doux); }
+.module-absent { border: 1px dashed var(--ligne-forte); }
+.badge-invite { display: inline-block; margin-left: 6px; font-size: .7rem; font-weight: 800; padding: 2px 8px; border-radius: var(--pilule); background: var(--fond); border: 1px solid var(--ligne-forte); color: var(--texte-2); }
 </style>
 </head>
 <body>
@@ -677,7 +724,12 @@ const ETIQ = {
   sourceIndicateur: { manuel: "Saisie à la main", clients_contactes: "Auto : PME contactées", rendez_vous: "Auto : rendez-vous obtenus", devis_envoyes: "Auto : devis envoyés", mandats_signes: "Auto : mandats signés", ca_facture: "Auto : CA facturé (CHF)", ca_encaisse: "Auto : CA encaissé (CHF)", taches_faites: "Auto : tâches terminées" },
   typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", presentation: "Présentation", cours: "Cours BTA", administratif: "Administratif", proces_verbal: "Procès-verbal", autre: "Autre" },
   periode: { unique: "Paiement unique", mois: "Par mois", an: "Par an" },
+  categoriePage: { equipe: ["Équipe", "corail"], process: ["Process", "bleu"], guide: ["Guide", "vert"], client: ["Client", "jaune"], bta: ["Business Team Academy", "violet"], autre: ["Autre", "gris"] },
 };
+/* Les 14 compétences du référentiel Team Academy (version du 14.09.2024) */
+const COMPETENCES_BTA = ["Traitement de l’information et méthodologies de recherche", "Économie et durabilité", "Gestion de projet", "Stratégie d’entreprise", "Marketing et vente", "Finance d’entreprise", "Statistique et gestion des données", "Apprendre à apprendre", "Créativité et innovation", "Communication interpersonnelle", "Auto-gestion et self-leadership", "Leadership d’équipe", "Création de réseau et diversité culturelle", "Agir entrepreneurial"];
+const OBJECTIF_SITUATIONS = 26;
+const nomCompetence = (n) => COMPETENCES_BTA[Number(n) - 1] || "";
 const STATUTS_DF_PAR_TYPE = { devis: ["brouillon", "envoye", "accepte", "facture", "annule"], facture: ["brouillon", "envoye", "paye", "annule"] };
 const PROJETS_EN_COURS = ["brief", "design", "developpement", "revue_client"];
 const libelle = (dict, v) => { const e = ETIQ[dict][v]; return Array.isArray(e) ? e[0] : (e || ""); };
@@ -713,6 +765,9 @@ const ICONES = {
   epingle: '<path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/>',
   etoile: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
   eclair: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+  situations: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5"/><path d="M22 9v6"/>',
+  wiki: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M8 7h6M8 11h6"/>',
+  calendrierExport: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13v5M9.5 15.5L12 18l2.5-2.5"/>',
 };
 const icone = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
 
@@ -737,7 +792,14 @@ const TABLES = {
   ressources: { ordre: ["titre", true] },
   competences: { ordre: ["nom", true] },
   contacts_clients: { ordre: ["date", false] },
+  situations: { ordre: ["date", false], optionnel: true },
+  pages: { ordre: ["titre", true], optionnel: true },
+  commentaires: { ordre: ["cree_le", true], optionnel: true },
 };
+/* Tables pas encore créées (migration 006 pas lancée) : le reste du dashboard continue de fonctionner. */
+const tablesAbsentes = new Set();
+const absente = (t) => tablesAbsentes.has(t);
+const colonnePresente = (t, c) => db[t].length > 0 && Object.prototype.hasOwnProperty.call(db[t][0], c);
 const db = Object.fromEntries(Object.keys(TABLES).map((t) => [t, []]));
 let session = null;
 let dernierChargement = 0;
@@ -745,10 +807,20 @@ let dernierChargement = 0;
 async function charger(table) {
   const [col, asc] = TABLES[table].ordre;
   const { data, error } = await sb.from(table).select("*").order(col, { ascending: asc, nullsFirst: false });
-  if (error) throw error;
+  if (error) {
+    if (TABLES[table].optionnel && (["42P01", "PGRST205", "PGRST204"].includes(error.code) || /does not exist|schema cache/i.test(error.message || ""))) { db[table] = []; tablesAbsentes.add(table); return; }
+    throw error;
+  }
+  tablesAbsentes.delete(table);
   db[table] = data;
+  if (table === "membres" && dernierChargement) await chargerEtatComptes();
 }
-async function chargerTout() { await Promise.all(Object.keys(TABLES).map(charger)); dernierChargement = Date.now(); }
+let etatComptes = [];
+async function chargerEtatComptes() {
+  try { const { data, error } = await sb.rpc("etat_comptes"); etatComptes = error ? [] : (data || []); }
+  catch { etatComptes = []; }
+}
+async function chargerTout() { await Promise.all([...Object.keys(TABLES).map(charger), chargerEtatComptes()]); dernierChargement = Date.now(); }
 async function enregistrer(table, valeurs, id) {
   const req = id ? sb.from(table).update(valeurs).eq("id", id) : sb.from(table).insert(valeurs);
   const { data, error } = await req.select().single();
@@ -766,9 +838,11 @@ function msgErreur(e) {
   if (e && e.code === "23505") return "Cette valeur existe déjà (doublon).";
   if (e && e.code === "23503") return "Élément encore utilisé ailleurs.";
   if (e && (e.code === "42501" || /row-level security/i.test(m))) return "Accès refusé : votre compte n’est pas reconnu comme membre actif.";
-  if (/Invalid login credentials/i.test(m)) return "E-mail ou mot de passe incorrect.";
+  if (/Invalid login credentials/i.test(m)) return "E-mail ou mot de passe incorrect. Première connexion ? Utilise le mot de passe provisoire reçu d’un membre de l’équipe (attention aux majuscules et aux espaces).";
+  if (/Email not confirmed/i.test(m)) return "Ce compte n’est pas encore confirmé. Demande à un membre de le confirmer dans Supabase (Authentication, Users).";
   if (/Failed to fetch|NetworkError/i.test(m)) return "Connexion impossible. Vérifiez internet et réessayez.";
-  if (/rate limit/i.test(m)) return "Trop de tentatives. Réessayez dans quelques minutes.";
+  if (/email rate limit|over_email_send_rate_limit/i.test(m) || (e && e.code === "over_email_send_rate_limit")) return "Supabase n’envoie que 2 e-mails par heure pour tout le projet, et cette limite est atteinte. Inutile de recliquer : réessaie dans une heure, ou demande à un membre de te donner un mot de passe provisoire.";
+  if (/rate limit|too many/i.test(m)) return "Trop de tentatives de connexion depuis ce réseau. Attends 5 minutes avant de réessayer, sans recliquer entre-temps.";
   return m;
 }
 
@@ -777,6 +851,7 @@ const nomClient = (id) => parId("clients", id)?.nom || "";
 const nomProjet = (id) => parId("projets", id)?.nom || "";
 const parametres = () => db.parametres[0] || {};
 const membresActifs = () => db.membres.filter((m) => m.actif);
+const accesEchu = (m) => !!(m && m.acces_jusquau && m.acces_jusquau < aujourdhui());
 const moi = () => db.membres.find((m) => m.email && session && m.email.toLowerCase() === (session.user.email || "").toLowerCase());
 const initiales = (nom) => String(nom || "?").trim().split(/\s+/).map((s) => s[0]).join("").slice(0, 2).toUpperCase();
 const TEINTES = ["corail", "bleu", "vert", "violet", "jaune"];
@@ -998,13 +1073,43 @@ function editerTache(id, defauts = {}) {
     extra: `<datalist id="liste-sprints">${sprints().map((s) => `<option value="${esc(s)}">`).join("")}</datalist>`,
     enregistrer: async (v) => { if (!id && defauts.reunion_id) v.reunion_id = defauts.reunion_id; await enregistrer("taches", v, id); toast("Tâche enregistrée."); },
     supprimer: t ? () => supprimerLigne("taches", id) : null,
+    apresOuverture: t ? (form) => brancherCommentaires(form, t) : null,
   });
+}
+function blocCommentaires(t) {
+  if (absente("commentaires")) return "";
+  return `<section class="commentaires"><h3>Commentaires</h3><div data-com-liste>${listeCommentaires(t.id)}</div>
+    <div class="ajout-com"><textarea rows="2" data-com-texte placeholder="Écrire un commentaire, une question, un point bloquant..." aria-label="Nouveau commentaire"></textarea><button type="button" class="btn mini" data-com-ajouter>Envoyer</button></div>
+    ${absente("situations") ? "" : `<p class="petit muted" style="margin:12px 0 0">Tâche terminée et qui t’a appris quelque chose ? <button type="button" class="btn discret mini" data-com-situation>Créer une situation apprenante</button></p>`}</section>`;
+}
+function listeCommentaires(tacheId) {
+  const l = db.commentaires.filter((c) => c.tache_id === tacheId);
+  if (!l.length) return '<div class="petit muted">Aucun commentaire.</div>';
+  return l.map((c) => `<div class="com">${avatar(c.membre_id, "")}<div class="corps"><div class="meta">${esc(parId("membres", c.membre_id)?.nom || "Ancien membre")} · ${esc(new Date(c.cree_le).toLocaleString("fr-CH", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }))}${c.membre_id && c.membre_id === moi()?.id ? ` · <button type="button" class="btn discret mini" data-com-suppr="${c.id}">Supprimer</button>` : ""}</div><div class="texte">${esc(c.texte)}</div></div></div>`).join("");
+}
+function brancherCommentaires(form, t) {
+  const bloc = blocCommentaires(t);
+  if (!bloc) return;
+  $(".corps", form).insertAdjacentHTML("beforeend", bloc);
+  const majListe = () => { $("[data-com-liste]", form).innerHTML = listeCommentaires(t.id); };
+  $("[data-com-ajouter]", form).addEventListener("click", async () => {
+    const zone = $("[data-com-texte]", form), texte = zone.value.trim();
+    if (!texte) { zone.focus(); return; }
+    try { await enregistrer("commentaires", { tache_id: t.id, membre_id: moi()?.id || null, texte }); zone.value = ""; majListe(); }
+    catch (err) { toast(msgErreur(err), "erreur"); }
+  });
+  $("[data-com-liste]", form).addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-com-suppr]");
+    if (!b) return;
+    try { await supprimerLigne("commentaires", b.dataset.comSuppr); majListe(); } catch (err) { toast(msgErreur(err), "erreur"); }
+  });
+  $("[data-com-situation]", form)?.addEventListener("click", () => { fermerModale(); editerSituation(null, { titre: t.titre, tache_id: t.id, projet_id: t.projet_id, membre_id: moi()?.id || t.responsable_id, heures: t.heures_reelles }); });
 }
 
 const champsMembre = () => [
   { nom: "nom", label: "Nom", requis: true },
   { nom: "role", label: "Rôle" },
-  { nom: "email", label: "E-mail de connexion", type: "email", pleine: true, aide: "Le même que celui du compte de connexion. Sans lui, la personne n’a pas accès." },
+  { nom: "email", label: "E-mail de connexion", type: "email", pleine: true, aide: "Exactement l’adresse du compte de connexion (Supabase, Authentication, Users). Une lettre de différence et la personne est refusée." },
   { nom: "acces_jusquau", label: "Accès jusqu’au", type: "date", aide: "Pour un accès temporaire. Vide : accès permanent." },
   { nom: "actif", label: "Membre actif", type: "checkbox" },
 ];
@@ -1078,17 +1183,21 @@ const PAGES = {
   equipe: { titre: "Équipe", icone: "equipe", rendre: pageEquipe, groupe: "Équipe et BTA" },
   reunions: { titre: "Réunions et décisions", icone: "reunions", rendre: pageReunions, groupe: "Équipe et BTA" },
   ressources: { titre: "Ressources", icone: "ressources", rendre: pageRessources, groupe: "Équipe et BTA" },
+  situations: { titre: "Situations apprenantes", icone: "situations", rendre: pageSituations, groupe: "Équipe et BTA" },
+  wiki: { titre: "Wiki", icone: "wiki", rendre: pageWiki, groupe: "Équipe et BTA" },
   reglages: { titre: "Réglages", icone: "reglages", rendre: pageReglages, groupe: "Équipe et BTA" },
 };
 const filtres = {
   clients: { q: "", statut: "", vue: "pipeline", fini: "", suivi: "" },
-  agenda: { mois: "", moi: "" },
+  agenda: { mois: "", moi: "", vue: "mois", semaine: "" },
   reunions: { onglet: "reunions", type: "", q: "" },
   ressources: { q: "", categorie: "" },
   projets: { q: "", statut: "actifs" },
   devis: { type: "", statut: "", q: "" },
   taches: { vue: "statut", sprint: "", personne: "", projet: "", fait: "1" },
   documents: { q: "", client: "", projet: "", type: "", portee: "" },
+  situations: { membre: "", competence: "", vue: "toutes", q: "" },
+  wiki: { q: "", categorie: "" },
 };
 function lireRoute() {
   const h = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
@@ -1725,6 +1834,19 @@ function brancherGlisser() {
 /* ==========================================================================
    Équipe
    ========================================================================== */
+function alerteComptes() {
+  const sansFiche = etatComptes.filter((c) => c.a_compte && !c.a_fiche);
+  const sansCompte = etatComptes.filter((c) => !c.a_compte && c.a_fiche);
+  if (!sansFiche.length && !sansCompte.length) return "";
+  const ligne = (c) => `<li><b>${esc(c.email || "(sans e-mail)")}</b>${c.fiche ? ` · fiche ${esc(c.fiche)}` : ""}${c.derniere_connexion ? ` · dernière tentative ${dateFr(String(c.derniere_connexion).slice(0, 10))}` : ""}</li>`;
+  return `<section class="carte" style="margin-bottom:16px;border-color:var(--corail, #FF5F57)">
+    <h2>Connexions à vérifier</h2>
+    <p class="petit muted">Une personne n’entre dans le dashboard que si l’e-mail de sa fiche est exactement celui de son compte de connexion.</p>
+    ${sansFiche.length ? `<p class="petit"><b>Comptes de connexion sans fiche</b> (la personne se connecte mais est refusée) :</p><ul class="petit">${sansFiche.map(ligne).join("")}</ul>` : ""}
+    ${sansCompte.length ? `<p class="petit"><b>Fiches sans compte de connexion</b> (la personne ne peut pas encore se connecter) :</p><ul class="petit">${sansCompte.map(ligne).join("")}</ul>` : ""}
+    <p class="petit muted">Pour corriger : modifie l’e-mail de la fiche pour qu’il soit identique, ou crée le compte dans Supabase (Authentication, Users, Add user, Create new user, avec « Auto Confirm User ») et donne un mot de passe provisoire à la personne.</p>
+  </section>`;
+}
 function pageEquipe() {
   const auj = aujourdhui();
   const charges = db.membres.map((m) => db.taches.filter((t) => t.responsable_id === m.id && t.statut !== "fait").reduce((s, t) => s + Math.max(0, Number(t.heures_estimees || 0) - Number(t.heures_reelles || 0)), 0));
@@ -1734,6 +1856,7 @@ function pageEquipe() {
   return `
   <div class="entete"><div><h1>Équipe</h1><div class="sous-titre">Rôles, charge de travail, heures et progression de chacun</div></div>
     <div class="boutons"><button class="btn" data-action="nouveauMembre">${icone("plus")}Membre</button></div></div>
+  ${alerteComptes()}
   <div class="membres">${db.membres.map((m, i) => {
     const r = db.taches.filter((t) => t.responsable_id === m.id);
     const ouvertes = r.filter((t) => t.statut !== "fait");
@@ -2238,6 +2361,42 @@ function ligneEvenement(e) {
   return `<div class="ligne-item cliquable" ${attrsEvt(e)}><span class="date-pastille${e.date === aujourdhui() ? " aujourdhui" : ""}"><small>${esc(d.toLocaleDateString("fr-CH", { weekday: "short" }).replace(".", ""))}</small><b>${d.getDate()}</b></span>
     <div class="corps"><div class="titre">${esc(e.titre)}</div><div class="meta">${esc(e.meta || "")}</div></div><span class="badge t-${TYPES_EVT[e.type][1]} masquer-mobile">${esc(TYPES_EVT[e.type][0])}</span></div>`;
 }
+/* « 16h30 », « 16:30-18h », « 9h à 10h15 » : début et fin en minutes (fin par défaut : 1 h après) */
+function plageHeure(txt) {
+  const t = String(txt || "").toLowerCase().replace(/\s+/g, " ");
+  const re = /(\d{1,2})\s*(?:[:h.]\s*(\d{2})?)/g;
+  const m = [...t.matchAll(re)].map((x) => Number(x[1]) * 60 + Number(x[2] || 0)).filter((v) => v >= 0 && v < 24 * 60);
+  if (!m.length) return null;
+  const debut = m[0], fin = m[1] > debut ? m[1] : Math.min(debut + 60, 24 * 60 - 1);
+  return { debut, fin };
+}
+const hhmm = (min) => `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+function lundiDe(iso) { const d = new Date(iso + "T12:00:00"); return ajouterJours(iso, -((d.getDay() + 6) % 7)); }
+function vueSemaine(f, membre, auj) {
+  const lundi = f.semaine || lundiDe(auj);
+  const jours = Array.from({ length: 7 }, (_, i) => ajouterJours(lundi, i));
+  const ev = evenements(jours[0], jours[6], membre);
+  const H0 = 7, H1 = 22, PX = 48;
+  const blocs = {}, entiers = {};
+  for (const e of ev) {
+    const r = e.type === "reunion" && e.href ? parId("reunions", e.href.split("/").pop()) : null;
+    const pl = r ? plageHeure(r.heure) : null;
+    if (pl) (blocs[e.date] = blocs[e.date] || []).push({ e, r, pl }); else (entiers[e.date] = entiers[e.date] || []).push(e);
+  }
+  const maintenant = new Date(), minNow = maintenant.getHours() * 60 + maintenant.getMinutes();
+  const col = (j) => {
+    const bs = (blocs[j] || []).sort((a, b) => a.pl.debut - b.pl.debut);
+    return `<div class="sem-col${j === auj ? " auj" : ""}">${Array.from({ length: H1 - H0 }, () => '<div class="ligne-h"></div>').join("")}
+      ${bs.map(({ e, r, pl }) => { const top = Math.max(0, (pl.debut - H0 * 60) / 60 * PX), h = Math.max(22, (pl.fin - pl.debut) / 60 * PX - 2);
+        return `<a class="bloc t-${TYPES_EVT.reunion[1]}" href="${e.href}" style="top:${top}px;height:${h}px" title="${esc(e.titre + " · " + e.meta)}">${esc(r.titre)}<small>${hhmm(pl.debut)} à ${hhmm(pl.fin)}${r.lieu ? " · " + esc(r.lieu) : ""}</small></a>`; }).join("")}
+      ${j === auj && minNow >= H0 * 60 && minNow < H1 * 60 ? `<div class="maintenant" style="top:${(minNow - H0 * 60) / 60 * PX}px"></div>` : ""}</div>`;
+  };
+  return `<div class="semaine">
+    <div class="sem-tete"><div></div>${jours.map((j) => { const d = new Date(j + "T12:00:00"); return `<div class="${j === auj ? "auj" : ""}">${esc(d.toLocaleDateString("fr-CH", { weekday: "short" }).replace(".", ""))}<b>${d.getDate()}</b></div>`; }).join("")}</div>
+    <div class="sem-jour-entier"><div>Jour</div>${jours.map((j) => `<div>${(entiers[j] || []).map(puceEvenement).join("")}</div>`).join("")}</div>
+    <div class="sem-corps" id="sem-corps"><div class="sem-heures">${Array.from({ length: H1 - H0 }, (_, i) => `<div>${H0 + i}h</div>`).join("")}</div>${jours.map(col).join("")}</div>
+  </div>`;
+}
 function puceEvenement(e) {
   const cls = `evt t-${TYPES_EVT[e.type][1]}`, titre = esc(e.titre + (e.meta ? " · " + e.meta : ""));
   return e.href ? `<a class="${cls}" href="${e.href}" title="${titre}">${esc(e.titre)}</a>` : `<button type="button" class="${cls}" data-action="${e.action}" data-id="${e.id}" title="${titre}">${esc(e.titre)}</button>`;
@@ -2256,18 +2415,25 @@ function pageAgenda() {
   const parJour = {};
   for (const e of ev) (parJour[e.date] = parJour[e.date] || []).push(e);
   const prec = isoLocal(new Date(an, mo - 2, 1, 12)).slice(0, 7), suiv = isoLocal(new Date(an, mo, 1, 12)).slice(0, 7);
+  const enSemaine = f.vue === "semaine", lundi = f.semaine || lundiDe(auj);
+  const dim = ajouterJours(lundi, 6), dl = new Date(lundi + "T12:00:00"), dd = new Date(dim + "T12:00:00");
+  const titreSemaine = dl.getMonth() === dd.getMonth() ? `${dl.getDate()} au ${dd.toLocaleDateString("fr-CH", { day: "numeric", month: "long" })}` : `${dl.toLocaleDateString("fr-CH", { day: "numeric", month: "long" })} au ${dd.toLocaleDateString("fr-CH", { day: "numeric", month: "long" })}`;
   const aVenir = evenements(auj, ajouterJours(auj, 30), membre);
   return `
   <div class="entete"><div><h1>Agenda</h1><div class="sous-titre">Échéances, réunions, relances, paiements et mises en ligne, au même endroit.</div></div>
-    <div class="boutons"><button class="btn" data-action="nouvelleReunion">${icone("plus")}Réunion</button><button class="btn primaire" data-action="nouvelleTache">${icone("plus")}Tâche</button></div></div>
+    <div class="boutons"><button class="btn" data-action="abonnerAgenda" title="Voir tâches, réunions et relances dans Google Agenda, Apple Calendrier ou Outlook, mises à jour automatiquement">${icone("calendrierExport")}Synchroniser mon agenda</button><button class="btn discret" data-action="exporterAgenda" title="Fichier .ics ponctuel, sans mise à jour automatique">Export .ics</button><button class="btn" data-action="nouvelleReunion">${icone("plus")}Réunion</button><button class="btn primaire" data-action="nouvelleTache">${icone("plus")}Tâche</button></div></div>
   <div class="filtres" style="justify-content:space-between">
-    <div class="agenda-tete"><button class="rond-btn" data-action="moisAgenda" data-mois="${prec}" aria-label="Mois précédent">${icone("gauche")}</button><h2>${esc(premier.toLocaleDateString("fr-CH", { month: "long", year: "numeric" }))}</h2><button class="rond-btn" data-action="moisAgenda" data-mois="${suiv}" aria-label="Mois suivant">${icone("droite")}</button>
-      ${base !== auj.slice(0, 7) ? `<button class="btn mini" data-action="moisAgenda" data-mois="">Aujourd’hui</button>` : ""}</div>
+    ${enSemaine
+      ? `<div class="agenda-tete"><button class="rond-btn" data-action="semaineAgenda" data-semaine="${ajouterJours(lundi, -7)}" aria-label="Semaine précédente">${icone("gauche")}</button><h2 style="text-transform:none">${esc(titreSemaine)}</h2><button class="rond-btn" data-action="semaineAgenda" data-semaine="${ajouterJours(lundi, 7)}" aria-label="Semaine suivante">${icone("droite")}</button>
+      ${lundi !== lundiDe(auj) ? `<button class="btn mini" data-action="semaineAgenda" data-semaine="">Aujourd’hui</button>` : ""}</div>`
+      : `<div class="agenda-tete"><button class="rond-btn" data-action="moisAgenda" data-mois="${prec}" aria-label="Mois précédent">${icone("gauche")}</button><h2>${esc(premier.toLocaleDateString("fr-CH", { month: "long", year: "numeric" }))}</h2><button class="rond-btn" data-action="moisAgenda" data-mois="${suiv}" aria-label="Mois suivant">${icone("droite")}</button>
+      ${base !== auj.slice(0, 7) ? `<button class="btn mini" data-action="moisAgenda" data-mois="">Aujourd’hui</button>` : ""}</div>`}
+    <div class="onglets" role="group" aria-label="Vue">${[["mois", "Mois"], ["semaine", "Semaine"]].map(([k, l]) => `<button aria-pressed="${(f.vue || "mois") === k}" data-action="puce" data-filtre="agenda.vue" data-valeur="${k}">${l}</button>`).join("")}</div>
     <div class="onglets" role="group" aria-label="Portée">${[["", "Toute l’équipe"], ["1", "Mes éléments"]].map(([k, l]) => `<button aria-pressed="${f.moi === k}" data-action="puce" data-filtre="agenda.moi" data-valeur="${k}">${l}</button>`).join("")}</div>
   </div>
-  <div class="calendrier">${["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((j) => `<div class="jour-nom">${j}</div>`).join("")}
+  ${enSemaine ? vueSemaine(f, membre, auj) : `<div class="calendrier">${["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((j) => `<div class="jour-nom">${j}</div>`).join("")}
     ${jours.map((j) => { const es = parJour[j] || []; return `<div class="case${j.slice(0, 7) !== base ? " hors" : ""}${j === auj ? " auj" : ""}"><span class="n">${Number(j.slice(8))}</span>${es.slice(0, 3).map(puceEvenement).join("")}${es.length > 3 ? `<button type="button" class="evt plus" data-action="jourAgenda" data-jour="${j}">+ ${es.length - 3} autre${es.length - 3 > 1 ? "s" : ""}</button>` : ""}</div>`; }).join("")}
-  </div>
+  </div>`}
   <div class="legende">${Object.values(TYPES_EVT).map(([l, t]) => `<span><i style="background:var(--t-${t})"></i>${esc(l)}</span>`).join("")}</div>
   <section class="carte agenda-liste"><header><h2>Les 30 prochains jours</h2></header>${aVenir.length ? aVenir.map(ligneEvenement).join("") : '<div class="vide-liste">Rien de prévu.</div>'}</section>`;
 }
@@ -2375,7 +2541,7 @@ const champsReunion = () => [
   { nom: "titre", label: "Titre", requis: true, pleine: true },
   { nom: "type", label: "Type", type: "select", options: options("typeReunion"), vide: false, defaut: "seance" },
   { nom: "date", label: "Date", type: "date", requis: true },
-  { nom: "heure", label: "Heure", placeholder: "16h30" },
+  { nom: "heure", label: "Heure", placeholder: "16h30-18h", aide: "Avec l’heure de fin, la réunion bloque le bon créneau dans la vue semaine et dans vos agendas (Outlook, Google, iPhone). Sans fin : 1 h." },
   { nom: "lieu", label: "Lieu", placeholder: "Salle BTA, Teams, chez le client..." },
   { nom: "participants", label: "Participants", type: "multi", options: optMembres(), pleine: true },
   { nom: "client_id", label: "Client concerné", type: "select", options: optClients() },
@@ -2561,10 +2727,239 @@ function editerCompetence(id, membreId) {
 /* ==========================================================================
    Menu « Créer » et palette de recherche (Cmd+K)
    ========================================================================== */
+/* ==========================================================================
+   Version 3 : situations apprenantes, wiki, export d'agenda
+   ========================================================================== */
+function moduleAbsent(nom) {
+  return `<section class="carte module-absent"><div class="vide-liste"><b>${esc(nom)} : module à activer.</b><br>La table n’existe pas encore dans la base. Il faut lancer une fois <code>supabase/006_bta_wiki_commentaires.sql</code> dans Supabase (SQL Editor).</div></section>`;
+}
+function telecharger(nomFichier, contenu, type) {
+  const url = URL.createObjectURL(new Blob([contenu], { type }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nomFichier; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+const slug = (s) => sansAccent(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "export";
+
+/* ---------- Situations apprenantes ---------- */
+const optTaches = () => db.taches.map((t) => [t.id, t.titre + (t.projet_id ? " (" + nomProjet(t.projet_id) + ")" : "")]);
+const champsSituation = () => [
+  { nom: "titre", label: "Situation", requis: true, pleine: true, placeholder: "Premier rendez-vous client au bar Marrakech" },
+  { nom: "date", label: "Date", type: "date", requis: true },
+  { nom: "membre_id", label: "Qui", type: "select", options: optMembres(true), vide: "Personne" },
+  { nom: "projet_id", label: "Projet / site", type: "select", options: optProjets() },
+  { nom: "tache_id", label: "Tâche liée", type: "select", options: optTaches() },
+  { nom: "heures", label: "Heures", type: "number", step: "0.25", min: 0 },
+  { nom: "preuve", label: "Preuve", placeholder: "Lien, nom du document, photo, PV..." },
+  { nom: "competences", label: "Compétences touchées", type: "multi", pleine: true, options: COMPETENCES_BTA.map((n, i) => [String(i + 1), `${i + 1} · ${n}`]) },
+  { nom: "ce_que_jai_fait", label: "Ce que j’ai fait", type: "textarea", pleine: true, rows: 3 },
+  { nom: "apprentissage", label: "Ce que j’en retire", type: "textarea", pleine: true, rows: 3 },
+  { nom: "validee", label: "Validée par le coach", type: "checkbox" },
+  { nom: "marquante", label: "Parmi mes plus marquantes (fin de semestre)", type: "checkbox" },
+];
+function editerSituation(id, defauts = {}) {
+  if (absente("situations")) { toast("Module à activer : lancer la migration 006 dans Supabase.", "erreur"); return; }
+  const x = parId("situations", id);
+  const valeurs = x ? { ...x, competences: (x.competences || []).map(String) } : { date: aujourdhui(), membre_id: moi()?.id, competences: [], validee: false, marquante: false, ...defauts };
+  formulaire({
+    titre: x ? "Modifier la situation" : "Nouvelle situation apprenante", champs: champsSituation(), valeurs, large: true,
+    enregistrer: async (v) => { v.competences = (v.competences || []).map(Number).sort((a, b) => a - b); await enregistrer("situations", v, id); toast("Situation enregistrée."); },
+    supprimer: x ? () => supprimerLigne("situations", id) : null,
+  });
+}
+function situationsFiltrees() {
+  const f = filtres.situations, q = sansAccent(f.q);
+  return db.situations.filter((x) => (!f.membre || x.membre_id === f.membre)
+    && (!f.competence || (x.competences || []).includes(Number(f.competence)))
+    && (f.vue === "toutes" || (f.vue === "a_valider" && !x.validee) || (f.vue === "validees" && x.validee) || (f.vue === "marquantes" && x.marquante))
+    && (!q || sansAccent([x.titre, x.ce_que_jai_fait, x.apprentissage, x.preuve].join(" ")).includes(q)));
+}
+function pageSituations() {
+  if (absente("situations")) return `<div class="entete"><div><h1>Situations apprenantes</h1></div></div>${moduleAbsent("Situations apprenantes")}`;
+  const f = filtres.situations;
+  if (!f.membre && !f._init && moi()) { f.membre = moi().id; f._init = true; }
+  const base = db.situations.filter((x) => !f.membre || x.membre_id === f.membre);
+  const couverture = COMPETENCES_BTA.map((n, i) => [i + 1, n, base.filter((x) => (x.competences || []).includes(i + 1)).length]);
+  return `
+  <div class="entete"><div><h1>Situations apprenantes</h1><div class="sous-titre">Ce que chacun apprend dans les projets, avec la compétence, les heures et la preuve. Objectif BTA : ${OBJECTIF_SITUATIONS} validées par semestre.</div></div>
+    <div class="boutons"><button class="btn" data-action="exporterSituations">${icone("pdf")}Exporter mes marquantes</button><button class="btn primaire" data-action="nouvelleSituation">${icone("plus")}Nouvelle situation</button></div></div>
+  <div class="kpis">${membresActifs().map((m) => { const l = db.situations.filter((x) => x.membre_id === m.id); const v = l.filter((x) => x.validee).length;
+    return kpi(m.nom, `${v} / ${OBJECTIF_SITUATIONS}`, `${l.length} notée${l.length > 1 ? "s" : ""} · ${heures(l.reduce((s, x) => s + Number(x.heures || 0), 0))}`, "#/situations", false); }).join("")}</div>
+  <div class="filtres">
+    <select data-filtre="situations.membre" aria-label="Personne"><option value="">Toute l’équipe</option>${db.membres.map((m) => `<option value="${m.id}"${f.membre === m.id ? " selected" : ""}>${esc(m.nom)}</option>`).join("")}</select>
+    <div class="onglets" role="group" aria-label="Statut">${[["toutes", "Toutes"], ["a_valider", "À valider"], ["validees", "Validées"], ["marquantes", "Marquantes"]].map(([k, l]) => `<button aria-pressed="${f.vue === k}" data-action="puce" data-filtre="situations.vue" data-valeur="${k}">${l}</button>`).join("")}</div>
+    <input type="search" placeholder="Rechercher" value="${esc(f.q)}" data-filtre="situations.q" aria-label="Rechercher">
+  </div>
+  <section class="carte"><header><h2>Couverture des 14 compétences</h2><span class="muted petit">${couverture.filter((c) => c[2]).length} / 14 touchées${f.competence ? ` · <button class="btn discret mini" data-action="puce" data-filtre="situations.competence" data-valeur="">Voir toutes</button>` : ""}</span></header>
+    <div class="couverture">${couverture.map(([n, nom, k]) => `<button type="button" class="${k ? "" : "zero"}" aria-pressed="${f.competence === String(n)}" data-action="puce" data-filtre="situations.competence" data-valeur="${f.competence === String(n) ? "" : n}" title="${esc(nom)}"><b>${k}</b><span>${n} · ${esc(nom)}</span></button>`).join("")}</div></section>
+  <div id="liste-situations">${listeSituations()}</div>`;
+}
+function listeSituations() {
+  const l = situationsFiltrees();
+  if (!l.length) return `<section class="carte"><div class="vide-liste">Aucune situation ici.<br><button class="btn" data-action="nouvelleSituation">${icone("plus")}Noter une situation</button></div></section>`;
+  return `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Date</th><th>Situation</th><th class="masquer-mobile">Qui</th><th>Compétences</th><th class="num masquer-mobile">Heures</th><th>Validée</th><th class="masquer-mobile">Marquante</th></tr></thead><tbody>
+    ${l.map((x) => `<tr data-action="modifierSituation" data-id="${x.id}"><td style="white-space:nowrap">${dateFr(x.date)}</td>
+      <td><div class="fort" style="font-weight:700">${esc(x.titre)}</div><div class="petit muted">${esc([x.projet_id && nomProjet(x.projet_id), x.preuve ? "Preuve : " + x.preuve : "Preuve manquante"].filter(Boolean).join(" · "))}</div></td>
+      <td class="masquer-mobile">${avatar(x.membre_id, "")}</td>
+      <td>${(x.competences || []).map((n) => `<span class="comp-num" title="${esc(nomCompetence(n))}">${n}</span>`).join("") || vide}</td>
+      <td class="num masquer-mobile">${x.heures != null ? heures(x.heures) : vide}</td>
+      <td><button class="btn discret mini" data-action="basculerSituation" data-champ="validee" data-id="${x.id}" aria-label="Basculer validée">${x.validee ? badge("statutTache", "fait").replace("Fait", "Validée") : '<span class="badge t-gris">À valider</span>'}</button></td>
+      <td class="masquer-mobile"><button class="btn discret mini" data-action="basculerSituation" data-champ="marquante" data-id="${x.id}" aria-label="Basculer marquante" style="opacity:${x.marquante ? 1 : 0.35}">${icone("etoile")}</button></td></tr>`).join("")}
+  </tbody></table></div></section>`;
+}
+function exporterSituations() {
+  const m = parId("membres", filtres.situations.membre) || moi();
+  if (!m) { toast("Choisis d’abord une personne dans le filtre.", "erreur"); return; }
+  const toutes = db.situations.filter((x) => x.membre_id === m.id).sort((a, b) => a.date.localeCompare(b.date));
+  const l = toutes.some((x) => x.marquante) ? toutes.filter((x) => x.marquante) : toutes.filter((x) => x.validee);
+  if (!l.length) { toast("Aucune situation marquante ni validée pour " + m.nom + ".", "erreur"); return; }
+  const lignes = [`# Situations apprenantes les plus marquantes, ${m.nom}`, "", `Export du ${dateFr(aujourdhui())} depuis le dashboard NexusLab. ${l.length} situation${l.length > 1 ? "s" : ""}.`, ""];
+  for (const x of l) {
+    lignes.push(`## ${dateFr(x.date)} · ${x.titre}`, "");
+    if (x.projet_id) lignes.push(`- Projet : ${nomProjet(x.projet_id)}`);
+    if ((x.competences || []).length) lignes.push(`- Compétences : ${x.competences.map((n) => `${n} (${nomCompetence(n)})`).join(", ")}`);
+    if (x.heures != null) lignes.push(`- Heures : ${heures(x.heures)}`);
+    lignes.push(`- Preuve : ${x.preuve || "à compléter"}`, `- Validée : ${x.validee ? "oui" : "non"}`, "");
+    if (x.ce_que_jai_fait) lignes.push("**Ce que j’ai fait.** " + x.ce_que_jai_fait, "");
+    if (x.apprentissage) lignes.push("**Ce que j’en retire.** " + x.apprentissage, "");
+  }
+  telecharger(`situations-${slug(m.nom)}.md`, lignes.join("\n"), "text/markdown;charset=utf-8");
+  toast("Export téléchargé.");
+}
+
+/* ---------- Wiki ---------- */
+function mdEnLigne(t) {
+  return esc(t)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|#\/[^\s)]*)\)/g, (_, txt, url) => `<a href="${url}"${url.startsWith("#") ? "" : ' target="_blank" rel="noopener"'}>${txt}</a>`);
+}
+function markdown(src) {
+  const out = []; let liste = null, para = [];
+  const finPara = () => { if (para.length) { out.push(`<p>${para.map(mdEnLigne).join("<br>")}</p>`); para = []; } };
+  const finListe = () => { if (liste) { out.push(`<${liste.type}>${liste.items.map((i) => `<li>${mdEnLigne(i)}</li>`).join("")}</${liste.type}>`); liste = null; } };
+  for (const ligne of String(src || "").replace(/\r/g, "").split("\n")) {
+    const l = ligne.trimEnd(); let m;
+    if (!l.trim()) { finPara(); finListe(); continue; }
+    if ((m = l.match(/^(#{1,3})\s+(.*)$/))) { finPara(); finListe(); out.push(`<h${m[1].length}>${mdEnLigne(m[2])}</h${m[1].length}>`); continue; }
+    if (/^(-{3,}|\*{3,})$/.test(l.trim())) { finPara(); finListe(); out.push("<hr>"); continue; }
+    if ((m = l.match(/^>\s?(.*)$/))) { finPara(); finListe(); out.push(`<blockquote>${mdEnLigne(m[1])}</blockquote>`); continue; }
+    if ((m = l.match(/^\s*[-*]\s+(.*)$/)) || (m = l.match(/^\s*\d+[.)]\s+(.*)$/))) {
+      finPara(); const type = /^\s*\d/.test(l) ? "ol" : "ul";
+      if (!liste || liste.type !== type) { finListe(); liste = { type, items: [] }; }
+      liste.items.push(m[1]); continue;
+    }
+    finListe(); para.push(l.trim());
+  }
+  finPara(); finListe();
+  return out.join("");
+}
+const champsPage = () => [
+  { nom: "titre", label: "Titre", requis: true },
+  { nom: "categorie", label: "Catégorie", type: "select", options: options("categoriePage"), vide: false, defaut: "equipe" },
+  { nom: "contenu", label: "Contenu", type: "textarea", pleine: true, rows: 18, aide: "Mise en forme : # Titre, ## Sous-titre, - liste, 1. liste numérotée, **gras**, [texte du lien](https://...), > encadré." },
+  { nom: "epingle", label: "Épingler en haut du wiki", type: "checkbox", pleine: true },
+];
+function editerPage(id) {
+  if (absente("pages")) { toast("Module à activer : lancer la migration 006 dans Supabase.", "erreur"); return; }
+  const p = parId("pages", id);
+  formulaire({
+    titre: p ? "Modifier la page" : "Nouvelle page du wiki", champs: champsPage(), valeurs: p || { categorie: "equipe" }, large: true,
+    enregistrer: async (v) => { v.modifie_par = moi()?.id || null; const r = await enregistrer("pages", v, id); toast("Page enregistrée."); if (!id && r) setTimeout(() => (location.hash = "#/wiki/" + r.id), 0); },
+    supprimer: p ? async () => { await supprimerLigne("pages", id); location.hash = "#/wiki"; } : null,
+  });
+}
+function pageWiki(id) {
+  if (absente("pages")) return `<div class="entete"><div><h1>Wiki</h1></div></div>${moduleAbsent("Wiki")}`;
+  if (id) return fichePage(id);
+  const f = filtres.wiki;
+  return `
+  <div class="entete"><div><h1>Wiki</h1><div class="sous-titre">La charte, nos process et nos guides, au même endroit. Ce qui était dans les pages Notion vit ici.</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouvellePage">${icone("plus")}Nouvelle page</button></div></div>
+  <div class="filtres">
+    <input type="search" placeholder="Rechercher dans le wiki" value="${esc(f.q)}" data-filtre="wiki.q" aria-label="Rechercher">
+    <div class="puces">${[["", "Toutes"], ...options("categoriePage")].filter(([k]) => !k || db.pages.some((p) => p.categorie === k)).map(([k, l]) => `<button class="puce" aria-pressed="${f.categorie === k}" data-action="puce" data-filtre="wiki.categorie" data-valeur="${k}">${esc(l)}</button>`).join("")}</div>
+  </div>
+  <div id="liste-wiki">${listeWiki()}</div>`;
+}
+function listeWiki() {
+  const f = filtres.wiki, q = sansAccent(f.q);
+  const l = db.pages.filter((p) => (!f.categorie || p.categorie === f.categorie) && (!q || sansAccent([p.titre, p.contenu].join(" ")).includes(q)))
+    .sort((a, b) => (b.epingle - a.epingle) || a.titre.localeCompare(b.titre, "fr"));
+  if (!l.length) return `<section class="carte"><div class="vide-liste">Aucune page.<br><button class="btn" data-action="nouvellePage">${icone("plus")}Écrire la première page</button></div></section>`;
+  return `<div class="ressources">${l.map((p) => { const [, teinte] = ETIQ.categoriePage[p.categorie] || ["", "gris"]; const apercu = String(p.contenu || "").replace(/[#*>\[\]()_-]/g, " ").replace(/\s+/g, " ").trim().slice(0, 140);
+    return `<article class="carte ressource cliquable" data-href="#/wiki/${p.id}" style="cursor:pointer"><span class="ico t-${teinte}">${icone(p.epingle ? "epingle" : "wiki")}</span>
+      <div style="flex:1;min-width:0"><div class="titre">${esc(p.titre)}</div>${apercu ? `<div class="desc">${esc(apercu)}${String(p.contenu || "").length > 140 ? "…" : ""}</div>` : ""}<div class="domaine">${esc(libelle("categoriePage", p.categorie))} · modifiée le ${esc(dateFr(p.modifie_le))}</div></div></article>`; }).join("")}</div>`;
+}
+function fichePage(id) {
+  const p = parId("pages", id);
+  if (!p) return '<div class="vide-liste">Page introuvable. <a href="#/wiki">Retour au wiki</a></div>';
+  const auteur = parId("membres", p.modifie_par)?.nom;
+  return `
+  <div class="fil"><a href="#/wiki">Wiki</a></div>
+  <div class="entete"><div><div class="tag">${esc(libelle("categoriePage", p.categorie))}</div><h1>${esc(p.titre)}</h1><div class="sous-titre">Modifiée le ${esc(dateFr(p.modifie_le))}${auteur ? " par " + esc(auteur) : ""}</div></div>
+    <div class="boutons"><button class="btn" data-action="modifierPage" data-id="${p.id}">${icone("crayon")}Modifier</button></div></div>
+  <section class="carte"><div class="md">${markdown(p.contenu) || '<p class="muted">Page vide. Clique sur Modifier pour l’écrire.</p>'}</div></section>`;
+}
+
+/* ---------- Abonnement à l'agenda (lien personnel, mis à jour automatiquement) ---------- */
+const lienAgenda = (jeton) => `${CONFIG.supabaseUrl}/functions/v1/agenda?jeton=${jeton}`;
+async function jetonAgenda(renouveler) {
+  const m = moi(); if (!m) throw new Error("Fiche membre introuvable.");
+  if (renouveler) { const { error } = await sb.from("jetons_agenda").delete().eq("membre_id", m.id); if (error) throw error; }
+  const { data, error } = await sb.from("jetons_agenda").select("jeton").eq("membre_id", m.id).maybeSingle();
+  if (error) throw error;
+  if (data) return data.jeton;
+  const r = await sb.from("jetons_agenda").insert({ membre_id: m.id }).select("jeton").single();
+  if (r.error) throw r.error;
+  return r.data.jeton;
+}
+async function abonnerAgenda(renouveler) {
+  try {
+    const url = lienAgenda(await jetonAgenda(renouveler));
+    const webcal = url.replace(/^https:/, "webcal:");
+    fenetre("Synchroniser avec mon agenda", `
+      <p class="petit">Ton lien personnel. Ton agenda y lit tes tâches (R ou A), tes réunions, tes relances clients, les mises en ligne et les objectifs, et se met à jour tout seul.</p>
+      <div style="display:flex;gap:8px;margin:10px 0"><input readonly value="${esc(url)}" id="lien-agenda" style="flex:1;min-width:0" onclick="this.select()"><button class="btn primaire" data-action="copierLienAgenda">Copier</button></div>
+      <p class="petit"><b>Google Agenda</b> (sur ordinateur) : Autres agendas, bouton +, « À partir de l’URL », colle le lien. Il apparaît aussi sur ton téléphone. Google rafraîchit lui-même, en général en quelques heures.</p>
+      <p class="petit"><b>iPhone ou Mac</b> : <a href="${esc(webcal)}">ouvrir l’abonnement</a>, puis Valider.</p>
+      <p class="petit"><b>Outlook</b> : Ajouter un calendrier, « S’abonner à partir du web », colle le lien.</p>
+      <p class="petit muted">Ce lien est personnel : ne le partage pas. Il s’arrête tout seul si ton accès prend fin. En cas de doute, <button type="button" data-action="renouvelerLienAgenda" style="background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer">crée un nouveau lien</button> (l’ancien cesse de marcher, il faudra le remplacer dans ton agenda).</p>`);
+  } catch (err) {
+    if (["42P01", "PGRST205"].includes(err && err.code) || /jetons_agenda|schema cache|does not exist/i.test((err && err.message) || "")) toast("Module à activer : lancer la migration 008 dans Supabase et déployer la fonction « agenda ».", "erreur");
+    else toast(msgErreur(err), "erreur");
+  }
+}
+async function copierLienAgenda() {
+  const champ = $("#lien-agenda"); if (!champ) return;
+  try { await navigator.clipboard.writeText(champ.value); toast("Lien copié."); }
+  catch { champ.select(); toast("Sélectionne le lien et copie-le (Ctrl C).", "erreur"); }
+}
+
+/* ---------- Export de l'agenda (.ics) ---------- */
+function exporterAgenda() {
+  const auj = aujourdhui(), membre = filtres.agenda.moi && moi() ? moi().id : "";
+  const ev = evenements(ajouterJours(auj, -30), ajouterJours(auj, 365), membre);
+  if (!ev.length) { toast("Rien à exporter.", "erreur"); return; }
+  const echap = (t) => String(t || "").replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/([,;])/g, "\\$1");
+  const plier = (l) => { const o = []; let r = l; while (r.length > 73) { o.push(r.slice(0, 73)); r = " " + r.slice(73); } o.push(r); return o.join("\r\n"); };
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const lignes = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//NexusLab//Dashboard//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:NexusLab" + (membre ? " (" + echap(moi().nom) + ")" : "")];
+  for (const e of ev) {
+    const d = e.date.replace(/-/g, ""), fin = ajouterJours(e.date, 1).replace(/-/g, "");
+    lignes.push("BEGIN:VEVENT", `UID:${e.type}-${e.id || slug(e.titre)}-${d}@nexus-lab.ch`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${fin}`,
+      plier("SUMMARY:" + echap(TYPES_EVT[e.type][0] + " · " + e.titre)), plier("DESCRIPTION:" + echap(e.meta || "")), "TRANSP:TRANSPARENT", "END:VEVENT");
+  }
+  lignes.push("END:VCALENDAR");
+  telecharger(membre ? `nexuslab-agenda-${slug(moi().nom)}.ics` : "nexuslab-agenda.ics", lignes.join("\r\n") + "\r\n", "text/calendar;charset=utf-8");
+  toast(`${ev.length} élément${ev.length > 1 ? "s" : ""} exporté${ev.length > 1 ? "s" : ""}. Ouvre le fichier pour l’ajouter à ton agenda.`);
+}
+
 const CREER = [
   ["Client", "clients", "nouveauClient"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
   ["Devis", "devis", "nouveauDf", "devis"], ["Facture", "devis", "nouveauDf", "facture"], ["Réunion", "reunions", "nouvelleReunion"],
   ["Débrief du jour", "eclair", "debriefDuJour"], ["Document", "documents", "ajouterDocument"], ["Ressource", "ressources", "nouvelleRessource"], ["Objectif", "objectifs", "nouvelObjectif"],
+  ["Situation apprenante", "situations", "nouvelleSituation"], ["Page du wiki", "wiki", "nouvellePage"],
 ];
 function basculerMenuCreer(ouvrir) {
   const m = $("#menu-creer"), b = $("#btn-creer");
@@ -2591,6 +2986,8 @@ function resultatsPalette(q) {
     ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu)).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
     ajoute("Documents", db.documents.filter((d) => ok(d.nom)).map((d) => ({ titre: d.nom, meta: d.interne ? "Document interne" : nomClient(d.client_id), icone: "documents", faire: () => ouvrirDocument(d.id) })), 5);
     ajoute("Ressources", db.ressources.filter((r) => ok(r.titre, r.description, r.url)).map((r) => ({ titre: r.titre, meta: r.url || "", icone: "ressources", faire: () => (r.url ? window.open(r.url, "_blank", "noopener") : editerRessource(r.id)) })), 5);
+    ajoute("Wiki", db.pages.filter((p) => ok(p.titre, p.contenu)).map((p) => ({ titre: p.titre, meta: libelle("categoriePage", p.categorie), icone: "wiki", faire: () => (location.hash = "#/wiki/" + p.id) })), 5);
+    ajoute("Situations apprenantes", db.situations.filter((x) => ok(x.titre, x.ce_que_jai_fait, x.apprentissage)).map((x) => ({ titre: x.titre, meta: [dateFr(x.date), parId("membres", x.membre_id)?.nom].filter(Boolean).join(" · "), icone: "situations", faire: () => editerSituation(x.id) })), 5);
   }
   return items;
 }
@@ -2660,6 +3057,7 @@ const ACTIONS = {
   palette: () => ouvrirPalette(),
   menuCreer: () => basculerMenuCreer(),
   moisAgenda: (ds) => { filtres.agenda.mois = ds.mois; rendre(); },
+  semaineAgenda: (ds) => { filtres.agenda.semaine = ds.semaine; rendre(); },
   jourAgenda: (ds) => fenetre(new Date(ds.jour + "T12:00:00").toLocaleDateString("fr-CH", { weekday: "long", day: "numeric", month: "long" }), evenements(ds.jour, ds.jour, filtres.agenda.moi && moi() ? moi().id : "").map(ligneEvenement).join("")),
   nouvelObjectif: () => editerObjectif(),
   modifierObjectif: (ds) => editerObjectif(ds.id),
@@ -2674,6 +3072,16 @@ const ACTIONS = {
   tacheReunion: (ds) => { const r = parId("reunions", ds.reunion); editerTache(null, { reunion_id: ds.reunion, projet_id: r?.projet_id || null, echeance: ajouterJours(aujourdhui(), 7) }); },
   nouvelleRessource: () => editerRessource(),
   modifierRessource: (ds) => editerRessource(ds.id),
+  nouvelleSituation: () => editerSituation(),
+  modifierSituation: (ds) => editerSituation(ds.id),
+  basculerSituation: async (ds) => { const x = parId("situations", ds.id); try { await enregistrer("situations", { [ds.champ]: !x[ds.champ] }, x.id); rendre(); } catch (err) { toast(msgErreur(err), "erreur"); } },
+  exporterSituations: () => exporterSituations(),
+  nouvellePage: () => editerPage(),
+  modifierPage: (ds) => editerPage(ds.id),
+  exporterAgenda: () => exporterAgenda(),
+  abonnerAgenda: () => abonnerAgenda(false),
+  renouvelerLienAgenda: async () => { if (await confirmer("Créer un nouveau lien ? L’ancien cessera de fonctionner dans ton agenda.", "Créer")) abonnerAgenda(true); },
+  copierLienAgenda: () => copierLienAgenda(),
   nouvelleCompetence: (ds) => editerCompetence(null, ds.membre),
   attribuerClient: (ds) => attribuerClient(ds.id),
   assignerClient: (ds) => assignerClient(ds.id, ds.membre),
@@ -2698,10 +3106,11 @@ document.addEventListener("click", (e) => { if (!$("#menu-creer").hidden && !e.t
 document.addEventListener("keydown", (e) => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches("article.tache[data-action]")) { e.preventDefault(); ACTIONS.modifierTache(e.target.dataset); }
 });
-const LISTES = { reunions: ["#liste-reunions", listeReunions], ressources: ["#liste-ressources", listeRessources], clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
+const LISTES = { situations: ["#liste-situations", listeSituations], wiki: ["#liste-wiki", listeWiki], reunions: ["#liste-reunions", listeReunions], ressources: ["#liste-ressources", listeRessources], clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
 function majFiltre(el) {
   const [pg, cle] = el.dataset.filtre.split(".");
   filtres[pg][cle] = el.type === "checkbox" ? (el.checked ? "1" : "") : el.value;
+  if (pg === "situations" && cle === "membre") { filtres.situations._init = true; rendre(); return; }
   const [sel, fn] = LISTES[pg];
   const cible = $(sel);
   if (cible) { cible.innerHTML = fn(); apresRendu(pg); }
@@ -2753,9 +3162,9 @@ async function entrer() {
   catch (err) { $("#contenu").innerHTML = `<div class="message erreur">Chargement impossible : ${esc(msgErreur(err))}</div>`; return; }
   const m = moi();
   if (!m) {
-    messageSortie = `Le compte ${session?.user?.email || ""} n’a pas (ou plus) accès au dashboard NexusLab. Si c’est une erreur, demande à un membre de vérifier ta fiche dans Équipe.`;
+    messageSortie = `Le compte ${session?.user?.email || ""} n’a pas (ou plus) accès au dashboard NexusLab. Ta fiche dans Équipe doit porter exactement cette adresse e-mail, et ton accès ne doit pas être échu. Envoie cette adresse à un membre de l’équipe.`;
     await sb.auth.signOut();
-    afficherConnexion(`Le compte ${session?.user?.email || ""} n’a pas (ou plus) accès au dashboard NexusLab. Si c’est une erreur, demande à un membre de vérifier ta fiche dans Équipe.`);
+    afficherConnexion(`Le compte ${session?.user?.email || ""} n’a pas (ou plus) accès au dashboard NexusLab. Ta fiche dans Équipe doit porter exactement cette adresse e-mail, et ton accès ne doit pas être échu. Envoie cette adresse à un membre de l’équipe.`);
     return;
   }
   $("#utilisateur").innerHTML = `${avatar(m.id, "")}<div style="min-width:0"><div class="nom">${esc(m.nom)}</div><div class="role">${esc(m.role || "")}</div></div>`;
@@ -2774,8 +3183,15 @@ $("#form-connexion").addEventListener("submit", async (e) => {
 $("#btn-oubli").addEventListener("click", async () => {
   const email = $("#form-connexion").email.value.trim();
   if (!email) { messageAuth("Indiquez d’abord votre e-mail ci-dessus."); return; }
+  let dernier = 0;
+  try { dernier = Number(localStorage.getItem("nx-oubli") || 0); } catch { /* stockage indisponible */ }
+  const attente = Math.ceil((dernier + 120000 - Date.now()) / 1000);
+  if (attente > 0) { messageAuth(`Un e-mail vient déjà d’être demandé. Regarde ta boîte (et les spams) avant d’en redemander un, dans ${attente} s.`, "ok"); return; }
+  const btn = $("#btn-oubli"); btn.disabled = true;
   const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
-  messageAuth(error ? msgErreur(error) : "Si ce compte existe, un e-mail de réinitialisation vient d’être envoyé.", error ? "erreur" : "ok");
+  btn.disabled = false;
+  if (!error) { try { localStorage.setItem("nx-oubli", String(Date.now())); } catch { /* stockage indisponible */ } }
+  messageAuth(error ? msgErreur(error) : "Si ce compte existe, un e-mail vient d’être envoyé. Le lien ne marche qu’une fois : ouvre-le directement, sans le transférer.", error ? "erreur" : "ok");
 });
 $("#form-nouveau-mdp").addEventListener("submit", async (e) => {
   e.preventDefault();

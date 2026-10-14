@@ -375,6 +375,35 @@ dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-und
 .niveau i.on { background: var(--corail); border-color: var(--corail); }
 .niveau i.cible { border: 2px solid var(--corail); }
 
+/* ---------- Suivi des prospects : étiquette du membre, bulle de contacts ---------- */
+.etiquette { display: inline-flex; align-items: center; gap: 5px; border: 0; border-radius: var(--pilule); padding: 2px 9px; font: inherit; font-size: .72rem; font-weight: 800; cursor: pointer; white-space: nowrap; line-height: 1.5; }
+.etiquette::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.etiquette.libre { background: transparent; border: 1px dashed var(--ligne-forte); color: var(--texte-3); padding: 1px 8px; }
+.etiquette:hover { box-shadow: 0 0 0 3px var(--corail-doux); }
+span.etiquette { cursor: default; }
+span.etiquette:hover { box-shadow: none; }
+.bulle { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--ligne); background: var(--fond); border-radius: var(--pilule); padding: 3px 10px 3px 8px; font: inherit; font-size: .74rem; font-weight: 700; color: var(--texte-2); cursor: pointer; white-space: nowrap; }
+.bulle svg { width: 13px; height: 13px; }
+.bulle b { color: var(--texte); }
+.bulle:hover { border-color: var(--corail); color: var(--texte); }
+.bulle.vide { border-style: dashed; background: transparent; color: var(--texte-3); }
+.dernier-contact { font-size: .76rem; color: var(--texte-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.journal { display: grid; }
+.journal-contact { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--ligne); align-items: flex-start; }
+.journal-contact:last-child { border-bottom: 0; }
+.journal-contact .ico { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.journal-contact .ico svg { width: 15px; height: 15px; }
+.journal-contact .corps { flex: 1; min-width: 0; }
+.journal-contact .tete { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: .84rem; font-weight: 700; }
+.journal-contact .notes { font-size: .86rem; color: var(--texte-2); white-space: pre-wrap; margin-top: 3px; }
+.journal-contact .qui { font-size: .74rem; color: var(--texte-3); margin-top: 3px; }
+.resume-suivi { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: .84rem; color: var(--texte-2); background: var(--fond); border-radius: 14px; padding: 10px 14px; margin-bottom: 14px; }
+.resume-suivi b { color: var(--texte); }
+.choix-membres { display: grid; gap: 8px; }
+.choix-membres button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--ligne); background: var(--carte); cursor: pointer; font: inherit; font-weight: 700; text-align: left; }
+.choix-membres button:hover { border-color: var(--graphite); }
+.choix-membres button[aria-pressed="true"] { border-color: var(--corail); box-shadow: 0 0 0 3px var(--corail-doux); }
+
 /* ---------- Équipe ---------- */
 .membres { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-bottom: 18px; }
 .membre-tete { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
@@ -410,7 +439,7 @@ dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-und
 .champ.case { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .9rem; color: var(--texte); align-self: end; padding-bottom: 9px; }
 .champ.case input { width: 18px; height: 18px; accent-color: var(--corail); }
 .choix-multiples { display: flex; flex-wrap: wrap; gap: 6px; }
-.choix-multiples label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--ligne-forte); border-radius: var(--pilule); font-size: .84rem; font-weight: 600; color: var(--texte); cursor: pointer; }
+.choix-multiples label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 6px 12px; border: 1px solid var(--ligne-forte); border-radius: var(--pilule); font-size: .84rem; font-weight: 600; color: var(--texte); cursor: pointer; }
 .choix-multiples input { accent-color: var(--corail); }
 .choix-multiples label:has(input:checked) { background: var(--graphite); color: var(--sur-graphite); border-color: var(--graphite); }
 
@@ -643,6 +672,8 @@ const ETIQ = {
   typeReunion: { seance: ["Séance d’équipe", "violet"], debrief: ["Débrief", "corail"], client: ["Rendez-vous client", "jaune"], atelier: ["Atelier", "bleu"], autre: ["Autre", "gris"] },
   statutDecision: { adoptee: ["Adoptée", "vert"], refusee: ["Refusée", "rouge"], reportee: ["Reportée", "jaune"], a_discuter: ["À discuter", "gris"] },
   categorieRessource: { outil: ["Outil", "gris"], bta: ["Business Team Academy", "violet"], vardena: ["Vardena", "bleu"], modele: ["Modèle", "jaune"], guide: ["Guide", "vert"], client: ["Client", "corail"], autre: ["Autre", "gris"] },
+  canalContact: { appel: ["Appel", "bleu"], whatsapp: ["WhatsApp", "vert"], email: ["E-mail", "violet"], sms: ["SMS", "gris"], visite: ["Visite", "corail"], rendez_vous: ["Rendez-vous", "jaune"], linkedin: ["LinkedIn", "bleu"], autre: ["Autre", "gris"] },
+  resultatContact: { sans_reponse: ["Pas de réponse", "gris"], a_rappeler: ["À rappeler", "jaune"], interesse: ["Intéressé", "vert"], rdv_pris: ["Rendez-vous pris", "violet"], devis_demande: ["Devis demandé", "corail"], pas_interesse: ["Pas intéressé", "rouge"], autre: ["Autre", "gris"] },
   sourceIndicateur: { manuel: "Saisie à la main", clients_contactes: "Auto : PME contactées", rendez_vous: "Auto : rendez-vous obtenus", devis_envoyes: "Auto : devis envoyés", mandats_signes: "Auto : mandats signés", ca_facture: "Auto : CA facturé (CHF)", ca_encaisse: "Auto : CA encaissé (CHF)", taches_faites: "Auto : tâches terminées" },
   typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", presentation: "Présentation", cours: "Cours BTA", administratif: "Administratif", proces_verbal: "Procès-verbal", autre: "Autre" },
   periode: { unique: "Paiement unique", mois: "Par mois", an: "Par an" },
@@ -705,6 +736,7 @@ const TABLES = {
   decisions: { ordre: ["date", false] },
   ressources: { ordre: ["titre", true] },
   competences: { ordre: ["nom", true] },
+  contacts_clients: { ordre: ["date", false] },
 };
 const db = Object.fromEntries(Object.keys(TABLES).map((t) => [t, []]));
 let session = null;
@@ -754,6 +786,24 @@ function avatar(id, role, grand) {
   const i = db.membres.indexOf(m);
   return `<span class="avatar t-${TEINTES[i % TEINTES.length]}${grand ? " grand" : ""}" title="${esc((role ? role + " : " : "") + m.nom)}">${esc(initiales(m.nom))}</span>`;
 }
+const prenomDe = (id) => (parId("membres", id)?.nom || "").split(" ")[0];
+function etiquetteMembre(id, clientId) {
+  const m = parId("membres", id);
+  const cls = m ? "t-" + TEINTES[db.membres.indexOf(m) % TEINTES.length] : "libre";
+  const texte = m ? prenomDe(id) : "Libre";
+  if (!clientId) return `<span class="etiquette ${cls}">${esc(texte)}</span>`;
+  const titre = m ? `Suivi par ${m.nom}. Clique pour changer.` : "Personne ne suit ce prospect. Clique pour l’attribuer.";
+  return `<button type="button" class="etiquette ${cls}" data-action="attribuerClient" data-id="${clientId}" title="${esc(titre)}" aria-label="${esc(titre)}">${esc(texte)}</button>`;
+}
+const contactsDe = (clientId) => db.contacts_clients.filter((x) => x.client_id === clientId).sort((a, b) => b.date.localeCompare(a.date) || String(b.cree_le).localeCompare(String(a.cree_le)));
+function ilYa(date) {
+  const j = Math.round((new Date(aujourdhui() + "T12:00:00") - new Date(date + "T12:00:00")) / 86400000);
+  return j <= 0 ? "aujourd’hui" : j === 1 ? "hier" : j < 30 ? `il y a ${j} j` : dateCourte(date);
+}
+function bulleContacts(c) {
+  const cs = contactsDe(c.id), dernier = cs[0];
+  return `<button type="button" class="bulle${cs.length ? "" : " vide"}" data-action="journalClient" data-id="${c.id}" title="Journal des contacts de ${esc(c.nom)}">${icone("reunions")}${cs.length ? `<b>${cs.length}</b><span>${esc(ilYa(dernier.date))}</span>` : "<span>Noter un contact</span>"}</button>`;
+}
 const enRetard = (t) => t.echeance && t.statut !== "fait" && t.echeance < aujourdhui();
 const optClients = () => db.clients.map((c) => [c.id, c.nom]);
 const optProjets = () => db.projets.map((p) => [p.id, p.nom + (p.client_id ? " (" + nomClient(p.client_id) + ")" : "")]);
@@ -786,6 +836,7 @@ function champHtml(c, v) {
   const req = c.requis ? " required" : "";
   const cls = "champ" + (c.pleine ? " pleine" : "");
   if (c.type === "separateur") return '<div class="separateur"></div>';
+  if (c.type === "choix") return `<div class="${cls}"><span class="label">${esc(c.label)}</span><div class="choix-multiples">${c.options.map(([k, l]) => `<label><input type="radio" name="${c.nom}" value="${esc(k)}"${String(v ?? c.defaut) === String(k) ? " checked" : ""}> ${esc(l)}</label>`).join("")}</div></div>`;
   if (c.type === "multi") return `<div class="${cls}"><span class="label">${esc(c.label)}</span><div class="choix-multiples">${c.options.map(([k, l]) => `<label><input type="checkbox" name="${c.nom}" value="${esc(k)}"${(v || []).includes(k) ? " checked" : ""}> ${esc(l)}</label>`).join("")}</div></div>`;
   if (c.type === "checkbox") return `<label class="${cls} case"><input type="checkbox" name="${c.nom}"${v ? " checked" : ""}> <span>${esc(c.label)}</span></label>`;
   let input;
@@ -804,6 +855,7 @@ function lireForm(form, champs) {
   const o = {};
   for (const c of champs) {
     if (c.type === "separateur" || c.lectureSeule) continue;
+    if (c.type === "choix") { o[c.nom] = $(`input[name="${c.nom}"]:checked`, form)?.value || c.defaut || null; continue; }
     if (c.type === "multi") { o[c.nom] = $$(`input[name="${c.nom}"]:checked`, form).map((x) => x.value); continue; }
     const el = form.elements[c.nom];
     if (!el) continue;
@@ -839,7 +891,7 @@ function formulaire({ titre, champs, valeurs = {}, enregistrer: surEnregistrer, 
   });
   dlg.showModal();
   if (apresOuverture) apresOuverture(form);
-  const premier = $("input:not([type=checkbox]),select,textarea", form);
+  const premier = form.contains(document.activeElement) ? null : $("input:not([type=checkbox]):not([type=radio]),select,textarea", form);
   if (premier) premier.focus();
 }
 
@@ -850,6 +902,7 @@ const champsClient = () => [
   { nom: "nom", label: "Nom de la PME", requis: true, pleine: true },
   { nom: "secteur", label: "Secteur", placeholder: "Coiffure, restaurant, artisan..." },
   { nom: "statut", label: "Statut", type: "select", options: options("statutClient"), vide: false, defaut: "prospect" },
+  { nom: "responsable_id", label: "Suivi par", type: "select", options: optMembres(), vide: "Personne (libre)" },
   { nom: "contact", label: "Personne de contact" },
   { nom: "email", label: "E-mail", type: "email" },
   { nom: "telephone", label: "Téléphone", type: "tel" },
@@ -864,8 +917,14 @@ const champsClient = () => [
 function editerClient(id) {
   const c = parId("clients", id);
   formulaire({
-    titre: c ? "Modifier le client" : "Nouveau client", champs: champsClient(), valeurs: c || { statut: "prospect" },
-    enregistrer: async (v) => { const r = await enregistrer("clients", v, id); if (!id) location.hash = "#/clients/" + r.id; toast("Client enregistré."); },
+    titre: c ? "Modifier le client" : "Nouveau client", champs: champsClient(), valeurs: c || { statut: "prospect", responsable_id: moi()?.id },
+    enregistrer: async (v) => {
+      if (!id) {
+        const cle = (n) => sansAccent(n).replace(/\b(sarl|sàrl|sa|gmbh|ag|sagl)\b/g, "").replace(/[^a-z0-9]/g, "");
+        const proche = db.clients.find((x) => cle(x.nom) && (cle(x.nom) === cle(v.nom) || (cle(v.nom).length > 4 && (cle(x.nom).includes(cle(v.nom)) || cle(v.nom).includes(cle(x.nom))))));
+        if (proche && !(await confirmer(`« ${proche.nom} » existe déjà${proche.responsable_id ? ", suivi par " + prenomDe(proche.responsable_id) : ""} (${libelle("statutClient", proche.statut)}). Créer quand même un nouveau client ?`, "Créer quand même"))) throw new Error("Création annulée : ouvre plutôt la fiche existante.");
+      }
+      const r = await enregistrer("clients", v, id); if (!id) location.hash = "#/clients/" + r.id; toast("Client enregistré."); },
     supprimer: c ? async () => { await supprimerLigne("clients", id); location.hash = "#/clients"; } : null,
   });
 }
@@ -946,7 +1005,8 @@ const champsMembre = () => [
   { nom: "nom", label: "Nom", requis: true },
   { nom: "role", label: "Rôle" },
   { nom: "email", label: "E-mail de connexion", type: "email", pleine: true, aide: "Le même que celui du compte de connexion. Sans lui, la personne n’a pas accès." },
-  { nom: "actif", label: "Membre actif", type: "checkbox", pleine: true },
+  { nom: "acces_jusquau", label: "Accès jusqu’au", type: "date", aide: "Pour un accès temporaire. Vide : accès permanent." },
+  { nom: "actif", label: "Membre actif", type: "checkbox" },
 ];
 function editerMembre(id) {
   const m = parId("membres", id);
@@ -1021,7 +1081,7 @@ const PAGES = {
   reglages: { titre: "Réglages", icone: "reglages", rendre: pageReglages, groupe: "Équipe et BTA" },
 };
 const filtres = {
-  clients: { q: "", statut: "", vue: "pipeline", fini: "" },
+  clients: { q: "", statut: "", vue: "pipeline", fini: "", suivi: "" },
   agenda: { mois: "", moi: "" },
   reunions: { onglet: "reunions", type: "", q: "" },
   ressources: { q: "", categorie: "" },
@@ -1037,7 +1097,7 @@ function lireRoute() {
 }
 function rendreNav(page) {
   const mesTaches = moi() ? db.taches.filter((t) => t.statut !== "fait" && (t.responsable_id === moi().id || (t.valideur_id === moi().id && t.statut === "a_valider"))).length : 0;
-  const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= aujourdhui() && !["termine", "perdu", "livre"].includes(c.statut)).length;
+  const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= aujourdhui() && !["termine", "perdu", "livre"].includes(c.statut) && (!c.responsable_id || c.responsable_id === moi()?.id)).length;
   const compteurs = { taches: [mesTaches, "Mes tâches ouvertes"], clients: [relances, "Relances à faire"] };
   let groupe = "";
   $("#nav").innerHTML = Object.entries(PAGES).map(([k, p]) => {
@@ -1090,7 +1150,7 @@ function pageAccueil() {
   const mesTaches = m ? db.taches.filter((t) => t.responsable_id === m.id && t.statut !== "fait") : [];
   const urgentes = mesTaches.filter((t) => t.echeance && t.echeance <= auj).sort((a, b) => a.echeance.localeCompare(b.echeance));
   const aValider = m ? db.taches.filter((t) => t.valideur_id === m.id && t.statut === "a_valider") : [];
-  const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= auj && !["termine", "perdu", "livre"].includes(c.statut));
+  const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= auj && !["termine", "perdu", "livre"].includes(c.statut) && (!c.responsable_id || c.responsable_id === m?.id));
   const reunionsAuj = db.reunions.filter((r) => r.date === auj);
   const bloquees = db.taches.filter((t) => t.statut === "bloque");
   const prochainsJours = evenements(ajouterJours(auj, 1), dans7, m && filtres.agenda.moi ? m.id : "");
@@ -1107,7 +1167,7 @@ function pageAccueil() {
   const lignesJour = [
     ...urgentes.map((t) => ({ html: ligneTache(t) })),
     ...aValider.map((t) => ({ html: ligneTache(t).replace('<div class="corps">', '<div class="corps"><span class="badge t-jaune sans-point" style="margin-bottom:3px">À valider par toi</span>') })),
-    ...relances.map((c) => ({ html: `<div class="ligne-item cliquable" data-href="#/clients/${c.id}"><span class="date-pastille"><small>${esc(new Date(c.date_relance + "T12:00:00").toLocaleDateString("fr-CH", { month: "short" }).replace(".", ""))}</small><b>${new Date(c.date_relance + "T12:00:00").getDate()}</b></span><div class="corps"><div class="titre">Relancer ${esc(c.nom)}</div><div class="meta">${esc(c.prochaine_action || "Prochaine action à définir")}${c.contact ? " · " + esc(c.contact) : ""}</div></div>${badge("statutClient", c.statut)}</div>` })),
+    ...relances.map((c) => ({ html: `<div class="ligne-item cliquable" data-action="journalClient" data-id="${c.id}"><span class="date-pastille"><small>${esc(new Date(c.date_relance + "T12:00:00").toLocaleDateString("fr-CH", { month: "short" }).replace(".", ""))}</small><b>${new Date(c.date_relance + "T12:00:00").getDate()}</b></span><div class="corps"><div class="titre">Relancer ${esc(c.nom)}</div><div class="meta">${esc(c.prochaine_action || "Prochaine action à définir")}${c.contact ? " · " + esc(c.contact) : ""}</div></div>${badge("statutClient", c.statut)}</div>` })),
     ...reunionsAuj.map((r) => ({ html: `<div class="ligne-item cliquable" data-href="#/reunions/${r.id}"><span class="date-pastille aujourdhui"><small>Auj.</small><b>${esc(r.heure || "·")}</b></span><div class="corps"><div class="titre">${esc(r.titre)}</div><div class="meta">${esc([libelle("typeReunion", r.type), r.lieu].filter(Boolean).join(" · "))}</div></div>${avatarsMembres(r.participants)}</div>` })),
   ];
 
@@ -1190,13 +1250,17 @@ function pageClients(id) {
       .map(([k, l, n]) => `<button class="puce" aria-pressed="${f.statut === k}" data-action="puce" data-filtre="clients.statut" data-valeur="${k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div>`
       : `<label class="petit" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-filtre="clients.fini" ${f.fini === "1" ? "checked" : ""}> Afficher livrés, terminés et internes</label>`}
   </div>
+  <div class="filtres" style="margin-top:-8px"><span class="petit muted" style="font-weight:700">Suivi par</span>
+    <div class="puces">${[["", "Toute l’équipe"], ["moi", "Moi"], ["libre", "Personne"], ...membresActifs().filter((m) => m.id !== moi()?.id).map((m) => [m.id, m.nom.split(" ")[0]])].map(([k, l]) => `<button class="puce" aria-pressed="${f.suivi === k}" data-action="puce" data-filtre="clients.suivi" data-valeur="${k}">${esc(l)}<span class="n">${externes.filter((c) => suiviCorrespond(c, k)).length}</span></button>`).join("")}</div>
+  </div>
   <div id="liste-clients">${listeClients()}</div>`;
 }
+function suiviCorrespond(c, k) { return !k || (k === "moi" ? c.responsable_id && c.responsable_id === moi()?.id : k === "libre" ? !c.responsable_id : c.responsable_id === k); }
 const estInterne = (c) => c.source === "Interne" || c.secteur === "Interne";
 const ETAPES_PIPELINE = ["prospect", "contacte", "rendez_vous", "offre_envoyee", "mandat_signe", "perdu"];
 function listeClients() {
   const f = filtres.clients, q = f.q.toLowerCase();
-  const cherche = (c) => !q || [c.nom, c.contact, c.localite, c.secteur, c.email, c.prochaine_action].join(" ").toLowerCase().includes(q);
+  const cherche = (c) => suiviCorrespond(c, f.suivi) && (!q || [c.nom, c.contact, c.localite, c.secteur, c.email, c.prochaine_action, prenomDe(c.responsable_id)].join(" ").toLowerCase().includes(q));
   if (f.vue === "pipeline") {
     const etapes = f.fini === "1" ? Object.keys(ETIQ.statutClient) : ETAPES_PIPELINE;
     const l = db.clients.filter((c) => cherche(c) && (f.fini === "1" || !estInterne(c)));
@@ -1209,18 +1273,78 @@ function listeClients() {
   }
   const l = db.clients.filter((c) => (!f.statut || c.statut === f.statut) && cherche(c));
   if (!l.length) return '<section class="carte"><div class="vide-liste">Aucun client ne correspond.</div></section>';
-  return `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Nom</th><th class="masquer-mobile">Secteur</th><th class="masquer-mobile">Contact</th><th class="masquer-mobile">Prochaine action</th><th>Relance</th><th>Statut</th><th class="num">Sites</th></tr></thead><tbody>
-    ${l.map((c) => `<tr data-href="#/clients/${c.id}"><td class="fort">${esc(c.nom)}<div class="muted petit" style="font-weight:500">${esc(c.localite || "")}</div></td><td class="masquer-mobile">${esc(c.secteur || "")}</td><td class="masquer-mobile">${esc(c.contact || "")}</td><td class="masquer-mobile">${esc(c.prochaine_action || "")}</td><td>${c.date_relance ? `<span class="${c.date_relance <= aujourdhui() ? "retard" : ""}">${dateCourte(c.date_relance)}</span>` : vide}</td><td>${badge("statutClient", c.statut)}</td><td class="num">${db.projets.filter((p) => p.client_id === c.id).length}</td></tr>`).join("")}
+  return `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Nom</th><th class="masquer-mobile">Secteur</th><th class="masquer-mobile">Contact</th><th>Suivi par</th><th class="masquer-mobile">Contacts</th><th class="masquer-mobile">Prochaine action</th><th>Relance</th><th>Statut</th></tr></thead><tbody>
+    ${l.map((c) => `<tr data-href="#/clients/${c.id}"><td class="fort">${esc(c.nom)}<div class="muted petit" style="font-weight:500">${esc(c.localite || "")}</div></td><td class="masquer-mobile">${esc(c.secteur || "")}</td><td class="masquer-mobile">${esc(c.contact || "")}</td><td>${etiquetteMembre(c.responsable_id, c.id)}</td><td class="masquer-mobile">${bulleContacts(c)}</td><td class="masquer-mobile">${esc(c.prochaine_action || "")}</td><td>${c.date_relance ? `<span class="${c.date_relance <= aujourdhui() ? "retard" : ""}">${dateCourte(c.date_relance)}</span>` : vide}</td><td>${badge("statutClient", c.statut)}</td></tr>`).join("")}
   </tbody></table></div></section>`;
 }
 function carteClient(c) {
   const due = c.date_relance && c.date_relance <= aujourdhui();
+  const dernier = contactsDe(c.id)[0];
   return `<article class="tache" draggable="true" data-client="${c.id}" data-href="#/clients/${c.id}" tabindex="0">
-    <div class="projet">${esc([c.secteur, c.localite].filter(Boolean).join(" · ") || "PME")}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="projet" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc([c.secteur, c.localite].filter(Boolean).join(" · ") || "PME")}</span>${etiquetteMembre(c.responsable_id, c.id)}</div>
     <div class="titre">${esc(c.nom)}</div>
+    ${dernier ? `<div class="dernier-contact">${badge("resultatContact", dernier.resultat)}<span>${esc(libelle("canalContact", dernier.canal))}${dernier.membre_id ? " par " + esc(prenomDe(dernier.membre_id)) : ""}</span></div>` : ""}
     ${c.prochaine_action ? `<div class="petit" style="color:var(--texte-2)">${icone("fleche").replace("<svg", '<svg style="width:13px;height:13px;vertical-align:-2px;margin-right:4px"')}${esc(c.prochaine_action)}</div>` : ""}
-    <div class="bas">${c.contact ? `<span>${esc(c.contact)}</span>` : ""}<span class="droite">${c.date_relance ? `<span class="relance ${due ? "retard" : ""}">Relance ${dateCourte(c.date_relance)}</span>` : ""}</span></div>
+    <div class="bas">${bulleContacts(c)}<span class="droite">${c.date_relance ? `<span class="relance ${due ? "retard" : ""}">Relance ${dateCourte(c.date_relance)}</span>` : ""}</span></div>
   </article>`;
+}
+
+/* ---------- Attribution et journal des contacts ---------- */
+function attribuerClient(id) {
+  const c = parId("clients", id);
+  if (!c) return;
+  const ligne = (m) => `<button type="button" data-action="assignerClient" data-id="${c.id}" data-membre="${m ? m.id : ""}" aria-pressed="${(m ? m.id : null) === (c.responsable_id || null)}">${m ? avatar(m.id, "") : '<span class="avatar vide">?</span>'}<span style="flex:1">${m ? esc(m.nom) + (m.id === moi()?.id ? " (moi)" : "") : "Personne (libre)"}</span>${m ? `<span class="muted petit">${((n) => n + (n > 1 ? " suivis" : " suivi"))(db.clients.filter((x) => x.responsable_id === m.id && !["termine", "perdu"].includes(x.statut)).length)}</span>` : ""}</button>`;
+  fenetre(`Qui suit ${c.nom} ?`, `<div class="choix-membres">${membresActifs().map(ligne).join("")}${ligne(null)}</div>`);
+}
+async function assignerClient(id, membreId) {
+  try { await enregistrer("clients", { responsable_id: membreId || null }, id); toast(membreId ? `${parId("clients", id).nom} : suivi par ${prenomDe(membreId)}.` : "Prospect libéré."); rendre(); }
+  catch (err) { toast(msgErreur(err), "erreur"); }
+}
+function ligneContact(x, supprimable) {
+  const [, teinte] = ETIQ.canalContact[x.canal] || ["", "gris"];
+  return `<div class="journal-contact"><span class="ico t-${teinte}">${icone(x.canal === "visite" || x.canal === "rendez_vous" ? "clients" : x.canal === "email" ? "devis" : "reunions")}</span>
+    <div class="corps"><div class="tete">${esc(libelle("canalContact", x.canal))} ${badge("resultatContact", x.resultat)}</div>
+      ${x.notes ? `<div class="notes">${esc(x.notes)}</div>` : ""}
+      <div class="qui">${esc(dateFr(x.date))}${x.membre_id ? " · par " + esc(parId("membres", x.membre_id)?.nom || "") : ""}</div></div>
+    ${supprimable ? `<button type="button" class="btn danger mini" data-suppr-contact="${x.id}" aria-label="Supprimer ce contact">×</button>` : ""}</div>`;
+}
+function journalClient(id) {
+  const c = parId("clients", id);
+  if (!c) return;
+  const cs = contactsDe(id);
+  const resume = `<div class="resume-suivi">Suivi par ${etiquetteMembre(c.responsable_id)} · <b>${cs.length}</b> contact${cs.length > 1 ? "s" : ""}${cs[0] ? `, le dernier ${esc(ilYa(cs[0].date))} par ${esc(prenomDe(cs[0].membre_id) || "?")}` : ""} · ${badge("statutClient", c.statut)}</div>`;
+  formulaire({
+    titre: `Suivi de ${c.nom}`, large: true, texteBouton: "Enregistrer le contact",
+    champs: [
+      { nom: "canal", label: "Comment", type: "choix", options: options("canalContact"), defaut: "appel", pleine: true },
+      { nom: "resultat", label: "Réponse obtenue", type: "choix", options: options("resultatContact"), defaut: "sans_reponse", pleine: true },
+      { nom: "date", label: "Date", type: "date", requis: true },
+      { nom: "date_relance", label: "Prochaine relance", type: "date" },
+      { nom: "notes", label: "Ce qui s’est dit", type: "textarea", pleine: true, rows: 2, placeholder: "Il est intéressé, rappeler jeudi après 14h..." },
+      { nom: "prochaine_action", label: "Prochaine action", pleine: true, placeholder: "Envoyer la maquette, rappeler, passer en boutique..." },
+    ],
+    valeurs: { date: aujourdhui(), date_relance: c.date_relance && c.date_relance > aujourdhui() ? c.date_relance : ajouterJours(aujourdhui(), 3), prochaine_action: c.prochaine_action || "" },
+    extra: resume.replace('class="resume-suivi"', 'class="resume-suivi" style="margin:16px 0 0"') + `<h3 style="margin:18px 0 2px">Historique</h3><div class="journal" id="journal-liste">${cs.map((x) => ligneContact(x, true)).join("") || '<div class="vide-liste">Aucun contact noté pour l’instant. Le premier fera passer la PME en « Contacté ».</div>'}</div>`,
+    enregistrer: async (v) => {
+      const m = moi();
+      await enregistrer("contacts_clients", { client_id: id, membre_id: m?.id || null, date: v.date, canal: v.canal, resultat: v.resultat, notes: v.notes });
+      const maj = { prochaine_action: v.prochaine_action, date_relance: v.date_relance };
+      if (!c.responsable_id && m) maj.responsable_id = m.id;
+      if (c.statut === "prospect") maj.statut = "contacte";
+      if (v.resultat === "rdv_pris" && ["prospect", "contacte"].includes(c.statut)) maj.statut = "rendez_vous";
+      await enregistrer("clients", maj, id);
+      toast(`Contact noté pour ${c.nom}.`);
+    },
+    apresOuverture: (form) => {
+      form.elements.notes.focus();
+      $("#journal-liste", form).addEventListener("click", async (e) => {
+        const b = e.target.closest("[data-suppr-contact]");
+        if (!b || !(await confirmer("Supprimer ce contact du journal ?"))) return;
+        try { await supprimerLigne("contacts_clients", b.dataset.supprContact); fermerModale(); rendre(); journalClient(id); toast("Contact supprimé."); }
+        catch (err) { toast(msgErreur(err), "erreur"); }
+      });
+    },
+  });
 }
 function brancherGlisserPipeline() {
   if (filtres.clients.vue !== "pipeline" || lireRoute().id) return;
@@ -1277,6 +1401,7 @@ function ficheClient(id) {
   <div class="grille g-fiche">
     <div class="pile">
       <section class="carte"><header><h2>Coordonnées</h2></header><dl class="infos">
+        <dt>Suivi par</dt><dd>${etiquetteMembre(c.responsable_id, c.id)}</dd>
         <dt>Contact</dt><dd>${esc(c.contact || "") || vide}</dd>
         <dt>E-mail</dt><dd>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : vide}</dd>
         <dt>Téléphone</dt><dd>${c.telephone ? `<a href="tel:${esc(c.telephone.replace(/\s/g, ""))}">${esc(c.telephone)}</a>` : vide}</dd>
@@ -1289,6 +1414,9 @@ function ficheClient(id) {
       <section class="carte"><header><h2>Historique</h2></header><ul class="chrono">${evts.slice(0, 25).map((e) => `<li><div>${esc(e.t)}</div><div class="quand">${dateFr(e.q)}</div></li>`).join("")}</ul></section>
     </div>
     <div class="pile">
+      <section class="carte"><header><h2>Suivi des contacts <span class="muted petit">${contactsDe(c.id).length}</span></h2><button class="btn primaire mini" data-action="journalClient" data-id="${c.id}">${icone("plus")}Noter un contact</button></header>
+        ${contactsDe(c.id).length ? `<div class="journal">${contactsDe(c.id).slice(0, 6).map((x) => ligneContact(x)).join("")}</div>${contactsDe(c.id).length > 6 ? `<button class="btn discret mini" data-action="journalClient" data-id="${c.id}">Voir tout l’historique</button>` : ""}` : '<div class="vide-liste">Aucun contact noté. Note chaque appel, message ou visite pour que toute l’équipe sache où en est cette PME.</div>'}
+      </section>
       <section class="carte"><header><h2>Sites</h2><button class="btn mini" data-action="nouveauProjet" data-client="${c.id}">${icone("plus")}Site</button></header>
         ${projets.length ? projets.map((p) => `<div class="ligne-item cliquable" data-href="#/projets/${p.id}"><div class="corps"><div class="titre">${esc(p.nom)} ${p.version ? `<span class="muted petit">${esc(p.version)}</span>` : ""}</div><div class="meta">${esc(p.prochaine_etape || libelle("typeProjet", p.type))}</div></div>${badge("statutProjet", p.statut)}</div>`).join("") : '<div class="vide-liste">Aucun site pour ce client.</div>'}</section>
       <section class="carte sans-marge"><header><h2>Devis et factures</h2><div class="boutons" style="display:flex;gap:6px"><button class="btn mini" data-action="nouveauDf" data-type="devis" data-client="${c.id}">${icone("plus")}Devis</button><button class="btn mini" data-action="nouveauDf" data-type="facture" data-client="${c.id}">${icone("plus")}Facture</button></div></header>
@@ -1616,10 +1744,11 @@ function pageEquipe() {
     return `<article class="carte${m.actif ? "" : " offre inactive"}">
       <div class="membre-tete">${avatar(m.id, "", true)}<div style="flex:1;min-width:0"><h2>${esc(m.nom)}</h2><div class="muted petit">${esc(m.role || "")}</div></div><button class="btn discret mini" data-action="modifierMembre" data-id="${m.id}" aria-label="Modifier ${esc(m.nom)}">${icone("crayon")}</button></div>
       <div class="petit muted">${m.email ? esc(m.email) : '<span class="retard">E-mail de connexion manquant</span>'}${m.actif ? "" : " · inactif"}</div>
+      ${m.acces_jusquau ? `<div style="margin-top:6px">${m.acces_jusquau >= aujourdhui() ? `<span class="badge t-jaune">Accès temporaire jusqu’au ${dateFr(m.acces_jusquau)}</span>` : `<span class="badge t-rouge">Accès terminé le ${dateFr(m.acces_jusquau)}</span>`}</div>` : ""}
       <div class="stats"><div class="stat"><div class="v">${ouvertes.length}</div><div class="l">Tâches (R)</div></div><div class="stat"><div class="v">${aValider.length}</div><div class="l">À valider (A)</div></div><div class="stat"><div class="v${retard.length ? " retard" : ""}">${retard.length}</div><div class="l">En retard</div></div></div>
       <div class="petit" style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Charge restante</span><strong>${heures(charges[i])}</strong></div>
       <div class="charge"><div style="width:${(charges[i] / maxCharge) * 100}%"></div></div>
-      <div class="petit muted" style="margin-top:10px">${heures(reel)} réalisées au total${projets.length ? " · responsable de " + projets.map((p) => esc(p.nom)).join(", ") : ""}</div>
+      <div class="petit muted" style="margin-top:10px">${db.clients.filter((c) => c.responsable_id === m.id && !["termine", "perdu"].includes(c.statut)).length} client(s) suivi(s) · ${db.contacts_clients.filter((x) => x.membre_id === m.id).length} contact(s) noté(s)<br>${heures(reel)} réalisées au total${projets.length ? " · responsable de " + projets.map((p) => esc(p.nom)).join(", ") : ""}</div>
       <div class="competences-liste">
         <div style="display:flex;justify-content:space-between;align-items:center"><h3>Compétences</h3><button class="btn discret mini" data-action="nouvelleCompetence" data-membre="${m.id}">${icone("plus")}Ajouter</button></div>
         ${db.competences.filter((c) => c.membre_id === m.id).sort((a, b) => b.niveau - a.niveau).map((c) => `<div class="competence" data-action="modifierCompetence" data-id="${c.id}" title="${esc(c.notes || "")}"><span class="nom">${esc(c.nom)}</span>${niveauPoints(c.niveau, c.objectif)}</div>`).join("") || '<div class="muted petit">Aucune compétence notée. Ajoute ce que tu maîtrises et ce que tu veux apprendre.</div>'}
@@ -2546,6 +2675,9 @@ const ACTIONS = {
   nouvelleRessource: () => editerRessource(),
   modifierRessource: (ds) => editerRessource(ds.id),
   nouvelleCompetence: (ds) => editerCompetence(null, ds.membre),
+  attribuerClient: (ds) => attribuerClient(ds.id),
+  assignerClient: (ds) => assignerClient(ds.id, ds.membre),
+  journalClient: (ds) => journalClient(ds.id),
   modifierCompetence: (ds) => editerCompetence(ds.id),
 };
 document.addEventListener("click", (e) => {
@@ -2621,9 +2753,9 @@ async function entrer() {
   catch (err) { $("#contenu").innerHTML = `<div class="message erreur">Chargement impossible : ${esc(msgErreur(err))}</div>`; return; }
   const m = moi();
   if (!m) {
-    messageSortie = `Le compte ${session?.user?.email || ""} n’est relié à aucun membre actif de NexusLab. Demandez à un membre de l’ajouter dans Équipe.`;
+    messageSortie = `Le compte ${session?.user?.email || ""} n’a pas (ou plus) accès au dashboard NexusLab. Si c’est une erreur, demande à un membre de vérifier ta fiche dans Équipe.`;
     await sb.auth.signOut();
-    afficherConnexion(`Le compte ${session?.user?.email || ""} n’est relié à aucun membre actif de NexusLab. Demandez à un membre de l’ajouter dans Équipe.`);
+    afficherConnexion(`Le compte ${session?.user?.email || ""} n’a pas (ou plus) accès au dashboard NexusLab. Si c’est une erreur, demande à un membre de vérifier ta fiche dans Équipe.`);
     return;
   }
   $("#utilisateur").innerHTML = `${avatar(m.id, "")}<div style="min-width:0"><div class="nom">${esc(m.nom)}</div><div class="role">${esc(m.role || "")}</div></div>`;

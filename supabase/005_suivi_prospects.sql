@@ -61,5 +61,5 @@ grant execute on function public.est_membre() to authenticated;
 
 -- Tassilo : accès temporaire jusqu'au 23.10.2026 (Rocket Week)
 insert into public.membres (nom, role, email, actif, acces_jusquau)
-values ('Tassilo', 'Vente (accès temporaire)', 'poteltassilo3@gmail.com', true, date '2026-10-23')
+values ('Tassilo', 'Vente (accès temporaire)', 'tassilopotel3@gmail.com', true, date '2026-10-23')
 on conflict (nom) do update set email = excluded.email, acces_jusquau = excluded.acces_jusquau, actif = true;

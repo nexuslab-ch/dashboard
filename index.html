@@ -458,6 +458,25 @@ span.etiquette:hover { box-shadow: none; }
 .choix-multiples { display: flex; flex-wrap: wrap; gap: 6px; }
 .choix-multiples label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 6px 12px; border: 1px solid var(--ligne-forte); border-radius: var(--pilule); font-size: .84rem; font-weight: 600; color: var(--texte); cursor: pointer; }
 .choix-multiples input { accent-color: var(--corail); }
+/* ---------- Entretiens découverte ---------- */
+.form-entretien { display: grid; gap: 18px; max-width: 860px; }
+.ent-script { max-width: 860px; margin-bottom: 18px; }
+.ent-script p { margin: 8px 0 0; font-weight: 600; }
+.ent-section > header h2 { display: flex; align-items: baseline; gap: 10px; }
+.ent-num { font-size: .78rem; font-weight: 800; color: var(--corail-texte); font-variant-numeric: tabular-nums; }
+.ent-pourquoi { color: var(--texte-3); font-size: .88rem; margin: -4px 0 12px; max-width: 70ch; }
+.ent-dire { border-left: 3px solid var(--corail); padding: 2px 0 2px 14px; margin: 0 0 16px; font-weight: 600; }
+.ent-dire span { display: block; font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--texte-3); margin-bottom: 2px; }
+.form-entretien .choix-multiples { gap: 8px; }
+.form-entretien .choix-multiples label { position: relative; padding: 9px 15px; font-size: .9rem; max-width: 100%; }
+.form-entretien .choix-multiples input { position: absolute; opacity: 0; pointer-events: none; }
+.form-entretien .choix-multiples label:has(input:focus-visible) { outline: 2px solid var(--corail); outline-offset: 2px; }
+.ent-requis label::after { content: " *"; color: var(--corail-texte); }
+.ent-pied { position: sticky; bottom: 10px; z-index: 5; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px; border-radius: var(--rayon); background: var(--verre); border: 1px solid var(--verre-bord); box-shadow: var(--ombre-verre); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.ent-pied .espace { flex: 1; }
+.g-ent { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g-ent .barre-ligne { grid-template-columns: minmax(0, 1.2fr) 1fr 28px; }
+@media (max-width: 760px) { .g-ent { grid-template-columns: 1fr; } }
 .choix-multiples label:has(input:checked) { background: var(--graphite); color: var(--sur-graphite); border-color: var(--graphite); }
 
 /* ---------- Fenêtres ---------- */
@@ -724,6 +743,7 @@ const ETIQ = {
   sourceIndicateur: { manuel: "Saisie à la main", clients_contactes: "Auto : PME contactées", rendez_vous: "Auto : rendez-vous obtenus", devis_envoyes: "Auto : devis envoyés", mandats_signes: "Auto : mandats signés", ca_facture: "Auto : CA facturé (CHF)", ca_encaisse: "Auto : CA encaissé (CHF)", taches_faites: "Auto : tâches terminées" },
   typeDoc: { contrat: "Contrat", devis: "Devis", facture: "Facture", brief: "Brief", maquette: "Maquette", photo: "Photo", logo: "Logo", texte: "Texte", presentation: "Présentation", cours: "Cours BTA", administratif: "Administratif", proces_verbal: "Procès-verbal", autre: "Autre" },
   periode: { unique: "Paiement unique", mois: "Par mois", an: "Par an" },
+  interet: { pas_interesse: ["Pas intéressé", "rouge"], curieux: ["Curieux", "gris"], demo: ["Veut une démo", "violet"], devis: ["Veut un devis", "corail"] },
   categoriePage: { equipe: ["Équipe", "corail"], process: ["Process", "bleu"], guide: ["Guide", "vert"], client: ["Client", "jaune"], bta: ["Business Team Academy", "violet"], autre: ["Autre", "gris"] },
 };
 /* Les 14 compétences du référentiel Team Academy (version du 14.09.2024) */
@@ -766,6 +786,7 @@ const ICONES = {
   etoile: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
   eclair: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
   situations: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5"/><path d="M22 9v6"/>',
+  entretien: '<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20.5l1.4-5A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 10h7M8.5 13.5h4.5"/>',
   wiki: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M8 7h6M8 11h6"/>',
   calendrierExport: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13v5M9.5 15.5L12 18l2.5-2.5"/>',
 };
@@ -795,6 +816,7 @@ const TABLES = {
   situations: { ordre: ["date", false], optionnel: true },
   pages: { ordre: ["titre", true], optionnel: true },
   commentaires: { ordre: ["cree_le", true], optionnel: true },
+  entretiens: { ordre: ["date", false], optionnel: true },
 };
 /* Tables pas encore créées (migration 006 pas lancée) : le reste du dashboard continue de fonctionner. */
 const tablesAbsentes = new Set();
@@ -1175,6 +1197,7 @@ const PAGES = {
   agenda: { titre: "Agenda", icone: "agenda", rendre: pageAgenda, groupe: "Pilotage" },
   objectifs: { titre: "Objectifs", icone: "objectifs", rendre: pageObjectifs, groupe: "Pilotage" },
   clients: { titre: "Clients et pipeline", icone: "clients", rendre: pageClients, groupe: "Commercial" },
+  entretiens: { titre: "Entretiens découverte", icone: "entretien", rendre: pageEntretiens, groupe: "Commercial" },
   offres: { titre: "Offres", icone: "offres", rendre: pageOffres, groupe: "Commercial" },
   devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis, groupe: "Commercial" },
   projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets, groupe: "Production" },
@@ -1228,7 +1251,7 @@ function rendre() {
   $("#app").classList.remove("menu-ouvert");
   apresRendu(page);
 }
-function apresRendu(page) { if (page === "taches") brancherGlisser(); if (page === "clients") brancherGlisserPipeline(); }
+function apresRendu(page) { if (page === "taches") brancherGlisser(); if (page === "clients") brancherGlisserPipeline(); if (page === "entretiens") brancherEntretien(); }
 window.addEventListener("hashchange", () => {
   if (/access_token|error_description/.test(location.hash)) return;
   rendre();
@@ -1519,6 +1542,7 @@ function ficheClient(id) {
         <dt>Prochaine action</dt><dd>${esc(c.prochaine_action || "") || vide}</dd>
         <dt>Relance</dt><dd>${c.date_relance ? `<span class="${c.date_relance <= aujourdhui() ? "retard" : ""}">${dateFr(c.date_relance)}</span>` : vide}</dd>
         <dt>Suivi depuis</dt><dd>${dateFr(c.cree_le)}</dd></dl></section>
+      ${carteEntretienClient(c)}
       <section class="carte"><header><h2>Notes</h2></header>${c.notes ? `<p class="texte-libre">${esc(c.notes)}</p>` : '<p class="muted petit" style="margin:0">Pas de note.</p>'}</section>
       <section class="carte"><header><h2>Historique</h2></header><ul class="chrono">${evts.slice(0, 25).map((e) => `<li><div>${esc(e.t)}</div><div class="quand">${dateFr(e.q)}</div></li>`).join("")}</ul></section>
     </div>
@@ -1533,6 +1557,221 @@ function ficheClient(id) {
       <section class="carte"><header><h2>Documents</h2><button class="btn mini" data-action="ajouterDocument" data-client="${c.id}">${icone("plus")}Ajouter</button></header>${listeDocs(docs)}</section>
     </div>
   </div>`;
+}
+
+/* ==========================================================================
+   Entretiens découverte : guide d'entretien relié au répertoire clients
+   ========================================================================== */
+const OBJ_ENTRETIENS = 10, OBJ_DEVIS_ENTRETIENS = 3;
+const ENT = {
+  secteurs: ["Bâtiment et artisanat", "Restauration et hôtellerie", "Commerce", "Santé et beauté", "Services et bureau", "Vigne et agriculture", "Autre"],
+  taches: ["Devis et factures", "Relances de paiement", "Planning et horaires", "Rendez-vous clients", "Suivi des chantiers ou commandes", "Stock et achats", "Comptabilité", "Absences et RH", "Réseaux sociaux et site", "E-mails et téléphone"],
+  valeur: ["Rien", "Moins de CHF 30", "CHF 30 à 60", "CHF 60 à 100", "Plus de CHF 100", "Ne sait pas"],
+};
+const opt = (liste) => liste.map((x) => [x, x]);
+const RESULTAT_PAR_INTERET = { devis: "devis_demande", demo: "interesse", curieux: "interesse", pas_interesse: "pas_interesse" };
+/* Champs enregistrés dans la fiche client (le reste va dans les réponses de l'entretien) */
+const CHAMPS_CLIENT_ENT = ["nom", "secteur", "localite", "contact", "email", "telephone"];
+const SECTIONS_ENT = () => [
+  { titre: "L’entreprise", pourquoi: "Choisis la PME si elle est déjà dans le répertoire, sinon remplis ses coordonnées : la fiche client se crée toute seule.", champs: [
+    { nom: "client_id", label: "PME déjà dans le répertoire", type: "select", options: optClients().sort((a, b) => a[1].localeCompare(b[1], "fr")), vide: "Nouvelle PME", pleine: true },
+    { nom: "nom", label: "Nom de l’entreprise", placeholder: "Menuiserie Fellay SA" },
+    { nom: "localite", label: "Localité", placeholder: "Martigny" },
+    { nom: "contact", label: "Personne rencontrée", placeholder: "Prénom et nom" },
+    { nom: "role", label: "Son rôle", placeholder: "Patron, gérante, secrétaire..." },
+    { nom: "email", label: "E-mail", type: "email" },
+    { nom: "telephone", label: "Téléphone", type: "tel" },
+    { nom: "secteur", label: "Métier", type: "choix", options: opt(ENT.secteurs), pleine: true },
+    { nom: "taille", label: "Nombre de personnes dans l’entreprise", type: "choix", options: opt(["Seul", "2 à 5", "6 à 10", "11 à 50", "Plus de 50"]), pleine: true },
+    { nom: "membre_id", label: "Entretien mené par", type: "select", options: optMembres(), vide: false },
+    { nom: "date", label: "Date", type: "date", requis: true },
+  ] },
+  { titre: "Une semaine normale", pourquoi: "On cherche où part le temps en dehors du vrai métier. Laisser parler, puis cocher ce qui a été cité.",
+    dire: "Racontez-moi une semaine normale. En dehors de votre métier, qu’est-ce qui vous prend le plus de temps ?", champs: [
+    { nom: "semaine", label: "Ce qu’il ou elle raconte", type: "textarea", pleine: true, placeholder: "Ses mots, le plus fidèlement possible" },
+    { nom: "taches", label: "Tâches citées", type: "multi", options: opt(ENT.taches), pleine: true },
+    { nom: "heures", label: "Temps perdu sur ces tâches, par semaine (son estimation)", type: "choix", options: opt(["Moins d’1 h", "1 à 3 h", "3 à 5 h", "5 à 10 h", "Plus de 10 h"]), pleine: true },
+  ] },
+  { titre: "Les outils d’aujourd’hui", pourquoi: "Savoir avec quoi on serait en concurrence, et ce qui agace déjà.",
+    dire: "Pour tout ça, vous utilisez quoi aujourd’hui ? Qu’est-ce qui vous agace là-dedans ?", champs: [
+    { nom: "outils", label: "Outils utilisés", type: "multi", options: opt(["Papier et carnet", "Excel ou tableur", "WhatsApp", "Agenda Google ou Outlook", "Logiciel de compta", "Logiciel de son métier", "Site web", "Rien de spécial"]), pleine: true },
+    { nom: "logiciel", label: "Nom du logiciel, s’il y en a un", placeholder: "Bexio, Winbiz, logiciel de la branche..." },
+    { nom: "site", label: "Site web de l’entreprise", type: "choix", options: opt(["Pas de site", "Site ancien", "Site à jour"]) },
+    { nom: "agace", label: "Ce qui l’agace dans ces outils", type: "textarea", pleine: true },
+  ] },
+  { titre: "La dernière fois", pourquoi: "La question la plus utile. Un vrai souvenir vaut plus qu’un avis : on demande ce qui s’est passé, pas ce qu’il ferait.",
+    dire: "Racontez-moi la dernière fois que ça vous a fait perdre du temps ou de l’argent. Qu’est-ce qui s’est passé ?", champs: [
+    { nom: "derniere", label: "L’histoire", type: "textarea", pleine: true, placeholder: "Quand, quoi, combien de temps ou d’argent perdu" },
+    { nom: "cherche", label: "A déjà cherché une solution ?", type: "choix", options: opt(["Non", "Oui, abandonné", "Oui, en utilise une"]), pleine: true },
+    { nom: "pourquoi_pas", label: "Laquelle, et pourquoi ça n’a pas marché", type: "textarea", pleine: true, rows: 2 },
+  ] },
+  { titre: "L’outil idéal", pourquoi: "Faire rêver un peu, puis trier ce qui compte vraiment pour lui.",
+    dire: "Si un outil pouvait faire une seule chose pour vous dès demain, ce serait quoi ?", champs: [
+    { nom: "ideal", label: "Sa réponse", type: "textarea", pleine: true },
+    { nom: "criteres", label: "Ce qui compte le plus pour lui (trois au maximum)", type: "multi", options: opt(["Simple à utiliser", "Sur le téléphone", "Fait pour mon métier", "Petit prix", "Quelqu’un à appeler", "Données en Suisse", "Rapide à mettre en place"]), pleine: true },
+  ] },
+  { titre: "Budget et décision", pourquoi: "Ne pas proposer de prix. On demande ce qu’il paie déjà, puis ce que vaudrait le temps gagné.",
+    dire: "Vos outils actuels vous coûtent combien par mois ? Et si vous gagniez ces heures chaque semaine, ça vaudrait combien pour vous ?", champs: [
+    { nom: "paie", label: "Ce qu’il paie déjà par mois pour ses outils", type: "choix", options: opt(["Rien", "Moins de CHF 30", "CHF 30 à 100", "Plus de CHF 100", "Ne sait pas"]), pleine: true },
+    { nom: "vaut", label: "Ce que vaudrait le temps gagné, par mois", type: "choix", options: opt(ENT.valeur), pleine: true },
+    { nom: "decide", label: "Qui décide d’un achat comme ça", type: "choix", options: opt(["La personne rencontrée", "Un associé", "Le comptable ou la fiduciaire", "Autre"]), pleine: true },
+  ] },
+  { titre: "La suite", pourquoi: "Finir sur une action concrète, et demander un autre contact : c’est comme ça que le réseau grandit.",
+    dire: "Est-ce qu’on peut revenir vers vous avec une proposition ? Et vous connaissez quelqu’un qui a le même problème ?", champs: [
+    { nom: "interet", label: "Son intérêt", type: "choix", options: options("interet"), pleine: true },
+    { nom: "prochaine_action", label: "Prochaine étape", placeholder: "Envoyer une maquette, rappeler..." },
+    { nom: "date_relance", label: "Date de relance", type: "date" },
+    { nom: "reco", label: "Contact recommandé", placeholder: "Nom, entreprise, comment le joindre", pleine: true },
+    { nom: "surpris", label: "Ce qui nous a surpris", type: "textarea", pleine: true, rows: 2, placeholder: "À noter juste après l’entretien" },
+  ] },
+];
+const champsEntretien = () => SECTIONS_ENT().flatMap((s) => s.champs);
+const entretiensDe = (clientId) => db.entretiens.filter((x) => x.client_id === clientId);
+
+function pageEntretiens(id) {
+  if (absente("entretiens")) return `<div class="entete"><div><h1>Entretiens découverte</h1></div></div><div class="message info">La table des entretiens n’existe pas encore. Lance le fichier supabase/009_entretiens_decouverte.sql dans Supabase (SQL Editor), puis recharge la page.</div>`;
+  if (id) return formEntretien(id);
+  const liste = db.entretiens;
+  const devis = liste.filter((e) => e.interet === "devis").length;
+  const chauds = liste.filter((e) => e.interet === "devis" || e.interet === "demo").length;
+  const compte = (cle, opts) => opts.map((o) => [o, liste.filter((e) => [].concat(e.reponses?.[cle] || []).includes(o)).length]).filter((x) => x[1]).sort((a, b) => b[1] - a[1]);
+  const barres = (rows) => { const max = Math.max(1, ...rows.map((r) => r[1])); return `<div class="barres">${rows.map(([t, n]) => `<div class="barre-ligne"><span>${esc(t)}</span><span class="piste"><span class="rempli" style="width:${n / max * 100}%"></span></span><b>${n}</b></div>`).join("")}</div>`; };
+  const taches = compte("taches", ENT.taches), valeur = compte("vaut", ENT.valeur);
+  return `
+  <div class="entete"><div><div class="tag">Commercial</div><h1>Entretiens découverte</h1>
+      <div class="sous-titre">Ce que les PME nous disent de leur quotidien. Chaque entretien est rangé dans la fiche du client.</div></div>
+    <div class="boutons"><a class="btn primaire" href="#/entretiens/nouveau">${icone("plus")}Nouvel entretien</a></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="label">PME rencontrées</div><div class="valeur">${liste.length}<span class="muted" style="font-size:1rem"> / ${OBJ_ENTRETIENS}</span></div><span class="piste" style="margin-top:10px"><span class="rempli${liste.length >= OBJ_ENTRETIENS ? " atteint" : ""}" style="width:${Math.min(100, liste.length / OBJ_ENTRETIENS * 100)}%"></span></span></div>
+    <div class="kpi"><div class="label">Demandes de devis</div><div class="valeur">${devis}<span class="muted" style="font-size:1rem"> / ${OBJ_DEVIS_ENTRETIENS}</span></div><span class="piste" style="margin-top:10px"><span class="rempli${devis >= OBJ_DEVIS_ENTRETIENS ? " atteint" : ""}" style="width:${Math.min(100, devis / OBJ_DEVIS_ENTRETIENS * 100)}%"></span></span></div>
+    <div class="kpi"><div class="label">Veulent une démo ou un devis</div><div class="valeur">${chauds}</div><div class="detail">${liste.length ? Math.round(chauds / liste.length * 100) + " % des entretiens" : "Aucun entretien pour l’instant"}</div></div>
+  </div>
+  ${liste.length ? `<div class="grille g-ent">
+    <section class="carte"><header><h2>Les tâches qui font perdre le plus de temps</h2></header>${taches.length ? barres(taches) : '<p class="muted petit" style="margin:0">Pas encore de tâche citée.</p>'}</section>
+    <section class="carte"><header><h2>Ce que vaudrait le temps gagné, par mois</h2></header>${valeur.length ? barres(valeur) : '<p class="muted petit" style="margin:0">Pas encore de réponse.</p>'}</section>
+  </div>
+  <section class="carte sans-marge" style="margin-top:18px"><div style="overflow-x:auto"><table class="liste"><thead><tr><th>Date</th><th>PME</th><th>Métier</th><th>Mené par</th><th>Intérêt</th></tr></thead><tbody>
+    ${liste.map((e) => `<tr data-href="#/entretiens/${e.id}"><td>${esc(dateFr(e.date))}</td><td><b>${esc(nomClient(e.client_id))}</b>${e.reponses?.contact ? `<div class="muted petit">${esc(e.reponses.contact)}</div>` : ""}</td><td>${esc(parId("clients", e.client_id)?.secteur || "") || vide}</td><td>${esc(prenomDe(e.membre_id)) || vide}</td><td>${badge("interet", e.interet) || vide}</td></tr>`).join("")}
+  </tbody></table></div></section>`
+  : `<section class="carte"><div class="vide-liste">Aucun entretien pour l’instant. Pendant un rendez-vous, ouvre « Nouvel entretien » sur ton téléphone et suis le guide : la PME arrive directement dans Clients et pipeline.<br><a class="btn primaire" href="#/entretiens/nouveau">${icone("plus")}Commencer un entretien</a></div></section>`}`;
+}
+
+const cleBrouillonEnt = (id) => "nx-entretien-" + (id || "nouveau");
+function formEntretien(id) {
+  const ex = parId("entretiens", id);
+  if (!ex && id !== "nouveau" && !id.startsWith("client-")) return '<div class="vide-liste">Entretien introuvable. <a href="#/entretiens">Retour aux entretiens</a></div>';
+  const clientPre = ex ? ex.client_id : id.startsWith("client-") ? id.slice(7) : "";
+  const c = parId("clients", clientPre);
+  let valeurs = ex ? { ...ex.reponses, client_id: ex.client_id, membre_id: ex.membre_id, date: ex.date, interet: ex.interet } : { date: aujourdhui(), membre_id: moi()?.id, client_id: clientPre };
+  if (c) for (const k of CHAMPS_CLIENT_ENT) if (valeurs[k] == null && c[k]) valeurs[k] = c[k];
+  if (c && !ex) { valeurs.prochaine_action = c.prochaine_action; valeurs.date_relance = c.date_relance; }
+  let repris = false;
+  try { const b = JSON.parse(lireStockage(cleBrouillonEnt(ex?.id || (clientPre ? "client-" + clientPre : ""))) || "null"); if (b) { valeurs = { ...valeurs, ...b }; repris = true; } } catch { /* brouillon illisible */ }
+  const sections = SECTIONS_ENT();
+  return `
+  <div class="fil"><a href="#/entretiens">Entretiens découverte</a>${c ? ` · <a href="#/clients/${c.id}">${esc(c.nom)}</a>` : ""}</div>
+  <div class="entete"><div><h1>${ex ? "Entretien avec " + esc(nomClient(ex.client_id)) : "Nouvel entretien"}</h1>
+    <div class="sous-titre">15 à 20 minutes. On ne vend rien : on écoute, on note, et on parle de ce qui s’est vraiment passé.</div></div></div>
+  ${repris ? `<div class="message info" id="ent-repris">Brouillon repris là où tu l’avais laissé. <button type="button" class="btn mini" id="ent-vider">Repartir de zéro</button></div>` : ""}
+  ${ex ? "" : `<section class="carte ent-script"><div class="tag">À dire en ouvrant</div><p>« Merci de nous recevoir. On est étudiants à la HES-SO à Sierre et on monte NexusLab, on crée des outils simples pour les PME. Aujourd’hui on ne vous vend rien : on veut comprendre comment vous travaillez et ce qui vous fait perdre du temps. Ça prend un quart d’heure. »</p></section>`}
+  <form id="form-entretien" class="form-entretien" data-id="${ex?.id || ""}" data-brouillon="${cleBrouillonEnt(ex?.id || (clientPre ? "client-" + clientPre : ""))}" novalidate>
+    ${sections.map((s, i) => `<section class="carte ent-section"><header><h2><span class="ent-num">${i + 1} / ${sections.length}</span>${esc(s.titre)}</h2></header>
+      <p class="ent-pourquoi">${esc(s.pourquoi)}</p>${s.dire ? `<p class="ent-dire"><span>À demander</span>« ${esc(s.dire)} »</p>` : ""}
+      <div class="grille-form">${s.champs.map((ch) => champHtml(ch, valeurs[ch.nom])).join("")}</div></section>`).join("")}
+    <div class="ent-pied">${ex ? `<button type="button" class="btn danger" id="ent-suppr">Supprimer</button>` : ""}<span class="espace"></span>
+      <a class="btn" href="${c ? "#/clients/" + c.id : "#/entretiens"}">Annuler</a><button type="submit" class="btn primaire">${ex ? "Enregistrer les modifications" : "Enregistrer l’entretien"}</button></div>
+  </form>`;
+}
+
+function brancherEntretien() {
+  const form = $("#form-entretien");
+  if (!form) return;
+  const cle = form.dataset.brouillon;
+  const maj = () => {
+    const sansClient = !form.elements.client_id.value;
+    form.elements.nom.required = sansClient;
+    form.elements.nom.closest(".champ").classList.toggle("ent-requis", sansClient);
+  };
+  maj();
+  let minuterie;
+  form.addEventListener("input", () => { clearTimeout(minuterie); minuterie = setTimeout(() => ecrireStockage(cle, JSON.stringify(lireForm(form, champsEntretien()))), 400); });
+  form.addEventListener("change", (e) => {
+    if (e.target.name === "criteres" && $$('input[name="criteres"]:checked', form).length > 3) { e.target.checked = false; toast("Trois choix au maximum."); }
+    if (e.target.name === "client_id") {
+      const c = parId("clients", e.target.value);
+      if (c) for (const k of ["nom", "localite", "contact", "email", "telephone"]) if (form.elements[k] && c[k]) form.elements[k].value = c[k];
+      if (c?.secteur) { const r = $(`input[name="secteur"][value="${CSS.escape(c.secteur)}"]`, form); if (r) r.checked = true; }
+      maj();
+    }
+  });
+  $("#ent-vider")?.addEventListener("click", () => { try { localStorage.removeItem(cle); } catch { /* rien */ } rendre(); });
+  $("#ent-suppr")?.addEventListener("click", async () => {
+    if (!(await confirmer("Supprimer cet entretien ? La fiche client et son historique de contacts restent."))) return;
+    try { await supprimerLigne("entretiens", form.dataset.id); try { localStorage.removeItem(cle); } catch { /* rien */ } location.hash = "#/entretiens"; toast("Entretien supprimé."); }
+    catch (err) { toast(msgErreur(err), "erreur"); }
+  });
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    const btn = $('[type="submit"]', form);
+    btn.disabled = true;
+    try {
+      const nom = await enregistrerEntretien(lireForm(form, champsEntretien()), form.dataset.id || null);
+      try { localStorage.removeItem(cle); } catch { /* rien */ }
+      toast(`Entretien avec ${nom} enregistré. La fiche client est à jour.`);
+      location.hash = "#/entretiens";
+    } catch (err) { toast(msgErreur(err), "erreur"); }
+    finally { btn.disabled = false; }
+  });
+}
+
+async function enregistrerEntretien(v, id) {
+  const m = moi();
+  const membreId = v.membre_id || m?.id || null;
+  let clientId = v.client_id;
+  const fiche = {};
+  for (const k of CHAMPS_CLIENT_ENT) if (v[k]) fiche[k] = v[k];
+  if (v.prochaine_action) fiche.prochaine_action = v.prochaine_action;
+  if (v.date_relance) fiche.date_relance = v.date_relance;
+  if (!clientId) {
+    if (!v.nom) throw new Error("Indique le nom de l’entreprise, ou choisis-la dans le répertoire.");
+    const cle = (n) => sansAccent(n).replace(/\b(sarl|sàrl|sa|gmbh|ag|sagl)\b/g, "").replace(/[^a-z0-9]/g, "");
+    const proche = db.clients.find((x) => cle(x.nom) && cle(x.nom) === cle(v.nom));
+    if (proche && (await confirmer(`« ${proche.nom} » est déjà dans le répertoire. Rattacher l’entretien à cette fiche ?`, "Rattacher"))) clientId = proche.id;
+  }
+  const c = parId("clients", clientId);
+  if (!c) {
+    const r = await enregistrer("clients", { ...fiche, source: "Entretien découverte", statut: "rendez_vous", responsable_id: membreId });
+    clientId = r.id;
+  } else {
+    if (["prospect", "contacte"].includes(c.statut)) fiche.statut = "rendez_vous";
+    if (!c.responsable_id && membreId) fiche.responsable_id = membreId;
+    if (Object.keys(fiche).length) await enregistrer("clients", fiche, clientId);
+  }
+  const reponses = {};
+  for (const ch of champsEntretien()) if (!["client_id", "membre_id", "date", "interet", ...CHAMPS_CLIENT_ENT, "prochaine_action", "date_relance"].includes(ch.nom)) reponses[ch.nom] = v[ch.nom];
+  reponses.contact = v.contact || null;
+  const ligne = { client_id: clientId, membre_id: membreId, date: v.date || aujourdhui(), interet: v.interet || null, reponses };
+  await enregistrer("entretiens", ligne, id);
+  if (!id) {
+    const phrase = (t) => t.replace(/[\s.]+$/, "") + ".";
+    const notes = ["Entretien découverte.", v.ideal && phrase("Outil idéal : " + v.ideal), (v.taches || []).length && phrase("Temps perdu sur : " + v.taches.join(", ").toLowerCase())].filter(Boolean).join(" ");
+    await enregistrer("contacts_clients", { client_id: clientId, membre_id: membreId, date: ligne.date, canal: "rendez_vous", resultat: RESULTAT_PAR_INTERET[v.interet] || "autre", notes });
+  }
+  return nomClient(clientId);
+}
+
+function carteEntretienClient(c) {
+  const liste = entretiensDe(c.id);
+  if (absente("entretiens")) return "";
+  const e = liste[0];
+  return `<section class="carte"><header><h2>Entretien découverte</h2>${e ? `<a class="btn mini" href="#/entretiens/${e.id}">Ouvrir</a>` : `<a class="btn primaire mini" href="#/entretiens/client-${c.id}">${icone("plus")}Faire l’entretien</a>`}</header>
+    ${e ? `<dl class="infos"><dt>Date</dt><dd>${esc(dateFr(e.date))}${e.membre_id ? " · " + esc(prenomDe(e.membre_id)) : ""}</dd>
+      <dt>Intérêt</dt><dd>${badge("interet", e.interet) || vide}</dd>
+      ${(e.reponses?.taches || []).length ? `<dt>Temps perdu</dt><dd>${esc(e.reponses.taches.join(", "))}${e.reponses.heures ? ` (${esc(e.reponses.heures)} par semaine)` : ""}</dd>` : ""}
+      ${e.reponses?.ideal ? `<dt>Outil idéal</dt><dd>${esc(e.reponses.ideal)}</dd>` : ""}
+      ${e.reponses?.vaut ? `<dt>Valeur</dt><dd>${esc(e.reponses.vaut)} par mois</dd>` : ""}</dl>${liste.length > 1 ? `<p class="muted petit" style="margin:10px 0 0">${liste.length} entretiens au total</p>` : ""}`
+    : '<p class="muted petit" style="margin:0">Pas encore d’entretien avec cette PME. Le guide aide à comprendre ce qui lui fait perdre du temps.</p>'}</section>`;
 }
 
 /* ==========================================================================
@@ -2956,7 +3195,7 @@ function exporterAgenda() {
 }
 
 const CREER = [
-  ["Client", "clients", "nouveauClient"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
+  ["Client", "clients", "nouveauClient"], ["Entretien découverte", "entretien", "nouvelEntretien"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
   ["Devis", "devis", "nouveauDf", "devis"], ["Facture", "devis", "nouveauDf", "facture"], ["Réunion", "reunions", "nouvelleReunion"],
   ["Débrief du jour", "eclair", "debriefDuJour"], ["Document", "documents", "ajouterDocument"], ["Ressource", "ressources", "nouvelleRessource"], ["Objectif", "objectifs", "nouvelObjectif"],
   ["Situation apprenante", "situations", "nouvelleSituation"], ["Page du wiki", "wiki", "nouvellePage"],
@@ -3086,6 +3325,7 @@ const ACTIONS = {
   attribuerClient: (ds) => attribuerClient(ds.id),
   assignerClient: (ds) => assignerClient(ds.id, ds.membre),
   journalClient: (ds) => journalClient(ds.id),
+  nouvelEntretien: (ds) => { location.hash = "#/entretiens/" + (ds.client ? "client-" + ds.client : "nouveau"); },
   modifierCompetence: (ds) => editerCompetence(ds.id),
 };
 document.addEventListener("click", (e) => {

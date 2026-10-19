@@ -320,7 +320,11 @@ dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-und
 .colonne > header h3 { display: flex; align-items: center; gap: 8px; }
 .colonne > header h3::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--point, var(--texte-3)); }
 .colonne.survol { outline: 2px dashed var(--corail); outline-offset: -2px; }
-.cartes { display: grid; gap: 9px; }
+.cartes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
+.kanban > .colonne { min-width: 0; }
+.cartes > .tache { min-width: 0; grid-template-columns: minmax(0, 1fr); overflow-wrap: anywhere; }
+.cartes > .tache > * { min-width: 0; }
+.cartes > .tache .etiquette { flex: none; }
 .tache { background: var(--carte); border: 1px solid var(--ligne); border-radius: 14px; padding: 12px 13px; cursor: pointer; display: grid; gap: 7px; box-shadow: var(--ombre-s); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
 .tache:hover { transform: translateY(-2px); box-shadow: var(--ombre); }
 .tache.glisse { opacity: .5; }

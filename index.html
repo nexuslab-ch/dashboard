@@ -476,6 +476,8 @@ span.etiquette:hover { box-shadow: none; }
 .form-entretien .choix-multiples input { position: absolute; opacity: 0; pointer-events: none; }
 .form-entretien .choix-multiples label:has(input:focus-visible) { outline: 2px solid var(--corail); outline-offset: 2px; }
 .ent-requis label::after { content: " *"; color: var(--corail-texte); }
+.ent-autre { margin-top: -6px; padding: 12px 14px; border-radius: 14px; background: var(--fond); border: 1px dashed var(--ligne-forte); }
+.ent-autre[hidden] { display: none; }
 .ent-pied { position: sticky; bottom: 10px; z-index: 5; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px; border-radius: var(--rayon); background: var(--verre); border: 1px solid var(--verre-bord); box-shadow: var(--ombre-verre); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .ent-pied .espace { flex: 1; }
 .g-ent { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -566,6 +568,30 @@ dialog[open] { animation: apparait .25s var(--ease); }
   .barre, .haut, .entete .boutons, .filtres { display: none !important; }
   .app { display: block; }
   body { background: #fff; }
+}
+
+/* ---------- Mobile : barre d'onglets, colonnes à faire glisser, chiffres en bandeau ---------- */
+.onglets-mobile { display: none; }
+.date-pastille b.heure-longue { font-size: .72rem; line-height: 1.15; overflow-wrap: anywhere; padding: 0 3px; }
+@media (max-width: 900px) {
+  main#contenu { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
+  .onglets-mobile { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; z-index: 60; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--verre); border: 1px solid var(--verre-bord); box-shadow: var(--ombre-verre); backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); border-radius: 22px; padding: 6px; }
+  .onglets-mobile a { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 2px 6px; border-radius: 16px; text-decoration: none; color: var(--texte-3); font-size: .68rem; font-weight: 700; }
+  .onglets-mobile a svg { width: 21px; height: 21px; }
+  .onglets-mobile a[aria-current="page"] { color: var(--texte); background: var(--fond-2); }
+  .onglets-mobile a.central svg { width: 34px; height: 34px; padding: 7px; margin: -6.5px 0; border-radius: 50%; background: var(--corail); color: #1D1D1F; }
+  .onglets-mobile .pastille { position: absolute; top: 3px; left: calc(50% + 6px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--corail); color: #1D1D1F; font-size: .62rem; font-style: normal; font-weight: 800; display: grid; place-items: center; }
+  .kpis { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 44%; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin: 0 -16px 18px; padding: 2px 16px 6px; scroll-padding: 0 16px; scrollbar-width: none; }
+  .kpis::-webkit-scrollbar { display: none; }
+  .kpi { scroll-snap-align: start; padding: 13px 14px; }
+  .kpi .valeur { font-size: 1.35rem; }
+  .kanban { grid-auto-columns: 84%; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 0 16px 10px; scroll-padding: 0 16px; }
+  .kanban > .colonne { scroll-snap-align: start; }
+  .g-fiche { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }
+  .g-fiche > .pile { display: contents; }
+  .carte.sombre { padding: 22px 20px !important; }
+  .ent-pied { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
 }
 /* ---------- Version 3 : wiki, situations, commentaires ---------- */
 .md { font-size: .95rem; line-height: 1.6; color: var(--texte); overflow-wrap: anywhere; }
@@ -658,6 +684,7 @@ dialog[open] { animation: apparait .25s var(--ease); }
       </button>
     </header>
     <main id="contenu" tabindex="-1"></main>
+    <nav class="onglets-mobile" id="nav-mobile" aria-label="Navigation rapide"></nav>
   </div>
 </div>
 
@@ -1231,6 +1258,16 @@ function lireRoute() {
   const [page, id] = h.split("/");
   return { page: PAGES[page] ? page : "accueil", id: id || null };
 }
+const ONGLETS_MOBILE = [["accueil", "Ma journée"], ["clients", "Clients"], ["entretiens", "Entretien"], ["taches", "Tâches"], ["agenda", "Agenda"]];
+function rendreNavMobile(page, compteurs) {
+  const el = $("#nav-mobile");
+  if (!el) return;
+  el.innerHTML = ONGLETS_MOBILE.map(([k, l]) => {
+    const n = (compteurs[k] || [0])[0];
+    const href = k === "entretiens" ? "#/entretiens/nouveau" : "#/" + k;
+    return `<a href="${href}"${k === page ? ' aria-current="page"' : ""}${k === "entretiens" ? ' class="central"' : ""}>${icone(PAGES[k].icone)}<span>${esc(l)}</span>${n ? `<i class="pastille">${n}</i>` : ""}</a>`;
+  }).join("");
+}
 function rendreNav(page) {
   const mesTaches = moi() ? db.taches.filter((t) => t.statut !== "fait" && (t.responsable_id === moi().id || (t.valideur_id === moi().id && t.statut === "a_valider"))).length : 0;
   const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= aujourdhui() && !["termine", "perdu", "livre"].includes(c.statut) && (!c.responsable_id || c.responsable_id === moi()?.id)).length;
@@ -1241,6 +1278,7 @@ function rendreNav(page) {
     const [n, titre] = compteurs[k] || [0, ""];
     return `${tete}<a href="#/${k}"${k === page ? ' aria-current="page"' : ""}>${icone(p.icone)}<span>${esc(p.titre)}</span>${n ? `<span class="compteur" title="${titre}">${n}</span>` : ""}</a>`;
   }).join("");
+  rendreNavMobile(page, compteurs);
 }
 function rendre() {
   if (!session) return;
@@ -1304,7 +1342,7 @@ function pageAccueil() {
     ...urgentes.map((t) => ({ html: ligneTache(t) })),
     ...aValider.map((t) => ({ html: ligneTache(t).replace('<div class="corps">', '<div class="corps"><span class="badge t-jaune sans-point" style="margin-bottom:3px">À valider par toi</span>') })),
     ...relances.map((c) => ({ html: `<div class="ligne-item cliquable" data-action="journalClient" data-id="${c.id}"><span class="date-pastille"><small>${esc(new Date(c.date_relance + "T12:00:00").toLocaleDateString("fr-CH", { month: "short" }).replace(".", ""))}</small><b>${new Date(c.date_relance + "T12:00:00").getDate()}</b></span><div class="corps"><div class="titre">Relancer ${esc(c.nom)}</div><div class="meta">${esc(c.prochaine_action || "Prochaine action à définir")}${c.contact ? " · " + esc(c.contact) : ""}</div></div>${badge("statutClient", c.statut)}</div>` })),
-    ...reunionsAuj.map((r) => ({ html: `<div class="ligne-item cliquable" data-href="#/reunions/${r.id}"><span class="date-pastille aujourdhui"><small>Auj.</small><b>${esc(r.heure || "·")}</b></span><div class="corps"><div class="titre">${esc(r.titre)}</div><div class="meta">${esc([libelle("typeReunion", r.type), r.lieu].filter(Boolean).join(" · "))}</div></div>${avatarsMembres(r.participants)}</div>` })),
+    ...reunionsAuj.map((r) => ({ html: `<div class="ligne-item cliquable" data-href="#/reunions/${r.id}"><span class="date-pastille aujourdhui"><small>Auj.</small><b${(r.heure || "").length > 5 ? ' class="heure-longue"' : ""}>${esc(r.heure || "·")}</b></span><div class="corps"><div class="titre">${esc(r.titre)}</div><div class="meta">${esc([libelle("typeReunion", r.type), r.lieu].filter(Boolean).join(" · "))}</div></div>${avatarsMembres(r.participants)}</div>` })),
   ];
 
   return `
@@ -1536,7 +1574,7 @@ function ficheClient(id) {
     <div class="boutons">${selectStatut("clients", c.id, "statutClient", c.statut)}<button class="btn" data-action="modifierClient" data-id="${c.id}">${icone("crayon")}Modifier</button></div></div>
   <div class="grille g-fiche">
     <div class="pile">
-      <section class="carte"><header><h2>Coordonnées</h2></header><dl class="infos">
+      <section class="carte" style="order:1"><header><h2>Coordonnées</h2></header><dl class="infos">
         <dt>Suivi par</dt><dd>${etiquetteMembre(c.responsable_id, c.id)}</dd>
         <dt>Contact</dt><dd>${esc(c.contact || "") || vide}</dd>
         <dt>E-mail</dt><dd>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : vide}</dd>
@@ -1547,18 +1585,18 @@ function ficheClient(id) {
         <dt>Relance</dt><dd>${c.date_relance ? `<span class="${c.date_relance <= aujourdhui() ? "retard" : ""}">${dateFr(c.date_relance)}</span>` : vide}</dd>
         <dt>Suivi depuis</dt><dd>${dateFr(c.cree_le)}</dd></dl></section>
       ${carteEntretienClient(c)}
-      <section class="carte"><header><h2>Notes</h2></header>${c.notes ? `<p class="texte-libre">${esc(c.notes)}</p>` : '<p class="muted petit" style="margin:0">Pas de note.</p>'}</section>
-      <section class="carte"><header><h2>Historique</h2></header><ul class="chrono">${evts.slice(0, 25).map((e) => `<li><div>${esc(e.t)}</div><div class="quand">${dateFr(e.q)}</div></li>`).join("")}</ul></section>
+      <section class="carte" style="order:4"><header><h2>Notes</h2></header>${c.notes ? `<p class="texte-libre">${esc(c.notes)}</p>` : '<p class="muted petit" style="margin:0">Pas de note.</p>'}</section>
+      <section class="carte" style="order:8"><header><h2>Historique</h2></header><ul class="chrono">${evts.slice(0, 25).map((e) => `<li><div>${esc(e.t)}</div><div class="quand">${dateFr(e.q)}</div></li>`).join("")}</ul></section>
     </div>
     <div class="pile">
-      <section class="carte"><header><h2>Suivi des contacts <span class="muted petit">${contactsDe(c.id).length}</span></h2><button class="btn primaire mini" data-action="journalClient" data-id="${c.id}">${icone("plus")}Noter un contact</button></header>
+      <section class="carte" style="order:2"><header><h2>Suivi des contacts <span class="muted petit">${contactsDe(c.id).length}</span></h2><button class="btn primaire mini" data-action="journalClient" data-id="${c.id}">${icone("plus")}Noter un contact</button></header>
         ${contactsDe(c.id).length ? `<div class="journal">${contactsDe(c.id).slice(0, 6).map((x) => ligneContact(x)).join("")}</div>${contactsDe(c.id).length > 6 ? `<button class="btn discret mini" data-action="journalClient" data-id="${c.id}">Voir tout l’historique</button>` : ""}` : '<div class="vide-liste">Aucun contact noté. Note chaque appel, message ou visite pour que toute l’équipe sache où en est cette PME.</div>'}
       </section>
-      <section class="carte"><header><h2>Sites</h2><button class="btn mini" data-action="nouveauProjet" data-client="${c.id}">${icone("plus")}Site</button></header>
+      <section class="carte" style="order:5"><header><h2>Sites</h2><button class="btn mini" data-action="nouveauProjet" data-client="${c.id}">${icone("plus")}Site</button></header>
         ${projets.length ? projets.map((p) => `<div class="ligne-item cliquable" data-href="#/projets/${p.id}"><div class="corps"><div class="titre">${esc(p.nom)} ${p.version ? `<span class="muted petit">${esc(p.version)}</span>` : ""}</div><div class="meta">${esc(p.prochaine_etape || libelle("typeProjet", p.type))}</div></div>${badge("statutProjet", p.statut)}</div>`).join("") : '<div class="vide-liste">Aucun site pour ce client.</div>'}</section>
-      <section class="carte sans-marge"><header><h2>Devis et factures</h2><div class="boutons" style="display:flex;gap:6px"><button class="btn mini" data-action="nouveauDf" data-type="devis" data-client="${c.id}">${icone("plus")}Devis</button><button class="btn mini" data-action="nouveauDf" data-type="facture" data-client="${c.id}">${icone("plus")}Facture</button></div></header>
+      <section class="carte sans-marge" style="order:6"><header><h2>Devis et factures</h2><div class="boutons" style="display:flex;gap:6px"><button class="btn mini" data-action="nouveauDf" data-type="devis" data-client="${c.id}">${icone("plus")}Devis</button><button class="btn mini" data-action="nouveauDf" data-type="facture" data-client="${c.id}">${icone("plus")}Facture</button></div></header>
         <div style="padding:8px 8px 6px">${tableDf(df, false)}</div></section>
-      <section class="carte"><header><h2>Documents</h2><button class="btn mini" data-action="ajouterDocument" data-client="${c.id}">${icone("plus")}Ajouter</button></header>${listeDocs(docs)}</section>
+      <section class="carte" style="order:7"><header><h2>Documents</h2><button class="btn mini" data-action="ajouterDocument" data-client="${c.id}">${icone("plus")}Ajouter</button></header>${listeDocs(docs)}</section>
     </div>
   </div>`;
 }
@@ -1569,7 +1607,7 @@ function ficheClient(id) {
 const OBJ_ENTRETIENS = 10, OBJ_DEVIS_ENTRETIENS = 3;
 const ENT = {
   secteurs: ["Bâtiment et artisanat", "Restauration et hôtellerie", "Commerce", "Santé et beauté", "Services et bureau", "Vigne et agriculture", "Autre"],
-  taches: ["Devis et factures", "Relances de paiement", "Planning et horaires", "Rendez-vous clients", "Suivi des chantiers ou commandes", "Stock et achats", "Comptabilité", "Absences et RH", "Réseaux sociaux et site", "E-mails et téléphone"],
+  taches: ["Devis et factures", "Relances de paiement", "Planning et horaires", "Rendez-vous clients", "Suivi des chantiers ou commandes", "Stock et achats", "Comptabilité", "Absences et RH", "Réseaux sociaux et site", "E-mails et téléphone", "Autre"],
   valeur: ["Rien", "Moins de CHF 30", "CHF 30 à 60", "CHF 60 à 100", "Plus de CHF 100", "Ne sait pas"],
 };
 const opt = (liste) => liste.map((x) => [x, x]);
@@ -1586,6 +1624,7 @@ const SECTIONS_ENT = () => [
     { nom: "email", label: "E-mail", type: "email" },
     { nom: "telephone", label: "Téléphone", type: "tel" },
     { nom: "secteur", label: "Métier", type: "choix", options: opt(ENT.secteurs), pleine: true },
+    { nom: "secteur_autre", label: "Quel métier ?", placeholder: "Ex. paysagiste, fiduciaire, garage...", pleine: true, autreDe: "secteur" },
     { nom: "taille", label: "Nombre de personnes dans l’entreprise", type: "choix", options: opt(["Seul", "2 à 5", "6 à 10", "11 à 50", "Plus de 50"]), pleine: true },
     { nom: "membre_id", label: "Entretien mené par", type: "select", options: optMembres(), vide: false },
     { nom: "date", label: "Date", type: "date", requis: true },
@@ -1594,11 +1633,13 @@ const SECTIONS_ENT = () => [
     dire: "Racontez-moi une semaine normale. En dehors de votre métier, qu’est-ce qui vous prend le plus de temps ?", champs: [
     { nom: "semaine", label: "Ce qu’il ou elle raconte", type: "textarea", pleine: true, placeholder: "Ses mots, le plus fidèlement possible" },
     { nom: "taches", label: "Tâches citées", type: "multi", options: opt(ENT.taches), pleine: true },
+    { nom: "taches_autre", label: "Autre tâche citée", type: "textarea", rows: 2, placeholder: "Ce qu’il a cité en plus, avec ses mots", pleine: true, autreDe: "taches" },
     { nom: "heures", label: "Temps perdu sur ces tâches, par semaine (son estimation)", type: "choix", options: opt(["Moins d’1 h", "1 à 3 h", "3 à 5 h", "5 à 10 h", "Plus de 10 h"]), pleine: true },
   ] },
   { titre: "Les outils d’aujourd’hui", pourquoi: "Savoir avec quoi on serait en concurrence, et ce qui agace déjà.",
     dire: "Pour tout ça, vous utilisez quoi aujourd’hui ? Qu’est-ce qui vous agace là-dedans ?", champs: [
-    { nom: "outils", label: "Outils utilisés", type: "multi", options: opt(["Papier et carnet", "Excel ou tableur", "WhatsApp", "Agenda Google ou Outlook", "Logiciel de compta", "Logiciel de son métier", "Site web", "Rien de spécial"]), pleine: true },
+    { nom: "outils", label: "Outils utilisés", type: "multi", options: opt(["Papier et carnet", "Excel ou tableur", "WhatsApp", "Agenda Google ou Outlook", "Logiciel de compta", "Logiciel de son métier", "Site web", "Rien de spécial", "Autre"]), pleine: true },
+    { nom: "outils_autre", label: "Autre outil", placeholder: "Lequel ?", pleine: true, autreDe: "outils" },
     { nom: "logiciel", label: "Nom du logiciel, s’il y en a un", placeholder: "Bexio, Winbiz, logiciel de la branche..." },
     { nom: "site", label: "Site web de l’entreprise", type: "choix", options: opt(["Pas de site", "Site ancien", "Site à jour"]) },
     { nom: "agace", label: "Ce qui l’agace dans ces outils", type: "textarea", pleine: true },
@@ -1612,13 +1653,15 @@ const SECTIONS_ENT = () => [
   { titre: "L’outil idéal", pourquoi: "Faire rêver un peu, puis trier ce qui compte vraiment pour lui.",
     dire: "Si un outil pouvait faire une seule chose pour vous dès demain, ce serait quoi ?", champs: [
     { nom: "ideal", label: "Sa réponse", type: "textarea", pleine: true },
-    { nom: "criteres", label: "Ce qui compte le plus pour lui (trois au maximum)", type: "multi", options: opt(["Simple à utiliser", "Sur le téléphone", "Fait pour mon métier", "Petit prix", "Quelqu’un à appeler", "Données en Suisse", "Rapide à mettre en place"]), pleine: true },
+    { nom: "criteres", label: "Ce qui compte le plus pour lui (trois au maximum)", type: "multi", options: opt(["Simple à utiliser", "Sur le téléphone", "Fait pour mon métier", "Petit prix", "Quelqu’un à appeler", "Données en Suisse", "Rapide à mettre en place", "Autre"]), pleine: true },
+    { nom: "criteres_autre", label: "Autre critère", placeholder: "Ce qui compte pour lui", pleine: true, autreDe: "criteres" },
   ] },
   { titre: "Budget et décision", pourquoi: "Ne pas proposer de prix. On demande ce qu’il paie déjà, puis ce que vaudrait le temps gagné.",
     dire: "Vos outils actuels vous coûtent combien par mois ? Et si vous gagniez ces heures chaque semaine, ça vaudrait combien pour vous ?", champs: [
     { nom: "paie", label: "Ce qu’il paie déjà par mois pour ses outils", type: "choix", options: opt(["Rien", "Moins de CHF 30", "CHF 30 à 100", "Plus de CHF 100", "Ne sait pas"]), pleine: true },
     { nom: "vaut", label: "Ce que vaudrait le temps gagné, par mois", type: "choix", options: opt(ENT.valeur), pleine: true },
     { nom: "decide", label: "Qui décide d’un achat comme ça", type: "choix", options: opt(["La personne rencontrée", "Un associé", "Le comptable ou la fiduciaire", "Autre"]), pleine: true },
+    { nom: "decide_autre", label: "Qui d’autre ?", placeholder: "Ex. la maison mère, le conseil d’administration", pleine: true, autreDe: "decide" },
   ] },
   { titre: "La suite", pourquoi: "Finir sur une action concrète, et demander un autre contact : c’est comme ça que le réseau grandit.",
     dire: "Est-ce qu’on peut revenir vers vous avec une proposition ? Et vous connaissez quelqu’un qui a le même problème ?", champs: [
@@ -1697,6 +1740,17 @@ function brancherEntretien() {
     form.elements.nom.closest(".champ").classList.toggle("ent-requis", sansClient);
   };
   maj();
+  const majAutres = () => {
+    for (const ch of champsEntretien().filter((x) => x.autreDe)) {
+      const el = form.elements[ch.nom]?.closest(".champ");
+      if (!el) continue;
+      const coche = $$(`input[name="${ch.autreDe}"]:checked`, form).some((x) => x.value === "Autre");
+      el.hidden = !coche && !form.elements[ch.nom].value;
+      el.classList.add("ent-autre");
+    }
+  };
+  majAutres();
+  form.addEventListener("change", (e) => { if (champsEntretien().some((x) => x.autreDe === e.target.name)) { majAutres(); if (e.target.value === "Autre" && e.target.checked) form.elements[e.target.name + "_autre"]?.focus(); } });
   let minuterie;
   form.addEventListener("input", () => { clearTimeout(minuterie); minuterie = setTimeout(() => ecrireStockage(cle, JSON.stringify(lireForm(form, champsEntretien()))), 400); });
   form.addEventListener("change", (e) => {
@@ -1735,6 +1789,7 @@ async function enregistrerEntretien(v, id) {
   let clientId = v.client_id;
   const fiche = {};
   for (const k of CHAMPS_CLIENT_ENT) if (v[k]) fiche[k] = v[k];
+  if (v.secteur === "Autre" && v.secteur_autre) fiche.secteur = v.secteur_autre;
   if (v.prochaine_action) fiche.prochaine_action = v.prochaine_action;
   if (v.date_relance) fiche.date_relance = v.date_relance;
   if (!clientId) {
@@ -1759,7 +1814,7 @@ async function enregistrerEntretien(v, id) {
   await enregistrer("entretiens", ligne, id);
   if (!id) {
     const phrase = (t) => t.replace(/[\s.]+$/, "") + ".";
-    const notes = ["Entretien découverte.", v.ideal && phrase("Outil idéal : " + v.ideal), (v.taches || []).length && phrase("Temps perdu sur : " + v.taches.join(", ").toLowerCase())].filter(Boolean).join(" ");
+    const notes = ["Entretien découverte.", v.ideal && phrase("Outil idéal : " + v.ideal), (v.taches || []).length && phrase("Temps perdu sur : " + v.taches.map((t) => t === "Autre" ? (v.taches_autre || "autre") : t).join(", ").toLowerCase())].filter(Boolean).join(" ");
     await enregistrer("contacts_clients", { client_id: clientId, membre_id: membreId, date: ligne.date, canal: "rendez_vous", resultat: RESULTAT_PAR_INTERET[v.interet] || "autre", notes });
   }
   return nomClient(clientId);
@@ -1769,10 +1824,10 @@ function carteEntretienClient(c) {
   const liste = entretiensDe(c.id);
   if (absente("entretiens")) return "";
   const e = liste[0];
-  return `<section class="carte"><header><h2>Entretien découverte</h2>${e ? `<a class="btn mini" href="#/entretiens/${e.id}">Ouvrir</a>` : `<a class="btn primaire mini" href="#/entretiens/client-${c.id}">${icone("plus")}Faire l’entretien</a>`}</header>
+  return `<section class="carte" style="order:3"><header><h2>Entretien découverte</h2>${e ? `<a class="btn mini" href="#/entretiens/${e.id}">Ouvrir</a>` : `<a class="btn primaire mini" href="#/entretiens/client-${c.id}">${icone("plus")}Faire l’entretien</a>`}</header>
     ${e ? `<dl class="infos"><dt>Date</dt><dd>${esc(dateFr(e.date))}${e.membre_id ? " · " + esc(prenomDe(e.membre_id)) : ""}</dd>
       <dt>Intérêt</dt><dd>${badge("interet", e.interet) || vide}</dd>
-      ${(e.reponses?.taches || []).length ? `<dt>Temps perdu</dt><dd>${esc(e.reponses.taches.join(", "))}${e.reponses.heures ? ` (${esc(e.reponses.heures)} par semaine)` : ""}</dd>` : ""}
+      ${(e.reponses?.taches || []).length ? `<dt>Temps perdu</dt><dd>${esc(e.reponses.taches.map((t) => t === "Autre" ? (e.reponses.taches_autre || "Autre") : t).join(", "))}${e.reponses.heures ? ` (${esc(e.reponses.heures)} par semaine)` : ""}</dd>` : ""}
       ${e.reponses?.ideal ? `<dt>Outil idéal</dt><dd>${esc(e.reponses.ideal)}</dd>` : ""}
       ${e.reponses?.vaut ? `<dt>Valeur</dt><dd>${esc(e.reponses.vaut)} par mois</dd>` : ""}</dl>${liste.length > 1 ? `<p class="muted petit" style="margin:10px 0 0">${liste.length} entretiens au total</p>` : ""}`
     : '<p class="muted petit" style="margin:0">Pas encore d’entretien avec cette PME. Le guide aide à comprendre ce qui lui fait perdre du temps.</p>'}</section>`;

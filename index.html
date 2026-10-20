@@ -814,6 +814,7 @@ const ICONES = {
   agenda: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2"/>',
   objectifs: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
   reunions: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M4 7l8 6 8-6"/>',
   ressources: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
   pipeline: '<rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/>',
   liste: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
@@ -856,6 +857,7 @@ const TABLES = {
   pages: { ordre: ["titre", true], optionnel: true },
   commentaires: { ordre: ["cree_le", true], optionnel: true },
   entretiens: { ordre: ["date", false], optionnel: true },
+  mails_envoyes: { ordre: ["cree_le", false], optionnel: true },
 };
 /* Tables pas encore créées (migration 006 pas lancée) : le reste du dashboard continue de fonctionner. */
 const tablesAbsentes = new Set();
@@ -1172,6 +1174,7 @@ const champsMembre = () => [
   { nom: "role", label: "Rôle" },
   { nom: "email", label: "E-mail de connexion", type: "email", pleine: true, aide: "Exactement l’adresse du compte de connexion (Supabase, Authentication, Users). Une lettre de différence et la personne est refusée." },
   { nom: "acces_jusquau", label: "Accès jusqu’au", type: "date", aide: "Pour un accès temporaire. Vide : accès permanent." },
+  ...(colonnePresente("membres", "telephone") ? [{ nom: "telephone", label: "Téléphone", type: "tel", aide: "Affiché dans la signature des mails." }] : []),
   { nom: "actif", label: "Membre actif", type: "checkbox" },
 ];
 function editerMembre(id) {
@@ -1237,6 +1240,7 @@ const PAGES = {
   objectifs: { titre: "Objectifs", icone: "objectifs", rendre: pageObjectifs, groupe: "Pilotage" },
   clients: { titre: "Clients et pipeline", icone: "clients", rendre: pageClients, groupe: "Commercial" },
   entretiens: { titre: "Entretiens découverte", icone: "entretien", rendre: pageEntretiens, groupe: "Commercial" },
+  mails: { titre: "Mails envoyés", icone: "mail", rendre: pageMails, groupe: "Commercial" },
   offres: { titre: "Offres", icone: "offres", rendre: pageOffres, groupe: "Commercial" },
   devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis, groupe: "Commercial" },
   projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets, groupe: "Production" },
@@ -1600,7 +1604,7 @@ function ficheClient(id) {
   return `
   <div class="fil"><a href="#/clients">Clients</a></div>
   <div class="entete"><div><h1>${esc(c.nom)}</h1><div class="sous-titre">${esc([c.secteur, c.localite].filter(Boolean).join(" · ") || "PME")}</div></div>
-    <div class="boutons">${selectStatut("clients", c.id, "statutClient", c.statut)}<button class="btn" data-action="modifierClient" data-id="${c.id}">${icone("crayon")}Modifier</button></div></div>
+    <div class="boutons">${selectStatut("clients", c.id, "statutClient", c.statut)}<button class="btn primaire" data-action="ecrireMail" data-client="${c.id}">${icone("mail")}Mail</button><button class="btn" data-action="modifierClient" data-id="${c.id}">${icone("crayon")}Modifier</button></div></div>
   <div class="grille g-fiche">
     <div class="pile">
       <section class="carte" style="order:1"><header><h2>Coordonnées</h2></header><dl class="infos">
@@ -1865,6 +1869,118 @@ function carteEntretienClient(c) {
       ${e.reponses?.vaut ? `<dt>Valeur</dt><dd>${esc(e.reponses.vaut)} par mois</dd>` : ""}
       ${e.reponses?.notes ? `<dt>Notes</dt><dd class="texte-libre">${esc(e.reponses.notes)}</dd>` : ""}</dl>${liste.length > 1 ? `<p class="muted petit" style="margin:10px 0 0">${liste.length} entretiens au total</p>` : ""}`
     : '<p class="muted petit" style="margin:0">Pas encore d’entretien avec cette PME. Le guide aide à comprendre ce qui lui fait perdre du temps.</p>'}</section>`;
+}
+
+/* ==========================================================================
+   Mails : écrire à un client depuis le dashboard (fonction Edge « envoyer-mail », Resend)
+   ========================================================================== */
+const prenomMembre = (m) => String(m?.nom || "").split(" ")[0];
+function signatureMail() {
+  const m = moi();
+  return [m?.nom || "", "NexusLab, sites et outils pour les PME", m?.telephone || "", "nexus-lab.ch"].filter(Boolean).join("\n");
+}
+const MODELES_MAIL = {
+  vide: { titre: "Message libre", sujet: () => "", corps: () => `Bonjour,\n\n\n\nMeilleures salutations,\n${signatureMail()}` },
+  merci: {
+    titre: "Merci pour l’entretien",
+    sujet: () => "Merci pour votre accueil",
+    corps: ({ c, e }) => `Bonjour,\n\nMerci encore de nous avoir reçus${e ? " le " + dateFr(e.date) : ""}. Ça nous a beaucoup aidés de comprendre comment vous travaillez au quotidien chez ${c?.nom || "vous"}.\n\nComme promis, on revient vers vous avec une proposition adaptée à ce qui vous fait perdre du temps. Si quelque chose vous revient d’ici là, vous pouvez simplement répondre à ce mail.\n\nMeilleures salutations,\n${signatureMail()}`,
+  },
+  relance: {
+    titre: "Relance",
+    sujet: () => "Suite à notre échange",
+    corps: ({ dernier }) => `Bonjour,\n\nJe me permets de revenir vers vous suite à notre échange${dernier ? " du " + dateFr(dernier.date) : ""}. Est-ce que vous avez eu le temps d’y réfléchir ?\n\nSi c’est plus simple, on peut aussi en parler de vive voix : il suffit de me dire quand ça vous arrange.\n\nMeilleures salutations,\n${signatureMail()}`,
+  },
+  devis: {
+    titre: "Envoi du devis",
+    sujet: ({ d }) => d ? `Votre devis ${d.numero}` : "Votre devis",
+    corps: ({ d }) => `Bonjour,\n\nVous trouverez en annexe notre devis${d ? " " + d.numero : ""}${d?.objet ? " pour " + d.objet.charAt(0).toLowerCase() + d.objet.slice(1) : ""}. Il reprend le contenu, le prix et le délai dont on a parlé.\n\nEst-ce que vous pourriez nous faire un retour${d?.echeance ? " d’ici le " + dateFr(d.echeance) : " dans les prochains jours"} ? Si vous avez des questions ou si vous souhaitez adapter quelque chose, je reste volontiers à disposition.\n\nMeilleures salutations,\n${signatureMail()}`,
+  },
+};
+const mailsDe = (clientId) => db.mails_envoyes.filter((x) => x.client_id === clientId);
+
+function ecrireMail(clientId, defauts = {}) {
+  if (absente("mails_envoyes")) { toast("L’envoi de mails n’est pas encore installé : lance la migration 010 dans Supabase.", "erreur"); return; }
+  const c = parId("clients", clientId);
+  const docs = db.devis_factures.filter((d) => d.client_id === clientId && d.statut !== "annule");
+  const e = (db.entretiens || []).find((x) => x.client_id === clientId);
+  const dernier = contactsDe(clientId)[0];
+  const modele = defauts.modele || (defauts.devis_id ? "devis" : e && !mailsDe(clientId).length ? "merci" : "vide");
+  const d0 = parId("devis_factures", defauts.devis_id) || (modele === "devis" ? docs.find((d) => d.type === "devis") : null);
+  const ctx = (d) => ({ c, e, d, dernier });
+  const champs = [
+    { nom: "destinataire", label: "À", type: "email", requis: true, placeholder: "adresse@client.ch", pleine: false },
+    { nom: "copie", label: "Copie (facultatif)", placeholder: "Plusieurs adresses : séparer par une virgule" },
+    { nom: "modele", label: "Modèle", type: "select", options: Object.entries(MODELES_MAIL).map(([k, m]) => [k, m.titre]), vide: false },
+    { nom: "devis_id", label: "Joindre un PDF", type: "select", options: docs.map((d) => [d.id, `${d.type === "devis" ? "Devis" : "Facture"} ${d.numero}${d.pdf_path ? "" : " (PDF à générer)"}`]), vide: "Aucune pièce jointe" },
+    { nom: "sujet", label: "Objet", requis: true, pleine: true },
+    { nom: "corps", label: "Message", type: "textarea", rows: 13, requis: true, pleine: true },
+  ];
+  const m = MODELES_MAIL[modele];
+  formulaire({
+    titre: c ? `Mail à ${c.nom}` : "Nouveau mail", champs, large: true, texteBouton: "Envoyer",
+    valeurs: { destinataire: c?.email || "", modele, devis_id: d0?.id || "", sujet: m.sujet(ctx(d0)), corps: m.corps(ctx(d0)) },
+    extra: `<p class="muted petit" style="margin:14px 0 0">Part de ${esc(prenomMembre(moi()) || "NexusLab")}, NexusLab &lt;contact@nexus-lab.ch&gt;. Les réponses arrivent dans nexuslab.mpa@gmail.com. Le mail est noté dans le suivi du client.</p>`,
+    apresOuverture: (form) => {
+      let touche = false;
+      form.elements.corps.addEventListener("input", () => (touche = true));
+      form.elements.sujet.addEventListener("input", () => (touche = true));
+      const appliquer = async () => {
+        if (touche && !(await confirmer("Remplacer ton texte par le modèle ?", "Remplacer"))) return;
+        const mm = MODELES_MAIL[form.elements.modele.value];
+        let d = parId("devis_factures", form.elements.devis_id.value);
+        if (form.elements.modele.value === "devis" && !d) { d = docs.find((x) => x.type === "devis"); if (d) form.elements.devis_id.value = d.id; }
+        form.elements.sujet.value = mm.sujet(ctx(d)); form.elements.corps.value = mm.corps(ctx(d)); touche = false;
+      };
+      form.elements.modele.addEventListener("change", appliquer);
+      form.elements.devis_id.addEventListener("change", () => { if (form.elements.modele.value === "devis") appliquer(); });
+      if (!c?.email) form.elements.destinataire.focus();
+    },
+    enregistrer: async (v) => {
+      const d = parId("devis_factures", v.devis_id);
+      if (d && !d.pdf_path) throw new Error(`Le PDF de ${d.numero} n’existe pas encore : ouvre-le dans Devis et factures et clique sur PDF, puis réessaie.`);
+      const { data, error } = await sb.functions.invoke("envoyer-mail", { body: { client_id: clientId || null, destinataire: v.destinataire, copie: v.copie, sujet: v.sujet, corps: v.corps, devis_id: v.devis_id || null, modele: v.modele } });
+      if (error) {
+        let msg = "L’envoi n’a pas abouti.";
+        try { const j = await error.context.json(); if (j?.erreur) msg = j.erreur; } catch { if (/Failed to send|FunctionsFetchError/i.test(error.message || "")) msg = "Le service d’envoi n’est pas encore en ligne (fonction envoyer-mail)."; }
+        throw new Error(msg);
+      }
+      if (data?.erreur) throw new Error(data.erreur);
+      await Promise.all([charger("mails_envoyes"), charger("contacts_clients"), charger("devis_factures")]);
+      if (c && c.email !== v.destinataire && !c.email) await enregistrer("clients", { email: v.destinataire }, c.id);
+      toast(`Mail envoyé${c ? " à " + c.nom : ""}.`);
+    },
+  });
+}
+
+function voirMail(id) {
+  const x = parId("mails_envoyes", id);
+  if (!x) return;
+  fenetre(x.sujet, `<dl class="infos" style="margin-bottom:16px">
+    <dt>Date</dt><dd>${esc(new Date(x.cree_le).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" }))}</dd>
+    <dt>Par</dt><dd>${esc(parId("membres", x.membre_id)?.nom || "") || vide}</dd>
+    <dt>À</dt><dd>${esc(x.destinataire)}${x.copie ? `<div class="muted petit">Copie : ${esc(x.copie)}</div>` : ""}</dd>
+    ${x.client_id ? `<dt>Client</dt><dd><a href="#/clients/${x.client_id}">${esc(nomClient(x.client_id))}</a></dd>` : ""}
+    ${x.piece_jointe ? `<dt>Pièce jointe</dt><dd>${esc(x.piece_jointe)}</dd>` : ""}
+    ${x.statut === "erreur" ? `<dt>Statut</dt><dd class="retard">Non envoyé : ${esc(x.erreur || "")}</dd>` : ""}
+  </dl><div class="texte-libre" style="background:var(--fond);border:1px solid var(--ligne);border-radius:14px;padding:16px">${esc(x.corps)}</div>
+  ${x.client_id ? `<div style="margin-top:14px"><button class="btn mini" data-action="ecrireMail" data-client="${x.client_id}">${icone("mail")}Écrire à nouveau</button></div>` : ""}`, true);
+}
+
+function pageMails() {
+  if (absente("mails_envoyes")) return `<div class="entete"><div><h1>Mails envoyés</h1></div></div><div class="message info">L’envoi de mails n’est pas encore installé. Lance le fichier supabase/010_mails.sql dans Supabase (SQL Editor), puis recharge la page.</div>`;
+  const l = db.mails_envoyes;
+  const ceMois = l.filter((x) => x.statut === "envoye" && String(x.cree_le).slice(0, 7) === aujourdhui().slice(0, 7)).length;
+  return `
+  <div class="entete"><div><div class="tag">Commercial</div><h1>Mails envoyés</h1>
+    <div class="sous-titre">Tous les mails partis du dashboard. Les réponses des clients arrivent dans nexuslab.mpa@gmail.com.</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="ecrireMail">${icone("mail")}Nouveau mail</button></div></div>
+  <div class="kpis"><div class="kpi"><div class="label">Envoyés ce mois</div><div class="valeur">${ceMois}</div><div class="detail">Plan gratuit : 100 par jour, 3000 par mois</div></div>
+    <div class="kpi"><div class="label">Au total</div><div class="valeur">${l.filter((x) => x.statut === "envoye").length}</div></div></div>
+  ${l.length ? `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Date</th><th>Client</th><th class="masquer-mobile">À</th><th>Objet</th><th class="masquer-mobile">Par</th></tr></thead><tbody>
+    ${l.map((x) => `<tr data-action="voirMail" data-id="${x.id}"><td>${esc(dateCourte(x.cree_le))}</td><td class="fort">${esc(nomClient(x.client_id)) || vide}</td><td class="masquer-mobile">${esc(x.destinataire)}</td><td>${x.statut === "erreur" ? '<span class="badge t-rouge">Non envoyé</span> ' : ""}${esc(x.sujet)}${x.piece_jointe ? ` <span class="muted petit">· ${esc(x.piece_jointe)}</span>` : ""}</td><td class="masquer-mobile">${esc(prenomDe(x.membre_id)) || vide}</td></tr>`).join("")}
+  </tbody></table></div></section>`
+  : `<section class="carte"><div class="vide-liste">Aucun mail envoyé pour l’instant. Ouvre une fiche client et clique sur « Mail », ou commence ici.<br><button class="btn primaire" data-action="ecrireMail">${icone("mail")}Nouveau mail</button></div></section>`}`;
 }
 
 /* ==========================================================================
@@ -3288,7 +3404,7 @@ function exporterAgenda() {
 }
 
 const CREER = [
-  ["Client", "clients", "nouveauClient"], ["Entretien découverte", "entretien", "nouvelEntretien"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
+  ["Client", "clients", "nouveauClient"], ["Entretien découverte", "entretien", "nouvelEntretien"], ["Mail", "mail", "ecrireMail"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
   ["Devis", "devis", "nouveauDf", "devis"], ["Facture", "devis", "nouveauDf", "facture"], ["Réunion", "reunions", "nouvelleReunion"],
   ["Débrief du jour", "eclair", "debriefDuJour"], ["Document", "documents", "ajouterDocument"], ["Ressource", "ressources", "nouvelleRessource"], ["Objectif", "objectifs", "nouvelObjectif"],
   ["Situation apprenante", "situations", "nouvelleSituation"], ["Page du wiki", "wiki", "nouvellePage"],
@@ -3418,6 +3534,8 @@ const ACTIONS = {
   attribuerClient: (ds) => attribuerClient(ds.id),
   assignerClient: (ds) => assignerClient(ds.id, ds.membre),
   journalClient: (ds) => journalClient(ds.id),
+  ecrireMail: (ds) => ecrireMail(ds.client || null, { devis_id: ds.devis || null }),
+  voirMail: (ds) => voirMail(ds.id),
   nouvelEntretien: (ds) => { location.hash = "#/entretiens/" + (ds.client ? "client-" + ds.client : "nouveau"); },
   modifierCompetence: (ds) => editerCompetence(ds.id),
 };

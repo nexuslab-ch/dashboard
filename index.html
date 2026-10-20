@@ -2584,6 +2584,16 @@ async function ouvrirDocument(id) {
   const d = parId("documents", id);
   if (!d) return;
   const fenetre = window.open("", "_blank");
+  // Une page HTML (maquette) est servie en texte brut par le stockage : on la rouvre comme une vraie page.
+  if (d.mime === "text/html" || /\.html?$/i.test(d.nom || "")) {
+    const { data: fichier, error: eDl } = await sb.storage.from(CONFIG.bucket).download(d.fichier_path);
+    if (eDl) { if (fenetre) fenetre.close(); toast(msgErreur(eDl), "erreur"); return; }
+    const page = new Blob([await fichier.text()], { type: "text/html;charset=utf-8" });
+    const lien = URL.createObjectURL(page);
+    if (fenetre) fenetre.location.href = lien; else location.href = lien;
+    setTimeout(() => URL.revokeObjectURL(lien), 60000);
+    return;
+  }
   const { data, error } = await sb.storage.from(CONFIG.bucket).createSignedUrl(d.fichier_path, 300);
   if (error) { if (fenetre) fenetre.close(); toast(msgErreur(error), "erreur"); return; }
   if (fenetre) fenetre.location.href = data.signedUrl; else location.href = data.signedUrl;

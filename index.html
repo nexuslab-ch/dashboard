@@ -81,6 +81,22 @@ h3 { font-size: .95rem; font-weight: 700; }
 .muted { color: var(--texte-3); }
 .petit { font-size: .82rem; }
 .sig-apercu { margin-top: 14px; }
+.pj-bloc { margin-top: 14px; display: grid; gap: 8px; }
+.pj-entete .label { font-size: .8rem; font-weight: 700; color: var(--texte-2); }
+.pj-entete { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.bouton-pj { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--ligne-forte); border-radius: var(--pilule); font-size: .84rem; font-weight: 700; cursor: pointer; }
+.bouton-pj svg { width: 16px; height: 16px; }
+.bouton-pj:hover { border-color: var(--texte-3); }
+.pj-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pj-liste:empty { display: none; }
+.pj-liste li, .pj-docs label { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 7px 10px; border: 1px solid var(--ligne); border-radius: 10px; font-size: .86rem; }
+.pj-liste li span, .pj-docs label span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pj-liste small, .pj-docs small { color: var(--texte-3); flex: none; }
+.pj-liste .icone-btn { flex: none; width: 28px; height: 28px; }
+.pj-docs summary { cursor: pointer; font-size: .86rem; font-weight: 600; color: var(--texte-2); }
+.pj-docs > div { display: grid; gap: 6px; margin-top: 8px; }
+.pj-docs input { accent-color: var(--corail); }
+.erreur-texte { color: var(--corail-texte) !important; font-weight: 700; }
 .sig-entete { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
 .sig-entete .lien { background: none; border: 0; padding: 0; color: var(--corail-texte); text-decoration: underline; cursor: pointer; font: inherit; font-size: .82rem; }
 .sig-mail { background: #FFFFFF; color: #1D1D1F; border: 1px solid #E6E3DE; border-radius: 12px; padding: 16px 18px; font-family: Manrope, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
@@ -1961,11 +1977,15 @@ function ecrireMail(clientId, defauts = {}) {
   const modele = defauts.modele || (defauts.devis_id ? "devis" : e && !mailsDe(clientId).length ? "merci" : "vide");
   const d0 = parId("devis_factures", defauts.devis_id) || (modele === "devis" ? docs.find((d) => d.type === "devis") : null);
   const ctx = (d) => ({ c, e, d, dernier });
+  const docsClient = clientId ? db.documents.filter((x) => x.client_id === clientId && x.fichier_path) : [];
+  let fichiersPj = [];
+  const LIMITE_PJ = 10 * 1048576;
   const champs = [
-    { nom: "destinataire", label: "À", type: "email", requis: true, placeholder: "adresse@client.ch", pleine: false },
-    { nom: "copie", label: "Copie (facultatif)", placeholder: "Plusieurs adresses : séparer par une virgule" },
+    { nom: "destinataire", label: "À", requis: true, placeholder: "adresse@client.ch", aide: "Plusieurs adresses : séparer par une virgule.", pleine: true, auto: "email" },
+    { nom: "copie", label: "Copie (Cc)", placeholder: "Facultatif", auto: "email" },
+    { nom: "cci", label: "Copie cachée (Cci)", placeholder: "Facultatif", auto: "email" },
     { nom: "modele", label: "Modèle", type: "select", options: Object.entries(MODELES_MAIL).map(([k, m]) => [k, m.titre]), vide: false },
-    { nom: "devis_id", label: "Joindre un PDF", type: "select", options: docs.map((d) => [d.id, `${d.type === "devis" ? "Devis" : "Facture"} ${d.numero}${d.pdf_path ? "" : " (PDF à générer)"}`]), vide: "Aucune pièce jointe" },
+    { nom: "devis_id", label: "Joindre un devis ou une facture", type: "select", options: docs.map((d) => [d.id, `${d.type === "devis" ? "Devis" : "Facture"} ${d.numero}${d.pdf_path ? "" : " (PDF à générer)"}`]), vide: "Aucune pièce jointe" },
     { nom: "sujet", label: "Objet", requis: true, pleine: true },
     { nom: "corps", label: "Message", type: "textarea", rows: 13, requis: true, pleine: true },
   ];
@@ -1973,7 +1993,13 @@ function ecrireMail(clientId, defauts = {}) {
   formulaire({
     titre: c ? `Mail à ${c.nom}` : "Nouveau mail", champs, large: true, texteBouton: "Envoyer",
     valeurs: { destinataire: c?.email || "", modele, devis_id: d0?.id || "", sujet: m.sujet(ctx(d0)), corps: m.corps(ctx(d0)) },
-    extra: `<div class="sig-apercu"><div class="sig-entete"><span class="muted petit">Signature ajoutée automatiquement</span>${moi() ? `<button type="button" class="lien petit" data-sig-modifier>Modifier ma signature</button>` : ""}</div>${signatureApercu()}</div>
+    extra: `<div class="pj-bloc">
+        <div class="pj-entete"><span class="label">Pièces jointes</span><label class="bouton-pj">${icone("documents")}<span>Joindre des fichiers</span><input type="file" multiple data-pj-fichiers hidden></label></div>
+        ${docsClient.length ? `<details class="pj-docs"><summary>Documents de la fiche client (${docsClient.length})</summary><div>${docsClient.map((x) => `<label><input type="checkbox" data-pj-doc value="${esc(x.id)}"> <span>${esc(x.nom)}</span><small>${esc(tailleFichier(x.taille))}</small></label>`).join("")}</div></details>` : ""}
+        <ul class="pj-liste" data-pj-liste></ul>
+        <small class="muted" data-pj-total>Jusqu’à 10 Mo au total. Pour un fichier plus lourd, mets plutôt un lien.</small>
+      </div>
+      <div class="sig-apercu"><div class="sig-entete"><span class="muted petit">Signature ajoutée automatiquement</span>${moi() ? `<button type="button" class="lien petit" data-sig-modifier>Modifier ma signature</button>` : ""}</div>${signatureApercu()}</div>
       <p class="muted petit" style="margin:14px 0 0">Part de ${esc(prenomMembre(moi()) || "NexusLab")}, NexusLab &lt;contact@nexus-lab.ch&gt;. Les réponses arrivent dans nexuslab.mpa@gmail.com.${c ? " Le mail est noté dans le suivi du client." : ""}</p>`,
     apresOuverture: (form) => {
       let touche = false;
@@ -1987,22 +2013,46 @@ function ecrireMail(clientId, defauts = {}) {
         form.elements.sujet.value = mm.sujet(ctx(d)); form.elements.corps.value = mm.corps(ctx(d)); touche = false;
       };
       form.querySelector("[data-sig-modifier]")?.addEventListener("click", () => { fermerModale(); editerMembre(moi().id); });
+      const majPj = () => {
+        const docsCoches = $$("[data-pj-doc]:checked", form).map((x) => parId("documents", x.value)).filter(Boolean);
+        const total = fichiersPj.reduce((n, f) => n + f.size, 0) + docsCoches.reduce((n, x) => n + (Number(x.taille) || 0), 0);
+        $("[data-pj-liste]", form).innerHTML = fichiersPj.map((f, i) => `<li><span>${esc(f.name)}</span><small>${esc(tailleFichier(f.size))}</small><button type="button" class="icone-btn" data-pj-retirer="${i}" aria-label="Retirer ${esc(f.name)}">×</button></li>`).join("");
+        const t = $("[data-pj-total]", form);
+        t.textContent = total ? `${tailleFichier(total)} sur 10 Mo${total > LIMITE_PJ ? " : trop lourd, retire un fichier ou mets un lien." : ""}` : "Jusqu’à 10 Mo au total. Pour un fichier plus lourd, mets plutôt un lien.";
+        t.classList.toggle("erreur-texte", total > LIMITE_PJ);
+      };
+      $("[data-pj-fichiers]", form).addEventListener("change", (ev) => { fichiersPj = fichiersPj.concat([...ev.target.files]); ev.target.value = ""; majPj(); });
+      $("[data-pj-liste]", form).addEventListener("click", (ev) => { const b = ev.target.closest("[data-pj-retirer]"); if (b) { fichiersPj.splice(Number(b.dataset.pjRetirer), 1); majPj(); } });
+      $$("[data-pj-doc]", form).forEach((x) => x.addEventListener("change", majPj));
       form.elements.modele.addEventListener("change", appliquer);
       form.elements.devis_id.addEventListener("change", () => { if (form.elements.modele.value === "devis") appliquer(); });
       if (!c?.email) form.elements.destinataire.focus();
     },
-    enregistrer: async (v) => {
+    enregistrer: async (v, form) => {
       const d = parId("devis_factures", v.devis_id);
       if (d && !d.pdf_path) throw new Error(`Le PDF de ${d.numero} n’existe pas encore : ouvre-le dans Devis et factures et clique sur PDF, puis réessaie.`);
-      const { data, error } = await sb.functions.invoke("envoyer-mail", { body: { client_id: clientId || null, destinataire: v.destinataire, copie: v.copie, sujet: v.sujet, corps: v.corps, devis_id: v.devis_id || null, modele: v.modele } });
+      const docsCoches = $$("[data-pj-doc]:checked", form).map((x) => parId("documents", x.value)).filter(Boolean);
+      const total = fichiersPj.reduce((n, f) => n + f.size, 0) + docsCoches.reduce((n, x) => n + (Number(x.taille) || 0), 0);
+      if (total > LIMITE_PJ) throw new Error("Les pièces jointes dépassent 10 Mo : retire un fichier ou envoie plutôt un lien.");
+      // Les fichiers joints sont d'abord rangés dans les documents (fiche client), puis la fonction les lit de là.
+      const pieces = docsCoches.map((x) => ({ chemin: x.fichier_path, nom: x.nom }));
+      for (const f of fichiersPj) {
+        const chemin = `${clientId || "sans-client"}/mails/${Date.now()}-${nomFichierSur(f.name)}`;
+        const { error: eUp } = await sb.storage.from(CONFIG.bucket).upload(chemin, f, { contentType: f.type || undefined, upsert: false });
+        if (eUp) throw new Error(`Impossible de charger ${f.name} : ${eUp.message}`);
+        if (clientId) await sb.from("documents").insert({ client_id: clientId, nom: f.name, type: "autre", fichier_path: chemin, taille: f.size, mime: f.type || null });
+        pieces.push({ chemin, nom: f.name });
+      }
+      const { data, error } = await sb.functions.invoke("envoyer-mail", { body: { client_id: clientId || null, destinataire: v.destinataire, copie: v.copie, cci: v.cci, sujet: v.sujet, corps: v.corps, devis_id: v.devis_id || null, pieces, modele: v.modele } });
       if (error) {
         let msg = "L’envoi n’a pas abouti.";
         try { const j = await error.context.json(); if (j?.erreur) msg = j.erreur; } catch { if (/Failed to send|FunctionsFetchError/i.test(error.message || "")) msg = "Le service d’envoi n’est pas encore en ligne (fonction envoyer-mail)."; }
         throw new Error(msg);
       }
       if (data?.erreur) throw new Error(data.erreur);
-      await Promise.all([charger("mails_envoyes"), charger("contacts_clients"), charger("devis_factures")]);
-      if (c && c.email !== v.destinataire && !c.email) await enregistrer("clients", { email: v.destinataire }, c.id);
+      await Promise.all([charger("mails_envoyes"), charger("contacts_clients"), charger("devis_factures"), ...(fichiersPj.length && clientId ? [charger("documents")] : [])]);
+      const premier = v.destinataire.split(/[,;]\s*/)[0];
+      if (c && !c.email && premier) await enregistrer("clients", { email: premier }, c.id);
       toast(`Mail envoyé${c ? " à " + c.nom : ""}.`);
     },
   });

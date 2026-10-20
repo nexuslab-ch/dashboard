@@ -2584,11 +2584,14 @@ async function ouvrirDocument(id) {
   const d = parId("documents", id);
   if (!d) return;
   const fenetre = window.open("", "_blank");
-  // Une page HTML (maquette) est servie en texte brut par le stockage : on la rouvre comme une vraie page.
+  // Une page HTML (maquette) est servie en texte brut par le stockage : on la rouvre comme une vraie page,
+  // mais isolée dans un cadre « sandbox » sans accès à l'origine du dashboard (ni session, ni données).
   if (d.mime === "text/html" || /\.html?$/i.test(d.nom || "")) {
     const { data: fichier, error: eDl } = await sb.storage.from(CONFIG.bucket).download(d.fichier_path);
     if (eDl) { if (fenetre) fenetre.close(); toast(msgErreur(eDl), "erreur"); return; }
-    const page = new Blob([await fichier.text()], { type: "text/html;charset=utf-8" });
+    const contenu = (await fichier.text()).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+    const cadre = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(d.nom || "Document")}</title><style>html,body{margin:0;height:100%;background:#fff}iframe{border:0;display:block;width:100%;height:100%}</style></head><body><iframe sandbox="allow-scripts allow-downloads allow-forms allow-modals allow-popups" srcdoc="${contenu}"></iframe></body></html>`;
+    const page = new Blob([cadre], { type: "text/html;charset=utf-8" });
     const lien = URL.createObjectURL(page);
     if (fenetre) fenetre.location.href = lien; else location.href = lien;
     setTimeout(() => URL.revokeObjectURL(lien), 60000);

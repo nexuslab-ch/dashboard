@@ -81,6 +81,9 @@ h3 { font-size: .95rem; font-weight: 700; }
 .muted { color: var(--texte-3); }
 .petit { font-size: .82rem; }
 .sig-apercu { margin-top: 14px; }
+.titre-section { font-size: 1.05rem; margin: 26px 0 10px; display: flex; align-items: center; gap: 10px; }
+tr.non-lu td { font-weight: 800; }
+tr.non-lu td:first-child { box-shadow: inset 3px 0 0 var(--corail); }
 .pj-bloc { margin-top: 14px; display: grid; gap: 8px; }
 .pj-entete .label { font-size: .8rem; font-weight: 700; color: var(--texte-2); }
 .pj-entete { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -898,6 +901,7 @@ const TABLES = {
   commentaires: { ordre: ["cree_le", true], optionnel: true },
   entretiens: { ordre: ["date", false], optionnel: true },
   mails_envoyes: { ordre: ["cree_le", false], optionnel: true },
+  mails_recus: { ordre: ["recu_le", false], optionnel: true },
 };
 /* Tables pas encore créées (migration 006 pas lancée) : le reste du dashboard continue de fonctionner. */
 const tablesAbsentes = new Set();
@@ -1297,7 +1301,7 @@ const PAGES = {
   objectifs: { titre: "Objectifs", icone: "objectifs", rendre: pageObjectifs, groupe: "Pilotage" },
   clients: { titre: "Clients et pipeline", icone: "clients", rendre: pageClients, groupe: "Commercial" },
   entretiens: { titre: "Entretiens découverte", icone: "entretien", rendre: pageEntretiens, groupe: "Commercial" },
-  mails: { titre: "Mails envoyés", icone: "mail", rendre: pageMails, groupe: "Commercial" },
+  mails: { titre: "Mails", icone: "mail", rendre: pageMails, groupe: "Commercial" },
   offres: { titre: "Offres", icone: "offres", rendre: pageOffres, groupe: "Commercial" },
   devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis, groupe: "Commercial" },
   projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets, groupe: "Production" },
@@ -1354,7 +1358,8 @@ document.addEventListener("click", (e) => {
 function rendreNav(page) {
   const mesTaches = moi() ? db.taches.filter((t) => t.statut !== "fait" && (t.responsable_id === moi().id || (t.valideur_id === moi().id && t.statut === "a_valider"))).length : 0;
   const relances = db.clients.filter((c) => c.date_relance && c.date_relance <= aujourdhui() && !["termine", "perdu", "livre"].includes(c.statut) && (!c.responsable_id || c.responsable_id === moi()?.id)).length;
-  const compteurs = { taches: [mesTaches, "Mes tâches ouvertes"], clients: [relances, "Relances à faire"] };
+  const nonLus = (db.mails_recus || []).filter((x) => !x.lu).length;
+  const compteurs = { taches: [mesTaches, "Mes tâches ouvertes"], clients: [relances, "Relances à faire"], mails: [nonLus, "Mails reçus non lus"] };
   const fermes = groupesFermes();
   const groupes = [...new Set(Object.values(PAGES).map((p) => p.groupe))];
   $("#nav").innerHTML = groupes.map((g) => {
@@ -1992,7 +1997,7 @@ function ecrireMail(clientId, defauts = {}) {
   const m = MODELES_MAIL[modele];
   formulaire({
     titre: c ? `Mail à ${c.nom}` : "Nouveau mail", champs, large: true, texteBouton: "Envoyer",
-    valeurs: { destinataire: c?.email || "", modele, devis_id: d0?.id || "", sujet: m.sujet(ctx(d0)), corps: m.corps(ctx(d0)) },
+    valeurs: { destinataire: defauts.destinataire || c?.email || "", modele, devis_id: d0?.id || "", sujet: defauts.sujet || m.sujet(ctx(d0)), corps: defauts.corps || m.corps(ctx(d0)) },
     extra: `<div class="pj-bloc">
         <div class="pj-entete"><span class="label">Pièces jointes</span><label class="bouton-pj">${icone("documents")}<span>Joindre des fichiers</span><input type="file" multiple data-pj-fichiers hidden></label></div>
         ${docsClient.length ? `<details class="pj-docs"><summary>Documents de la fiche client (${docsClient.length})</summary><div>${docsClient.map((x) => `<label><input type="checkbox" data-pj-doc value="${esc(x.id)}"> <span>${esc(x.nom)}</span><small>${esc(tailleFichier(x.taille))}</small></label>`).join("")}</div></details>` : ""}
@@ -2000,7 +2005,7 @@ function ecrireMail(clientId, defauts = {}) {
         <small class="muted" data-pj-total>Jusqu’à 10 Mo au total. Pour un fichier plus lourd, mets plutôt un lien.</small>
       </div>
       <div class="sig-apercu"><div class="sig-entete"><span class="muted petit">Signature ajoutée automatiquement</span>${moi() ? `<button type="button" class="lien petit" data-sig-modifier>Modifier ma signature</button>` : ""}</div>${signatureApercu()}</div>
-      <p class="muted petit" style="margin:14px 0 0">Part de ${esc(prenomMembre(moi()) || "NexusLab")}, NexusLab &lt;contact@nexus-lab.ch&gt;. Les réponses arrivent dans nexuslab.mpa@gmail.com.${c ? " Le mail est noté dans le suivi du client." : ""}</p>`,
+      <p class="muted petit" style="margin:14px 0 0">Part de ${esc(prenomMembre(moi()) || "NexusLab")}, NexusLab &lt;contact@nexus-lab.ch&gt;. Les réponses arrivent dans Mails et sur nexuslab.mpa@gmail.com.${c ? " Le mail est noté dans le suivi du client." : ""}</p>`,
     apresOuverture: (form) => {
       let touche = false;
       form.elements.corps.addEventListener("input", () => (touche = true));
@@ -2072,16 +2077,45 @@ function voirMail(id) {
   ${x.client_id ? `<div style="margin-top:14px"><button class="btn mini" data-action="ecrireMail" data-client="${x.client_id}">${icone("mail")}Écrire à nouveau</button></div>` : ""}`, true);
 }
 
+function voirMailRecu(id) {
+  const x = parId("mails_recus", id);
+  if (!x) return;
+  if (!x.lu) { x.lu = true; sb.from("mails_recus").update({ lu: true }).eq("id", id).then(() => rendre()); }
+  const pieces = Array.isArray(x.pieces) ? x.pieces : [];
+  fenetre(x.sujet || "(sans objet)", `<dl class="infos" style="margin-bottom:16px">
+    <dt>Reçu le</dt><dd>${esc(new Date(x.recu_le).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" }))}</dd>
+    <dt>De</dt><dd>${esc(x.expediteur_nom ? `${x.expediteur_nom} <${x.expediteur}>` : x.expediteur)}</dd>
+    <dt>À</dt><dd>${esc(x.destinataires || "") || vide}</dd>
+    <dt>Client</dt><dd>${x.client_id ? `<a href="#/clients/${x.client_id}">${esc(nomClient(x.client_id))}</a>` : `<span class="muted">Adresse inconnue dans les fiches clients</span>`}</dd>
+    ${pieces.length ? `<dt>Pièces jointes</dt><dd>${pieces.map((p) => esc(p.nom || "fichier")).join(", ")}<div class="muted petit">Les fichiers sont dans le mail transféré sur nexuslab.mpa@gmail.com.</div></dd>` : ""}
+  </dl><div class="texte-libre" style="background:var(--fond);border:1px solid var(--ligne);border-radius:14px;padding:16px">${esc(x.texte || "")}</div>
+  <div style="margin-top:14px"><button class="btn mini primaire" data-action="repondreMail" data-id="${x.id}">${icone("mail")}Répondre</button></div>`, true);
+}
+function repondreMail(id) {
+  const x = parId("mails_recus", id);
+  if (!x) return;
+  fermerModale();
+  const sujet = /^re\s*:/i.test(x.sujet || "") ? x.sujet : `Re: ${x.sujet || ""}`;
+  const cite = String(x.texte || "").split("\n").slice(0, 40).map((l) => "> " + l).join("\n");
+  const date = new Date(x.recu_le).toLocaleString("fr-CH", { dateStyle: "long", timeStyle: "short" });
+  ecrireMail(x.client_id || null, { destinataire: x.expediteur, sujet, modele: "vide", corps: `Bonjour,\n\n\n\nMeilleures salutations,\n\n\nLe ${date}, ${x.expediteur_nom || x.expediteur} a écrit :\n${cite}` });
+}
+
 function pageMails() {
   if (absente("mails_envoyes")) return `<div class="entete"><div><h1>Mails envoyés</h1></div></div><div class="message info">L’envoi de mails n’est pas encore installé. Lance le fichier supabase/010_mails.sql dans Supabase (SQL Editor), puis recharge la page.</div>`;
   const l = db.mails_envoyes;
   const ceMois = l.filter((x) => x.statut === "envoye" && String(x.cree_le).slice(0, 7) === aujourdhui().slice(0, 7)).length;
   return `
-  <div class="entete"><div><div class="tag">Commercial</div><h1>Mails envoyés</h1>
-    <div class="sous-titre">Tous les mails partis du dashboard. Les réponses des clients arrivent dans nexuslab.mpa@gmail.com.</div></div>
+  <div class="entete"><div><div class="tag">Commercial</div><h1>Mails</h1>
+    <div class="sous-titre">Les mails envoyés depuis le dashboard et ceux reçus sur contact@nexus-lab.ch. Les mails reçus sont aussi transférés vers nexuslab.mpa@gmail.com.</div></div>
     <div class="boutons"><button class="btn primaire" data-action="ecrireMail">${icone("mail")}Nouveau mail</button></div></div>
   <div class="kpis"><div class="kpi"><div class="label">Envoyés ce mois</div><div class="valeur">${ceMois}</div><div class="detail">Plan gratuit : 100 par jour, 3000 par mois</div></div>
     <div class="kpi"><div class="label">Au total</div><div class="valeur">${l.filter((x) => x.statut === "envoye").length}</div></div></div>
+  ${absente("mails_recus") ? "" : `<h2 class="titre-section">Reçus${db.mails_recus.filter((x) => !x.lu).length ? ` <span class="badge t-corail">${db.mails_recus.filter((x) => !x.lu).length} non lu${db.mails_recus.filter((x) => !x.lu).length > 1 ? "s" : ""}</span>` : ""}</h2>
+  ${db.mails_recus.length ? `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Date</th><th>De</th><th class="masquer-mobile">Client</th><th>Objet</th></tr></thead><tbody>
+    ${db.mails_recus.map((x) => `<tr data-action="voirMailRecu" data-id="${x.id}"${x.lu ? "" : ' class="non-lu"'}><td>${esc(dateCourte(x.recu_le))}</td><td class="fort">${esc(x.expediteur_nom || x.expediteur)}</td><td class="masquer-mobile">${esc(nomClient(x.client_id)) || vide}</td><td>${esc(x.sujet || "(sans objet)")}${(x.pieces || []).length ? ` <span class="muted petit">· ${(x.pieces || []).length} PJ</span>` : ""}</td></tr>`).join("")}
+  </tbody></table></div></section>` : `<section class="carte"><div class="vide-liste">Aucun mail reçu pour l’instant. Quand un client répond ou écrit à contact@nexus-lab.ch, il apparaît ici.</div></section>`}
+  <h2 class="titre-section">Envoyés</h2>`}
   ${l.length ? `<section class="carte sans-marge"><div class="table-wrap"><table class="liste"><thead><tr><th>Date</th><th>Client</th><th class="masquer-mobile">À</th><th>Objet</th><th class="masquer-mobile">Par</th></tr></thead><tbody>
     ${l.map((x) => `<tr data-action="voirMail" data-id="${x.id}"><td>${esc(dateCourte(x.cree_le))}</td><td class="fort">${esc(nomClient(x.client_id)) || vide}</td><td class="masquer-mobile">${esc(x.destinataire)}</td><td>${x.statut === "erreur" ? '<span class="badge t-rouge">Non envoyé</span> ' : ""}${esc(x.sujet)}${x.piece_jointe ? ` <span class="muted petit">· ${esc(x.piece_jointe)}</span>` : ""}</td><td class="masquer-mobile">${esc(prenomDe(x.membre_id)) || vide}</td></tr>`).join("")}
   </tbody></table></div></section>`
@@ -3662,6 +3696,8 @@ const ACTIONS = {
   journalClient: (ds) => journalClient(ds.id),
   ecrireMail: (ds) => ecrireMail(ds.client || null, { devis_id: ds.devis || null }),
   voirMail: (ds) => voirMail(ds.id),
+  voirMailRecu: (ds) => voirMailRecu(ds.id),
+  repondreMail: (ds) => repondreMail(ds.id),
   nouvelEntretien: (ds) => { location.hash = "#/entretiens/" + (ds.client ? "client-" + ds.client : "nouveau"); },
   modifierCompetence: (ds) => editerCompetence(ds.id),
 };

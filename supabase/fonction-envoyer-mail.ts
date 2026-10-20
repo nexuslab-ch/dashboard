@@ -80,23 +80,44 @@ Deno.serve(async (req) => {
 
     // 2. Contenu
     const b = await req.json();
-    const a = String(b.destinataire || "").trim(), cc = String(b.copie || "").trim();
+    const liste = (x: unknown) => String(x || "").split(/[,;\s]+/).map((e) => e.trim()).filter(Boolean);
+    const aListe = liste(b.destinataire), ccListe = liste(b.copie), cciListe = liste(b.cci);
+    const a = aListe.join(", "), cc = ccListe.join(", ");
     const sujet = String(b.sujet || "").trim(), corps = String(b.corps || "").trim();
-    if (!emailOk(a)) return json({ erreur: "L’adresse du destinataire n’est pas valide." }, 400);
-    if (cc && !cc.split(/[,;]\s*/).every(emailOk)) return json({ erreur: "Une adresse en copie n’est pas valide." }, 400);
+    if (!aListe.length || !aListe.every(emailOk)) return json({ erreur: "Une adresse du champ « À » n’est pas valide." }, 400);
+    if (!ccListe.every(emailOk)) return json({ erreur: "Une adresse en copie n’est pas valide." }, 400);
+    if (!cciListe.every(emailOk)) return json({ erreur: "Une adresse en copie cachée n’est pas valide." }, 400);
+    if (aListe.length + ccListe.length + cciListe.length > 20) return json({ erreur: "20 destinataires au maximum par mail." }, 400);
     if (!sujet || !corps) return json({ erreur: "Il manque l’objet ou le message." }, 400);
     if (corps.length > 20000) return json({ erreur: "Le message est trop long." }, 400);
 
     // 3. Pièce jointe : le PDF d'un devis ou d'une facture du dashboard
-    let pieces: { filename: string; content: string }[] = [], nomPj: string | null = null;
+    const pieces: { filename: string; content: string }[] = [], noms: string[] = [];
+    let poids = 0;
+    const lireFichier = async (chemin: string) => {
+      const f = await fetch(`${BASE}/storage/v1/object/${BUCKET}/${chemin.split("/").map(encodeURIComponent).join("/")}`, { headers: SERVEUR });
+      return f.ok ? new Uint8Array(await f.arrayBuffer()) : null;
+    };
     if (b.devis_id) {
       const [d] = await rest(`devis_factures?select=id,numero,pdf_path&id=eq.${encodeURIComponent(b.devis_id)}&limit=1`);
       if (!d?.pdf_path) return json({ erreur: "Ce devis n’a pas encore de PDF. Ouvre-le et clique sur PDF une fois, puis réessaie." }, 400);
-      const f = await fetch(`${BASE}/storage/v1/object/${BUCKET}/${d.pdf_path.split("/").map(encodeURIComponent).join("/")}`, { headers: SERVEUR });
-      if (!f.ok) return json({ erreur: "Le PDF du devis est introuvable dans les documents." }, 400);
-      nomPj = `${d.numero}.pdf`;
-      pieces = [{ filename: nomPj, content: base64(new Uint8Array(await f.arrayBuffer())) }];
+      const o = await lireFichier(d.pdf_path);
+      if (!o) return json({ erreur: "Le PDF du devis est introuvable dans les documents." }, 400);
+      poids += o.length; noms.push(`${d.numero}.pdf`);
+      pieces.push({ filename: `${d.numero}.pdf`, content: base64(o) });
     }
+    // Fichiers joints : déjà rangés dans le stockage « documents » par le dashboard
+    for (const p of (Array.isArray(b.pieces) ? b.pieces : []).slice(0, 15)) {
+      const chemin = String(p?.chemin || "");
+      if (!chemin || chemin.includes("..") || chemin.startsWith("/")) return json({ erreur: "Pièce jointe invalide." }, 400);
+      const o = await lireFichier(chemin);
+      if (!o) return json({ erreur: `Fichier introuvable : ${p?.nom || chemin}` }, 400);
+      poids += o.length;
+      if (poids > 10 * 1048576) return json({ erreur: "Les pièces jointes dépassent 10 Mo : envoie plutôt un lien." }, 400);
+      const nom = String(p?.nom || chemin.split("/").pop()).slice(0, 150);
+      noms.push(nom); pieces.push({ filename: nom, content: base64(o) });
+    }
+    const nomPj = noms.length ? noms.join(", ") : null;
 
     // 4. Envoi
     const prenom = String(m.nom || "").split(" ")[0];
@@ -105,12 +126,12 @@ Deno.serve(async (req) => {
       headers: { Authorization: `Bearer ${RESEND}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: `${prenom ? prenom + ", " : ""}NexusLab <${FROM}>`,
-        to: [a], ...(cc ? { cc: cc.split(/[,;]\s*/) } : {}), reply_to: REPLY_TO,
+        to: aListe, ...(ccListe.length ? { cc: ccListe } : {}), ...(cciListe.length ? { bcc: cciListe } : {}), reply_to: REPLY_TO,
         subject: sujet, text: `${corps}\n\n${signatureTexte(m)}`, html: enHtml(corps, signatureHtml(m)), ...(pieces.length ? { attachments: pieces } : {}),
       }),
     });
     const rep = await r.json().catch(() => ({}));
-    const ligne = { client_id: b.client_id || null, membre_id: m.id, destinataire: a, copie: cc || null, sujet, corps, devis_id: b.devis_id || null, piece_jointe: nomPj, modele: b.modele || null };
+    const ligne = { client_id: b.client_id || null, membre_id: m.id, destinataire: a, copie: [cc, cciListe.length ? `Cci : ${cciListe.join(", ")}` : ""].filter(Boolean).join(" | ") || null, sujet, corps, devis_id: b.devis_id || null, piece_jointe: nomPj, modele: b.modele || null };
     if (!r.ok) {
       await rest("mails_envoyes", { method: "POST", body: JSON.stringify({ ...ligne, statut: "erreur", erreur: String(rep.message || r.status) }) }).catch(() => {});
       return json({ erreur: `Resend a refusé l’envoi : ${rep.message || r.status}` }, 502);
@@ -119,7 +140,7 @@ Deno.serve(async (req) => {
 
     // 5. Trace dans le suivi du client
     if (b.client_id) {
-      await rest("contacts_clients", { method: "POST", body: JSON.stringify({ client_id: b.client_id, membre_id: m.id, date: auj, canal: "email", resultat: "autre", notes: `Mail envoyé : ${sujet}${nomPj ? " (PJ " + nomPj + ")" : ""}` }) }).catch(() => {});
+      await rest("contacts_clients", { method: "POST", body: JSON.stringify({ client_id: b.client_id, membre_id: m.id, date: auj, canal: "email", resultat: "autre", notes: `Mail envoyé : ${sujet}${nomPj ? " (PJ : " + nomPj + ")" : ""}` }) }).catch(() => {});
       if (b.devis_id) await rest(`devis_factures?id=eq.${encodeURIComponent(b.devis_id)}&statut=eq.brouillon`, { method: "PATCH", body: JSON.stringify({ statut: "envoye" }) }).catch(() => {});
     }
     return json({ ok: true, id: enr?.id });

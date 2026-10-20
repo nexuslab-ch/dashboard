@@ -3,7 +3,7 @@
 // Secrets à définir dans Supabase (Edge Functions > Secrets) :
 //   RESEND_API_KEY   la clé API Resend (obligatoire)
 //   MAIL_FROM        adresse d'envoi, par défaut contact@nexus-lab.ch (domaine vérifié chez Resend)
-//   MAIL_REPLY_TO    adresse qui reçoit les réponses, par défaut nexuslab.mpa@gmail.com
+//   MAIL_REPLY_TO    adresse qui reçoit les réponses, par défaut la même que MAIL_FROM (contact@nexus-lab.ch)
 
 const BASE = Deno.env.get("SUPABASE_URL")!;
 const SECRETS = (() => { try { return JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}"); } catch { return {}; } })();
@@ -12,7 +12,8 @@ const SERVEUR: Record<string, string> = CLE.startsWith("eyJ") ? { apikey: CLE, A
 const PUBLIQUE = Deno.env.get("SUPABASE_ANON_KEY") || (() => { try { const p = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}"); return p.default || Object.values(p)[0]; } catch { return ""; } })() as string;
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("MAIL_FROM") || "contact@nexus-lab.ch";
-const REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || "nexuslab.mpa@gmail.com";
+// Réponses : sur contact@ (reçues par Resend, rangées dans le dashboard et transférées au Gmail commun)
+const REPLY_TO = Deno.env.get("MAIL_REPLY_TO") || FROM;
 const BUCKET = "documents";
 const CORS = {
   "Access-Control-Allow-Origin": "*",

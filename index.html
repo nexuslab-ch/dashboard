@@ -80,6 +80,22 @@ h3 { font-size: .95rem; font-weight: 700; }
 [hidden] { display: none !important; }
 .muted { color: var(--texte-3); }
 .petit { font-size: .82rem; }
+.sig-apercu { margin-top: 14px; }
+.sig-entete { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.sig-entete .lien { background: none; border: 0; padding: 0; color: var(--corail-texte); text-decoration: underline; cursor: pointer; font: inherit; font-size: .82rem; }
+.sig-mail { background: #FFFFFF; color: #1D1D1F; border: 1px solid #E6E3DE; border-radius: 12px; padding: 16px 18px; font-family: Manrope, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+.sig-logo { line-height: 1; white-space: nowrap; margin-bottom: 14px; }
+.sig-logo span { vertical-align: middle; }
+.sig-logo .p1 { color: #1D1D1F; font-size: 11px; }
+.sig-logo .p2 { color: #FF5F57; font-size: 15px; }
+.sig-logo b { padding-left: 6px; font-size: 24px; font-weight: 800; letter-spacing: -0.6px; vertical-align: middle; }
+.sig-bloc { border-left: 3px solid #FF5F57; padding: 2px 0 2px 12px; }
+.sig-nom { font-size: 16px; line-height: 1.3; }
+.sig-titre { font-size: 13px; color: #6E6E73; margin-top: 2px; }
+.sig-tel { font-size: 13px; color: #3A3A3C; margin-top: 10px; }
+.sig-site { color: #C43A32; }
+.sig-accroche { font-size: 12px; color: #6E6E73; margin-top: 8px; }
+.sig-ecole { font-size: 12px; color: #8E8E93; margin-top: 2px; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .retard { color: var(--t-rouge); font-weight: 700; }
 :focus-visible { outline: 2px solid var(--corail); outline-offset: 2px; }
@@ -1198,6 +1214,8 @@ const champsMembre = () => [
   { nom: "email", label: "E-mail de connexion", type: "email", pleine: true, aide: "Exactement l’adresse du compte de connexion (Supabase, Authentication, Users). Une lettre de différence et la personne est refusée." },
   { nom: "acces_jusquau", label: "Accès jusqu’au", type: "date", aide: "Pour un accès temporaire. Vide : accès permanent." },
   ...(colonnePresente("membres", "telephone") ? [{ nom: "telephone", label: "Téléphone", type: "tel", aide: "Affiché dans la signature des mails." }] : []),
+  ...(colonnePresente("membres", "nom_complet") ? [{ nom: "nom_complet", label: "Nom complet (signature)", placeholder: "Prénom Nom" }] : []),
+  ...(colonnePresente("membres", "titre") ? [{ nom: "titre", label: "Titre (signature)", placeholder: "Co-fondateur", aide: "Affiché sous ton nom : « Co-fondateur · NexusLab »." }] : []),
   { nom: "actif", label: "Membre actif", type: "checkbox" },
 ];
 function editerMembre(id) {
@@ -1898,26 +1916,38 @@ function carteEntretienClient(c) {
    Mails : écrire à un client depuis le dashboard (fonction Edge « envoyer-mail », Resend)
    ========================================================================== */
 const prenomMembre = (m) => String(m?.nom || "").split(" ")[0];
-function signatureMail() {
-  const m = moi();
-  return [m?.nom || "", "NexusLab, sites et outils pour les PME", m?.telephone || "", "nexus-lab.ch"].filter(Boolean).join("\n");
+// Signature ajoutée par la fonction envoyer-mail (même rendu ici, en aperçu)
+function signatureApercu(m = moi()) {
+  const nom = String(m?.nom_complet || m?.nom || "").trim();
+  const titre = [String(m?.titre || "").trim(), "NexusLab"].filter(Boolean).join(" · ");
+  const tel = String(m?.telephone || "").trim();
+  return `<div class="sig-mail">
+    <div class="sig-logo"><span class="p1">●</span><span class="p2">●</span><b>nexus</b></div>
+    <div class="sig-bloc">
+      <div class="sig-nom">${esc(nom)}</div>
+      <div class="sig-titre">${esc(titre)}</div>
+      <div class="sig-tel">${tel ? esc(tel) + "&nbsp;&nbsp;|&nbsp;&nbsp;" : ""}<span class="sig-site">nexus-lab.ch</span></div>
+      <div class="sig-accroche">Sites web et outils digitaux pour les PME de Suisse romande</div>
+      <div class="sig-ecole">HES-SO Valais</div>
+    </div>
+  </div>`;
 }
 const MODELES_MAIL = {
-  vide: { titre: "Message libre", sujet: () => "", corps: () => `Bonjour,\n\n\n\nMeilleures salutations,\n${signatureMail()}` },
+  vide: { titre: "Message libre", sujet: () => "", corps: () => `Bonjour,\n\n\n\nMeilleures salutations,` },
   merci: {
     titre: "Merci pour l’entretien",
     sujet: () => "Merci pour votre accueil",
-    corps: ({ c, e }) => `Bonjour,\n\nMerci encore de nous avoir reçus${e ? " le " + dateFr(e.date) : ""}. Ça nous a beaucoup aidés de comprendre comment vous travaillez au quotidien chez ${c?.nom || "vous"}.\n\nComme promis, on revient vers vous avec une proposition adaptée à ce qui vous fait perdre du temps. Si quelque chose vous revient d’ici là, vous pouvez simplement répondre à ce mail.\n\nMeilleures salutations,\n${signatureMail()}`,
+    corps: ({ c, e }) => `Bonjour,\n\nMerci encore de nous avoir reçus${e ? " le " + dateFr(e.date) : ""}. Ça nous a beaucoup aidés de comprendre comment vous travaillez au quotidien chez ${c?.nom || "vous"}.\n\nComme promis, on revient vers vous avec une proposition adaptée à ce qui vous fait perdre du temps. Si quelque chose vous revient d’ici là, vous pouvez simplement répondre à ce mail.\n\nMeilleures salutations,`,
   },
   relance: {
     titre: "Relance",
     sujet: () => "Suite à notre échange",
-    corps: ({ dernier }) => `Bonjour,\n\nJe me permets de revenir vers vous suite à notre échange${dernier ? " du " + dateFr(dernier.date) : ""}. Est-ce que vous avez eu le temps d’y réfléchir ?\n\nSi c’est plus simple, on peut aussi en parler de vive voix : il suffit de me dire quand ça vous arrange.\n\nMeilleures salutations,\n${signatureMail()}`,
+    corps: ({ dernier }) => `Bonjour,\n\nJe me permets de revenir vers vous suite à notre échange${dernier ? " du " + dateFr(dernier.date) : ""}. Est-ce que vous avez eu le temps d’y réfléchir ?\n\nSi c’est plus simple, on peut aussi en parler de vive voix : il suffit de me dire quand ça vous arrange.\n\nMeilleures salutations,`,
   },
   devis: {
     titre: "Envoi du devis",
     sujet: ({ d }) => d ? `Votre devis ${d.numero}` : "Votre devis",
-    corps: ({ d }) => `Bonjour,\n\nVous trouverez en annexe notre devis${d ? " " + d.numero : ""}${d?.objet ? " pour " + d.objet.charAt(0).toLowerCase() + d.objet.slice(1) : ""}. Il reprend le contenu, le prix et le délai dont on a parlé.\n\nEst-ce que vous pourriez nous faire un retour${d?.echeance ? " d’ici le " + dateFr(d.echeance) : " dans les prochains jours"} ? Si vous avez des questions ou si vous souhaitez adapter quelque chose, je reste volontiers à disposition.\n\nMeilleures salutations,\n${signatureMail()}`,
+    corps: ({ d }) => `Bonjour,\n\nVous trouverez en annexe notre devis${d ? " " + d.numero : ""}${d?.objet ? " pour " + d.objet.charAt(0).toLowerCase() + d.objet.slice(1) : ""}. Il reprend le contenu, le prix et le délai dont on a parlé.\n\nEst-ce que vous pourriez nous faire un retour${d?.echeance ? " d’ici le " + dateFr(d.echeance) : " dans les prochains jours"} ? Si vous avez des questions ou si vous souhaitez adapter quelque chose, je reste volontiers à disposition.\n\nMeilleures salutations,`,
   },
 };
 const mailsDe = (clientId) => db.mails_envoyes.filter((x) => x.client_id === clientId);
@@ -1943,7 +1973,8 @@ function ecrireMail(clientId, defauts = {}) {
   formulaire({
     titre: c ? `Mail à ${c.nom}` : "Nouveau mail", champs, large: true, texteBouton: "Envoyer",
     valeurs: { destinataire: c?.email || "", modele, devis_id: d0?.id || "", sujet: m.sujet(ctx(d0)), corps: m.corps(ctx(d0)) },
-    extra: `<p class="muted petit" style="margin:14px 0 0">Part de ${esc(prenomMembre(moi()) || "NexusLab")}, NexusLab &lt;contact@nexus-lab.ch&gt;. Les réponses arrivent dans nexuslab.mpa@gmail.com. Le mail est noté dans le suivi du client.</p>`,
+    extra: `<div class="sig-apercu"><div class="sig-entete"><span class="muted petit">Signature ajoutée automatiquement</span>${moi() ? `<button type="button" class="lien petit" data-sig-modifier>Modifier ma signature</button>` : ""}</div>${signatureApercu()}</div>
+      <p class="muted petit" style="margin:14px 0 0">Part de ${esc(prenomMembre(moi()) || "NexusLab")}, NexusLab &lt;contact@nexus-lab.ch&gt;. Les réponses arrivent dans nexuslab.mpa@gmail.com.${c ? " Le mail est noté dans le suivi du client." : ""}</p>`,
     apresOuverture: (form) => {
       let touche = false;
       form.elements.corps.addEventListener("input", () => (touche = true));
@@ -1955,6 +1986,7 @@ function ecrireMail(clientId, defauts = {}) {
         if (form.elements.modele.value === "devis" && !d) { d = docs.find((x) => x.type === "devis"); if (d) form.elements.devis_id.value = d.id; }
         form.elements.sujet.value = mm.sujet(ctx(d)); form.elements.corps.value = mm.corps(ctx(d)); touche = false;
       };
+      form.querySelector("[data-sig-modifier]")?.addEventListener("click", () => { fermerModale(); editerMembre(moi().id); });
       form.elements.modele.addEventListener("change", appliquer);
       form.elements.devis_id.addEventListener("change", () => { if (form.elements.modele.value === "devis") appliquer(); });
       if (!c?.email) form.elements.destinataire.focus();

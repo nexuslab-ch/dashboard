@@ -591,7 +591,9 @@ dialog[open] { animation: apparait .25s var(--ease); }
   .g-fiche { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }
   .g-fiche > .pile { display: contents; }
   .carte.sombre { padding: 22px 20px !important; }
-  .ent-pied { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .ent-pied { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); flex-wrap: nowrap; gap: 6px; padding: 8px; }
+  .ent-pied .btn { padding: 10px 13px; font-size: .88rem; }
+  .ent-pied .cache-mobile { display: none; }
 }
 /* ---------- Version 3 : wiki, situations, commentaires ---------- */
 .md { font-size: .95rem; line-height: 1.6; color: var(--texte); overflow-wrap: anywhere; }
@@ -1671,6 +1673,9 @@ const SECTIONS_ENT = () => [
     { nom: "reco", label: "Contact recommandé", placeholder: "Nom, entreprise, comment le joindre", pleine: true },
     { nom: "surpris", label: "Ce qui nous a surpris", type: "textarea", pleine: true, rows: 2, placeholder: "À noter juste après l’entretien" },
   ] },
+  { titre: "Autres notes", pourquoi: "Tout ce qui ne rentre pas dans les cases : une remarque, une idée, un nom, un détail à ne pas oublier. Le bouton « Notes » en bas de l’écran t’amène ici à tout moment.", champs: [
+    { nom: "notes", label: "Notes libres", type: "textarea", pleine: true, rows: 7, placeholder: "Écris ici tout ce qui te semble utile" },
+  ] },
 ];
 const champsEntretien = () => SECTIONS_ENT().flatMap((s) => s.champs);
 const entretiensDe = (clientId) => db.entretiens.filter((x) => x.client_id === clientId);
@@ -1725,8 +1730,8 @@ function formEntretien(id) {
     ${sections.map((s, i) => `<section class="carte ent-section"><header><h2><span class="ent-num">${i + 1} / ${sections.length}</span>${esc(s.titre)}</h2></header>
       <p class="ent-pourquoi">${esc(s.pourquoi)}</p>${s.dire ? `<p class="ent-dire"><span>À demander</span>« ${esc(s.dire)} »</p>` : ""}
       <div class="grille-form">${s.champs.map((ch) => champHtml(ch, valeurs[ch.nom])).join("")}</div></section>`).join("")}
-    <div class="ent-pied">${ex ? `<button type="button" class="btn danger" id="ent-suppr">Supprimer</button>` : ""}<span class="espace"></span>
-      <a class="btn" href="${c ? "#/clients/" + c.id : "#/entretiens"}">Annuler</a><button type="submit" class="btn primaire">${ex ? "Enregistrer les modifications" : "Enregistrer l’entretien"}</button></div>
+    <div class="ent-pied">${ex ? `<button type="button" class="btn danger" id="ent-suppr">Supprimer</button>` : ""}<button type="button" class="btn" id="ent-notes">${icone("crayon")}Notes</button><span class="espace"></span>
+      <a class="btn" href="${c ? "#/clients/" + c.id : "#/entretiens"}">Annuler</a><button type="submit" class="btn primaire">Enregistrer<span class="cache-mobile">${ex ? " les modifications" : " l’entretien"}</span></button></div>
   </form>`;
 }
 
@@ -1762,6 +1767,7 @@ function brancherEntretien() {
       maj();
     }
   });
+  $("#ent-notes")?.addEventListener("click", () => { const t = form.elements.notes; t.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => t.focus({ preventScroll: true }), 350); });
   $("#ent-vider")?.addEventListener("click", () => { try { localStorage.removeItem(cle); } catch { /* rien */ } rendre(); });
   $("#ent-suppr")?.addEventListener("click", async () => {
     if (!(await confirmer("Supprimer cet entretien ? La fiche client et son historique de contacts restent."))) return;
@@ -1829,7 +1835,8 @@ function carteEntretienClient(c) {
       <dt>Intérêt</dt><dd>${badge("interet", e.interet) || vide}</dd>
       ${(e.reponses?.taches || []).length ? `<dt>Temps perdu</dt><dd>${esc(e.reponses.taches.map((t) => t === "Autre" ? (e.reponses.taches_autre || "Autre") : t).join(", "))}${e.reponses.heures ? ` (${esc(e.reponses.heures)} par semaine)` : ""}</dd>` : ""}
       ${e.reponses?.ideal ? `<dt>Outil idéal</dt><dd>${esc(e.reponses.ideal)}</dd>` : ""}
-      ${e.reponses?.vaut ? `<dt>Valeur</dt><dd>${esc(e.reponses.vaut)} par mois</dd>` : ""}</dl>${liste.length > 1 ? `<p class="muted petit" style="margin:10px 0 0">${liste.length} entretiens au total</p>` : ""}`
+      ${e.reponses?.vaut ? `<dt>Valeur</dt><dd>${esc(e.reponses.vaut)} par mois</dd>` : ""}
+      ${e.reponses?.notes ? `<dt>Notes</dt><dd class="texte-libre">${esc(e.reponses.notes)}</dd>` : ""}</dl>${liste.length > 1 ? `<p class="muted petit" style="margin:10px 0 0">${liste.length} entretiens au total</p>` : ""}`
     : '<p class="muted petit" style="margin:0">Pas encore d’entretien avec cette PME. Le guide aide à comprendre ce qui lui fait perdre du temps.</p>'}</section>`;
 }
 

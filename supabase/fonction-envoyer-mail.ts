@@ -28,9 +28,35 @@ async function rest(chemin: string, init: RequestInit = {}) {
   return await r.json();
 }
 const echapHtml = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
-function enHtml(texte: string) {
+// Signature : modèle de Mehdi (logo « nexus », filet corail, nom, titre, téléphone, site)
+const ACCROCHE = "Sites web et outils digitaux pour les PME de Suisse romande";
+function infosSignature(m: Record<string, string | null>) {
+  const nom = String(m.nom_complet || m.nom || "").trim();
+  const titre = [String(m.titre || "").trim(), "NexusLab"].filter(Boolean).join(" · ");
+  const tel = String(m.telephone || "").trim();
+  return { nom, titre, tel };
+}
+function signatureTexte(m: Record<string, string | null>) {
+  const { nom, titre, tel } = infosSignature(m);
+  return ["●● nexus", nom, titre, [tel, "nexus-lab.ch"].filter(Boolean).join("  |  "), ACCROCHE, "HES-SO Valais"].filter(Boolean).join("\n");
+}
+function signatureHtml(m: Record<string, string | null>) {
+  const { nom, titre, tel } = infosSignature(m);
+  const police = "Manrope,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif";
+  const lienTel = tel ? `<a href="tel:${echapHtml(tel.replace(/\s/g, ""))}" style="color:#3A3A3C;text-decoration:none">${echapHtml(tel)}</a>&nbsp;&nbsp;|&nbsp;&nbsp;` : "";
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;border-collapse:collapse;font-family:${police}">
+<tr><td style="padding:0 0 14px;line-height:1;white-space:nowrap"><span style="color:#1D1D1F;font-size:11px;vertical-align:middle">&#9679;</span><span style="color:#FF5F57;font-size:15px;vertical-align:middle">&#9679;</span><span style="padding-left:6px;color:#1D1D1F;font-size:24px;font-weight:800;letter-spacing:-0.6px;vertical-align:middle">nexus</span></td></tr>
+<tr><td style="border-left:3px solid #FF5F57;padding:2px 0 2px 12px">
+<div style="font-size:16px;line-height:1.3;color:#1D1D1F">${echapHtml(nom)}</div>
+<div style="font-size:13px;line-height:1.4;color:#6E6E73;margin-top:2px">${echapHtml(titre)}</div>
+<div style="font-size:13px;line-height:1.4;color:#3A3A3C;margin-top:10px">${lienTel}<a href="https://nexus-lab.ch" style="color:#C43A32;text-decoration:none">nexus-lab.ch</a></div>
+<div style="font-size:12px;line-height:1.4;color:#6E6E73;margin-top:8px">${ACCROCHE}</div>
+<div style="font-size:12px;line-height:1.4;color:#8E8E93;margin-top:2px">HES-SO Valais</div>
+</td></tr></table>`;
+}
+function enHtml(texte: string, signature = "") {
   const paras = echapHtml(texte).split(/\n{2,}/).map((p) => `<p style="margin:0 0 14px">${p.replace(/\n/g, "<br>")}</p>`).join("");
-  return `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.55;color:#1D1D1F">${paras}</div>`;
+  return `<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.55;color:#1D1D1F">${paras}${signature}</div>`;
 }
 function base64(octets: Uint8Array) {
   let s = ""; const pas = 0x8000;
@@ -49,7 +75,7 @@ Deno.serve(async (req) => {
     if (!u.ok) return json({ erreur: "Session expirée : reconnecte-toi au dashboard." }, 401);
     const email = String((await u.json()).email || "").toLowerCase();
     const auj = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Zurich" }).format(new Date());
-    const [m] = await rest(`membres?select=id,nom,actif,acces_jusquau&email=ilike.${encodeURIComponent(email)}&limit=1`);
+    const [m] = await rest(`membres?select=*&email=ilike.${encodeURIComponent(email)}&limit=1`);
     if (!m || !m.actif || (m.acces_jusquau && m.acces_jusquau < auj)) return json({ erreur: "Ton compte n’a pas le droit d’envoyer des mails." }, 403);
 
     // 2. Contenu
@@ -80,7 +106,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: `${prenom ? prenom + ", " : ""}NexusLab <${FROM}>`,
         to: [a], ...(cc ? { cc: cc.split(/[,;]\s*/) } : {}), reply_to: REPLY_TO,
-        subject: sujet, text: corps, html: enHtml(corps), ...(pieces.length ? { attachments: pieces } : {}),
+        subject: sujet, text: `${corps}\n\n${signatureTexte(m)}`, html: enHtml(corps, signatureHtml(m)), ...(pieces.length ? { attachments: pieces } : {}),
       }),
     });
     const rep = await r.json().catch(() => ({}));

@@ -720,7 +720,7 @@ dialog[open] { animation: apparait .25s var(--ease); }
       </button>
       <button class="recherche-btn" type="button" data-action="palette" aria-label="Rechercher">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <span>Rechercher un client, un site, une tâche...</span><kbd id="raccourci-k">⌘K</kbd>
+        <span>Rechercher partout : client, document, mail, devis…</span><kbd id="raccourci-k">⌘K</kbd>
       </button>
       <span class="espace"></span>
       <div class="menu-creer">
@@ -840,6 +840,7 @@ function badge(dict, v) { const e = ETIQ[dict][v]; return e ? `<span class="badg
 
 /* ---------- Icônes ---------- */
 const ICONES = {
+  recherche: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
   accueil: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
   clients: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
   projets: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M7 13h6M7 16h4"/>',
@@ -2504,7 +2505,7 @@ function pageDocuments() {
     <div class="boutons"><button class="btn" data-action="ajouterDocument" data-interne="1">${icone("plus")}Document interne</button><button class="btn primaire" data-action="ajouterDocument">${icone("plus")}Ajouter des fichiers</button></div></div>
   <div class="filtres">
     <div class="onglets" role="group" aria-label="Classement">${[["", "Tous"], ["interne", "Internes"], ["client", "Clients"]].map(([k, l]) => `<button aria-pressed="${f.portee === k}" data-action="puce" data-filtre="documents.portee" data-valeur="${k}">${l}</button>`).join("")}</div>
-    <input type="search" placeholder="Nom du fichier" value="${esc(f.q)}" data-filtre="documents.q" aria-label="Rechercher">
+    <input type="search" placeholder="Nom, client, site ou type de document" value="${esc(f.q)}" data-filtre="documents.q" aria-label="Rechercher">
     <select data-filtre="documents.client" aria-label="Client"><option value="">Tous les clients</option>${db.clients.map((c) => `<option value="${c.id}"${f.client === c.id ? " selected" : ""}>${esc(c.nom)}</option>`).join("")}</select>
     <select data-filtre="documents.projet" aria-label="Site"><option value="">Tous les sites</option>${db.projets.map((p) => `<option value="${p.id}"${f.projet === p.id ? " selected" : ""}>${esc(p.nom)}</option>`).join("")}</select>
     <select data-filtre="documents.type" aria-label="Type"><option value="">Tous les types</option>${options("typeDoc").map(([k, l]) => `<option value="${k}"${f.type === k ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
@@ -2512,8 +2513,8 @@ function pageDocuments() {
   <div id="liste-documents">${listeDocuments()}</div>`;
 }
 function listeDocuments() {
-  const f = filtres.documents, q = f.q.toLowerCase();
-  const l = db.documents.filter((d) => (!q || d.nom.toLowerCase().includes(q)) && (!f.client || d.client_id === f.client) && (!f.projet || d.projet_id === f.projet) && (!f.type || d.type === f.type)
+  const f = filtres.documents, mots = motsRecherche(f.q);
+  const l = db.documents.filter((d) => contientMots(mots, d.nom, libelle("typeDoc", d.type), d.interne ? "interne equipe" : nomClient(d.client_id), d.projet_id && nomProjet(d.projet_id)) && (!f.client || d.client_id === f.client) && (!f.projet || d.projet_id === f.projet) && (!f.type || d.type === f.type)
     && (!f.portee || (f.portee === "interne") === !!d.interne));
   if (!l.length) return '<div class="carte vide-liste">Aucun document. Ajoutez des présentations BTA, contrats, maquettes, logos ou photos.</div>';
   // Documents internes en premier, regroupés par type
@@ -3579,24 +3580,53 @@ function basculerMenuCreer(ouvrir) {
 const palette = $("#palette");
 let paletteItems = [], paletteSel = 0;
 const sansAccent = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+// Mots de la recherche : tous doivent apparaître (ordre libre, sans accents, sans majuscules)
+const motsRecherche = (q) => sansAccent(q).split(/[\s,;]+/).filter(Boolean);
+const contientMots = (mots, ...champs) => { if (!mots.length) return true; const t = sansAccent(champs.flat().filter(Boolean).join(" ")); return mots.every((m) => t.includes(m)); };
 function resultatsPalette(q) {
-  const n = sansAccent(q.trim());
-  const ok = (...champs) => !n || sansAccent(champs.join(" ")).includes(n);
+  const mots = motsRecherche(q), n = mots.length;
+  const ok = (...champs) => contientMots(mots, ...champs);
   const items = [];
-  const ajoute = (groupe, liste, max) => items.push(...liste.slice(0, max).map((x) => ({ groupe, ...x })));
-  ajoute("Actions", CREER.filter(([l]) => ok("créer nouveau ajouter " + l)).map(([l, ic, act, type]) => ({ titre: l === "Débrief du jour" ? l : "Créer : " + l, icone: ic, faire: () => ACTIONS[act]({ type }) })), n ? 4 : 3);
-  ajoute("Pages", Object.entries(PAGES).filter(([, p]) => ok(p.titre, p.groupe)).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), n ? 5 : 13);
-  if (n) {
-    ajoute("Clients", db.clients.filter((c) => ok(c.nom, c.contact, c.localite, c.secteur, c.email)).map((c) => ({ titre: c.nom, meta: [libelle("statutClient", c.statut), c.localite].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + c.id) })), 6);
-    ajoute("Sites", db.projets.filter((p) => ok(p.nom, p.domaine, nomClient(p.client_id))).map((p) => ({ titre: p.nom, meta: [nomClient(p.client_id), libelle("statutProjet", p.statut)].filter(Boolean).join(" · "), icone: "projets", faire: () => (location.hash = "#/projets/" + p.id) })), 5);
-    ajoute("Tâches", db.taches.filter((t) => ok(t.titre, t.description, t.sprint)).map((t) => ({ titre: t.titre, meta: [libelle("statutTache", t.statut), t.echeance && dateCourte(t.echeance)].filter(Boolean).join(" · "), icone: "taches", faire: () => editerTache(t.id) })), 6);
-    ajoute("Devis et factures", db.devis_factures.filter((d) => ok(d.numero, d.objet, nomClient(d.client_id))).map((d) => ({ titre: `${d.numero} · ${nomClient(d.client_id)}`, meta: [chf(d.montant_ttc), libelle("statutDf", d.statut)].join(" · "), icone: "devis", faire: () => editeurDf(d.id) })), 5);
-    ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu)).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
-    ajoute("Documents", db.documents.filter((d) => ok(d.nom)).map((d) => ({ titre: d.nom, meta: d.interne ? "Document interne" : nomClient(d.client_id), icone: "documents", faire: () => ouvrirDocument(d.id) })), 5);
-    ajoute("Ressources", db.ressources.filter((r) => ok(r.titre, r.description, r.url)).map((r) => ({ titre: r.titre, meta: r.url || "", icone: "ressources", faire: () => (r.url ? window.open(r.url, "_blank", "noopener") : editerRessource(r.id)) })), 5);
-    ajoute("Wiki", db.pages.filter((p) => ok(p.titre, p.contenu)).map((p) => ({ titre: p.titre, meta: libelle("categoriePage", p.categorie), icone: "wiki", faire: () => (location.hash = "#/wiki/" + p.id) })), 5);
-    ajoute("Situations apprenantes", db.situations.filter((x) => ok(x.titre, x.ce_que_jai_fait, x.apprentissage)).map((x) => ({ titre: x.titre, meta: [dateFr(x.date), parId("membres", x.membre_id)?.nom].filter(Boolean).join(" · "), icone: "situations", faire: () => editerSituation(x.id) })), 5);
+  // Les titres qui commencent par la recherche passent devant
+  const rang = (titre) => { const t = sansAccent(titre); return t.startsWith(mots.join(" ")) ? 0 : mots.every((m) => t.includes(m)) ? 1 : 2; };
+  const ajoute = (groupe, liste, max, voirTout) => {
+    if (n) liste = liste.map((x, i) => [x, i]).sort((x, y) => rang(x[0].titre) - rang(y[0].titre) || x[1] - y[1]).map((x) => x[0]);
+    items.push(...liste.slice(0, max).map((x) => ({ groupe, ...x })));
+    if (voirTout && liste.length > max) items.push({ groupe, titre: `Voir les ${liste.length} résultats`, meta: groupe, icone: "recherche", faire: voirTout });
+  };
+  if (!n) {
+    ajoute("Actions", CREER.map(([l, ic, act, type]) => ({ titre: l === "Débrief du jour" ? l : "Créer : " + l, icone: ic, faire: () => ACTIONS[act]({ type }) })), 3);
+    ajoute("Pages", Object.entries(PAGES).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), 20);
+    return items;
   }
+  const brut = q.trim();
+  const nbDe = (t, c) => (db[t] || []).filter((x) => x.client_id === c).length;
+  // 1. Clients : le dossier complet (fiche, documents, devis, mails, entretien)
+  ajoute("Clients", db.clients.filter((c) => ok(c.nom, c.contact, c.localite, c.secteur, c.email, c.telephone, c.prochaine_action, c.notes, libelle("statutClient", c.statut))).map((c) => {
+    const nd = nbDe("documents", c.id), nm = nbDe("mails_envoyes", c.id) + nbDe("mails_recus", c.id), nf = nbDe("devis_factures", c.id);
+    return { titre: c.nom, meta: [libelle("statutClient", c.statut), c.localite, nd && `${nd} doc.`, nf && `${nf} devis ou fact.`, nm && `${nm} mail${nm > 1 ? "s" : ""}`].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + c.id) };
+  }), 6, () => { filtres.clients.q = brut; filtres.clients.vue = "liste"; location.hash = "#/clients"; rendre(); });
+  // 2. Documents : par nom, type, client, site ou dossier
+  ajoute("Documents", db.documents.filter((d) => ok(d.nom, libelle("typeDoc", d.type), d.interne ? "interne equipe" : nomClient(d.client_id), d.projet_id && nomProjet(d.projet_id), d.date && dateFr(d.date))).map((d) => ({ titre: d.nom, meta: [d.interne ? "Document interne" : nomClient(d.client_id), libelle("typeDoc", d.type), d.date && dateCourte(d.date)].filter(Boolean).join(" · "), icone: "documents", faire: () => ouvrirDocument(d.id) })), 6,
+    () => { Object.assign(filtres.documents, { q: brut, client: "", projet: "", type: "", portee: "" }); location.hash = "#/documents"; rendre(); });
+  ajoute("Devis et factures", db.devis_factures.filter((d) => ok(d.numero, d.objet, nomClient(d.client_id), d.type === "facture" ? "facture" : "devis", libelle("statutDf", d.statut))).map((d) => ({ titre: `${d.numero} · ${nomClient(d.client_id)}`, meta: [d.objet, chf(d.montant_ttc), libelle("statutDf", d.statut)].filter(Boolean).join(" · "), icone: "devis", faire: () => editeurDf(d.id) })), 5,
+    () => { filtres.devis.q = brut; location.hash = "#/devis"; rendre(); });
+  ajoute("Mails", [
+    ...(db.mails_recus || []).filter((x) => ok(x.sujet, x.expediteur, x.expediteur_nom, x.texte, nomClient(x.client_id), (x.pieces || []).map((p) => p.nom), "recu")).map((x) => ({ titre: x.sujet || "(sans objet)", meta: ["Reçu de " + (x.expediteur_nom || x.expediteur), dateCourte(x.recu_le)].join(" · "), icone: "mail", faire: () => voirMailRecu(x.id) })),
+    ...(db.mails_envoyes || []).filter((x) => ok(x.sujet, x.destinataire, x.copie, x.corps, x.piece_jointe, nomClient(x.client_id), "envoye")).map((x) => ({ titre: x.sujet, meta: ["Envoyé à " + x.destinataire, dateCourte(x.cree_le)].join(" · "), icone: "mail", faire: () => voirMail(x.id) })),
+  ], 5, () => (location.hash = "#/mails"));
+  ajoute("Entretiens", (db.entretiens || []).filter((e) => ok(nomClient(e.client_id), JSON.stringify(e.reponses || {}), "entretien")).map((e) => ({ titre: "Entretien · " + nomClient(e.client_id), meta: [dateFr(e.date), parId("membres", e.membre_id)?.nom].filter(Boolean).join(" · "), icone: "entretien", faire: () => (location.hash = "#/entretiens/" + e.id) })), 4);
+  ajoute("Suivi des clients", (db.contacts_clients || []).filter((k) => ok(k.notes, nomClient(k.client_id))).filter((k) => k.notes).map((k) => ({ titre: k.notes.length > 80 ? k.notes.slice(0, 80) + "…" : k.notes, meta: [nomClient(k.client_id), dateCourte(k.date)].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + k.client_id) })), 4);
+  ajoute("Sites", db.projets.filter((p) => ok(p.nom, p.domaine, p.url_en_ligne, nomClient(p.client_id), p.prochaine_etape)).map((p) => ({ titre: p.nom, meta: [nomClient(p.client_id), libelle("statutProjet", p.statut)].filter(Boolean).join(" · "), icone: "projets", faire: () => (location.hash = "#/projets/" + p.id) })), 5);
+  ajoute("Tâches", db.taches.filter((t) => ok(t.titre, t.description, t.sprint, t.projet_id && nomProjet(t.projet_id))).map((t) => ({ titre: t.titre, meta: [libelle("statutTache", t.statut), t.echeance && dateCourte(t.echeance)].filter(Boolean).join(" · "), icone: "taches", faire: () => editerTache(t.id) })), 6);
+  ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu, dateFr(r.date))).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
+  ajoute("Offres", (db.offres || []).filter((o) => ok(o.nom, o.description, o.badge)).map((o) => ({ titre: o.nom, meta: o.badge || "", icone: "offres", faire: () => (location.hash = "#/offres") })), 3);
+  ajoute("Ressources", db.ressources.filter((r) => ok(r.titre, r.description, r.url)).map((r) => ({ titre: r.titre, meta: r.url || "", icone: "ressources", faire: () => (r.url ? window.open(r.url, "_blank", "noopener") : editerRessource(r.id)) })), 5);
+  ajoute("Wiki", db.pages.filter((p) => ok(p.titre, p.contenu)).map((p) => ({ titre: p.titre, meta: libelle("categoriePage", p.categorie), icone: "wiki", faire: () => (location.hash = "#/wiki/" + p.id) })), 5);
+  ajoute("Situations apprenantes", db.situations.filter((x) => ok(x.titre, x.ce_que_jai_fait, x.apprentissage)).map((x) => ({ titre: x.titre, meta: [dateFr(x.date), parId("membres", x.membre_id)?.nom].filter(Boolean).join(" · "), icone: "situations", faire: () => editerSituation(x.id) })), 5);
+  ajoute("Équipe", db.membres.filter((m) => ok(m.nom, m.nom_complet, m.role, m.email)).map((m) => ({ titre: m.nom_complet || m.nom, meta: m.role || "", icone: "equipe", faire: () => (location.hash = "#/equipe") })), 4);
+  ajoute("Pages", Object.entries(PAGES).filter(([, p]) => ok(p.titre, p.groupe)).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), 4);
+  ajoute("Actions", CREER.filter(([l]) => ok("créer nouveau ajouter " + l)).map(([l, ic, act, type]) => ({ titre: l === "Débrief du jour" ? l : "Créer : " + l, icone: ic, faire: () => ACTIONS[act]({ type }) })), 3);
   return items;
 }
 function rendrePalette() {

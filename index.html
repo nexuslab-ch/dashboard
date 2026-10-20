@@ -317,6 +317,14 @@ dl.infos a { color: var(--texte); text-decoration-color: var(--corail); text-und
 .offre li { display: flex; gap: 9px; }
 .offre li::before { content: "✓"; flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--corail-doux); color: var(--corail-texte); font-size: .7rem; font-weight: 800; display: grid; place-items: center; margin-top: 2px; }
 .offre.inactive { opacity: .55; }
+.offre .modes { display: grid; gap: 8px; }
+.offre .mode { padding: 10px 12px; border-radius: 12px; background: var(--fond); border: 1px solid var(--ligne); }
+.offre .mode .titre-mode { font-size: .72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--texte-3); }
+.offre .mode .montant { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--corail-texte); }
+.offre .mode .montant small { white-space: nowrap; }
+.offre .mode .montant small, .offre .mode .detail { font-size: .82rem; font-weight: 600; color: var(--texte-3); letter-spacing: 0; }
+.offres-titre { margin: 28px 0 12px; font-size: 1.05rem; }
+.offres.options { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 .offre footer { margin-top: auto; display: flex; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid var(--ligne); }
 
 /* ---------- Tableaux de cartes (tâches, pipeline) ---------- */
@@ -1098,19 +1106,34 @@ function editerProjet(id, defauts = {}) {
 
 const champsOffre = () => [
   { nom: "nom", label: "Nom de l’offre", requis: true },
-  { nom: "prix_depart", label: "Prix de départ (CHF)", type: "number", step: "1", min: 0 },
-  { nom: "periode", label: "Facturation", type: "select", options: options("periode"), vide: false, defaut: "unique" },
+  { nom: "type", label: "Type", type: "choix", options: [["formule", "Formule"], ["option", "Option (affichée à part)"]], defaut: "formule" },
+  { nom: "badge", label: "Badge", placeholder: "Prix de lancement" },
   { nom: "ordre", label: "Ordre d’affichage", type: "number", step: "1", defaut: 0 },
+  { type: "separateur" },
+  { nom: "prix_creation", label: "Paiement unique : création (CHF)", type: "number", step: "1", min: 0 },
+  { nom: "forfait_annuel", label: "Paiement unique : forfait annuel (CHF/an)", type: "number", step: "1", min: 0 },
+  { nom: "forfait_annuel_detail", label: "Ce que couvre le forfait annuel", placeholder: "Hébergement, nom de domaine, mises à jour", pleine: true },
+  { nom: "prix_mensuel", label: "Tout au mois : mensualité (CHF/mois)", type: "number", step: "1", min: 0 },
+  { nom: "engagement_mois", label: "Engagement (mois)", type: "number", step: "1", min: 0, aide: "Vide : sans engagement." },
+  { nom: "prix_des", label: "Afficher « dès » devant les prix", type: "checkbox" },
+  { nom: "sur_devis", label: "Prix sur devis", type: "checkbox" },
+  { type: "separateur" },
   { nom: "description", label: "Description", type: "textarea", pleine: true },
   { nom: "inclus", label: "Ce qui est inclus (une ligne par élément)", type: "liste", pleine: true, rows: 5 },
+  { nom: "conditions", label: "Conditions", placeholder: "Réservée au paiement unique.", pleine: true },
   { nom: "active", label: "Offre active (proposée aux clients)", type: "checkbox", pleine: true },
 ];
 function editerOffre(id) {
   const o = parId("offres", id);
   formulaire({
     titre: o ? "Modifier l’offre" : "Nouvelle offre", champs: champsOffre(),
-    valeurs: o || { active: true, periode: "unique", ordre: db.offres.length + 1 },
-    enregistrer: async (v) => { await enregistrer("offres", v, id); toast("Offre enregistrée."); },
+    valeurs: o || { active: true, type: "formule", badge: "Prix de lancement", engagement_mois: 12, ordre: db.offres.length + 1 },
+    enregistrer: async (v) => {
+      // prix_depart et periode restent tenus à jour pour les écrans qui ne lisent que ces deux champs.
+      if (v.prix_creation != null) { v.prix_depart = v.prix_creation; v.periode = "unique"; }
+      else if (v.prix_mensuel != null) { v.prix_depart = v.prix_mensuel; v.periode = "mois"; }
+      await enregistrer("offres", v, id); toast("Offre enregistrée.");
+    },
     supprimer: o ? () => supprimerLigne("offres", id) : null,
   });
 }
@@ -2050,19 +2073,35 @@ function ficheProjet(id) {
 /* ==========================================================================
    Offres
    ========================================================================== */
-function pageOffres() {
-  return `
-  <div class="entete"><div><h1>Offres</h1><div class="sous-titre">Les formules packagées. Prix de départ, modifiables à tout moment.</div></div>
-    <div class="boutons"><button class="btn primaire" data-action="nouvelleOffre">${icone("plus")}Nouvelle offre</button></div></div>
-  ${db.offres.length ? `<div class="offres">${db.offres.map((o) => {
-    const nb = db.projets.filter((p) => p.offre_id === o.id).length;
-    return `<article class="carte offre${o.active ? "" : " inactive"}">
+// Une offre a deux modes de paiement si au moins un des nouveaux prix est rempli ; sinon, ancien affichage à prix unique.
+const offreDeuxModes = (o) => o.prix_creation != null || o.prix_mensuel != null;
+const prixOffre = (o, n) => (o.prix_des ? "<small>dès </small>" : "") + chfCourt(n);
+const engagementOffre = (o) => o.engagement_mois ? `engagement ${o.engagement_mois} mois` : "sans engagement";
+function modesOffre(o) {
+  if (!offreDeuxModes(o)) return `<div class="prix">${o.prix_depart != null ? `<small>dès </small>${chfCourt(o.prix_depart)}${o.periode !== "unique" ? ` <small>${esc(libelle("periode", o.periode).toLowerCase())}</small>` : ""}` : '<small>Prix à définir</small>'}</div>`;
+  const modes = [];
+  if (o.prix_creation != null) modes.push(`<div class="mode"><div class="titre-mode">Paiement unique</div><div class="montant">${prixOffre(o, o.prix_creation)}${o.forfait_annuel != null ? ` <small>+ ${chfCourt(o.forfait_annuel)}/an</small>` : ""}</div>${o.sur_devis ? '<div class="detail">Sur devis</div>' : ""}${o.forfait_annuel_detail ? `<div class="detail">Forfait annuel : ${esc(o.forfait_annuel_detail)}</div>` : ""}</div>`);
+  if (o.prix_mensuel != null) modes.push(`<div class="mode"><div class="titre-mode">${o.type === "option" ? "Abonnement" : "Tout au mois"}</div><div class="montant">${prixOffre(o, o.prix_mensuel)} <small>/mois</small></div><div class="detail">${engagementOffre(o)}</div></div>`);
+  return `<div class="modes">${modes.join("")}</div>`;
+}
+function carteOffre(o) {
+  const nb = db.projets.filter((p) => p.offre_id === o.id).length;
+  return `<article class="carte offre${o.active ? "" : " inactive"}">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2>${esc(o.nom)}</h2>${o.active ? '<span class="badge t-vert">Active</span>' : '<span class="badge t-gris">Inactive</span>'}</div>
-      <div class="prix">${o.prix_depart != null ? `<small>dès </small>${chfCourt(o.prix_depart)}${o.periode !== "unique" ? ` <small>${esc(libelle("periode", o.periode).toLowerCase())}</small>` : ""}` : '<small>Prix à définir</small>'}</div>
+      ${o.badge ? `<div><span class="badge t-corail">${esc(o.badge)}</span></div>` : ""}
+      ${modesOffre(o)}
       ${o.description ? `<p class="texte-libre" style="margin:0">${esc(o.description)}</p>` : ""}
       ${o.inclus?.length ? `<ul>${o.inclus.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : ""}
+      ${o.conditions ? `<p class="muted petit" style="margin:0">${esc(o.conditions)}</p>` : ""}
       <footer><span class="muted petit">${nb} site${nb > 1 ? "s" : ""}</span><span class="espace"></span><button class="btn mini" data-action="basculerOffre" data-id="${o.id}">${o.active ? "Désactiver" : "Activer"}</button><button class="btn mini" data-action="modifierOffre" data-id="${o.id}">${icone("crayon")}Modifier</button></footer></article>`;
-  }).join("")}</div>` : '<div class="carte vide-liste">Aucune offre pour l’instant.</div>'}`;
+}
+function pageOffres() {
+  const formules = db.offres.filter((o) => o.type !== "option"), opts = db.offres.filter((o) => o.type === "option");
+  return `
+  <div class="entete"><div><h1>Offres</h1><div class="sous-titre">Les formules packagées, en paiement unique ou tout au mois. Modifiables à tout moment.</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="nouvelleOffre">${icone("plus")}Nouvelle offre</button></div></div>
+  ${formules.length ? `<div class="offres">${formules.map(carteOffre).join("")}</div>` : opts.length ? "" : '<div class="carte vide-liste">Aucune offre pour l’instant.</div>'}
+  ${opts.length ? `<h2 class="offres-titre">Options</h2><div class="offres options">${opts.map(carteOffre).join("")}</div>` : ""}`;
 }
 
 /* ==========================================================================
@@ -2120,7 +2159,9 @@ function editeurDf(id, defauts = {}) {
   const extra = `<h3 style="margin:18px 0 4px">Prestations</h3>
     <div class="table-wrap"><table class="lignes"><thead><tr><th>Description</th><th class="c-q">Quantité</th><th class="c-p">Prix unitaire</th><th class="c-t num">Total</th><th class="c-x"></th></tr></thead><tbody id="lignes-corps">${lignes.map(nouvelleLigneHtml).join("")}</tbody></table></div>
     <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap"><button type="button" class="btn mini" id="ajout-ligne">${icone("plus")}Ligne</button>
-      <select id="ajout-offre" class="statut-rapide" aria-label="Ajouter une offre"><option value="">Ajouter une offre...</option>${db.offres.filter((o) => o.active).map((o) => `<option value="${o.id}">${esc(o.nom)} (${chfCourt(o.prix_depart)})</option>`).join("")}</select></div>
+      <select id="ajout-offre" class="statut-rapide" aria-label="Ajouter une offre"><option value="">Ajouter une offre...</option>${db.offres.filter((o) => o.active).map((o) => !offreDeuxModes(o) ? `<option value="${o.id}">${esc(o.nom)} (${chfCourt(o.prix_depart)})</option>`
+        : (o.prix_creation != null ? `<option value="${o.id}|unique">${esc(o.nom)}, paiement unique (${chfCourt(o.prix_creation)}${o.forfait_annuel != null ? " + " + chfCourt(o.forfait_annuel) + "/an" : ""})</option>` : "")
+        + (o.prix_mensuel != null ? `<option value="${o.id}|mois">${esc(o.nom)}, ${o.type === "option" ? "abonnement" : "tout au mois"} (${chfCourt(o.prix_mensuel)}/mois)</option>` : "")).join("")}</select></div>
     <div class="totaux" id="totaux"></div>`;
   const titre = ex ? `${type === "devis" ? "Devis" : "Facture"} ${ex.numero}` : type === "devis" ? "Nouveau devis" : "Nouvelle facture";
   let pdfApres = false;
@@ -2165,11 +2206,14 @@ function editeurDf(id, defauts = {}) {
       corps.addEventListener("click", (e) => { if (e.target.closest("[data-suppr-ligne]")) { e.target.closest("tr").remove(); if (!$("tr", corps)) corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml()); recalcul(); } });
       $("#ajout-ligne", form).addEventListener("click", () => { corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml()); $("tr:last-child input", corps).focus(); recalcul(); });
       $("#ajout-offre", form).addEventListener("change", (e) => {
-        const o = parId("offres", e.target.value); e.target.value = "";
+        const [oid, mode] = e.target.value.split("|"), o = parId("offres", oid); e.target.value = "";
         if (!o) return;
         const premiere = $("tr", corps);
         if (corps.children.length === 1 && premiere && !$('[data-l="description"]', premiere).value) premiere.remove();
-        corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml({ description: `Offre ${o.nom}${o.periode !== "unique" ? " (" + libelle("periode", o.periode).toLowerCase() + ")" : ""}`, quantite: 1, prix: Number(o.prix_depart || 0) }));
+        const lignes = mode === "unique" ? [{ description: `Offre ${o.nom} : création`, quantite: 1, prix: Number(o.prix_creation) }].concat(o.forfait_annuel != null ? [{ description: `Offre ${o.nom} : forfait annuel${o.forfait_annuel_detail ? " (" + o.forfait_annuel_detail + ")" : ""}`, quantite: 1, prix: Number(o.forfait_annuel) }] : [])
+          : mode === "mois" ? [{ description: `Offre ${o.nom} : mensualité${o.engagement_mois ? ", engagement " + o.engagement_mois + " mois" : ", sans engagement"}`, quantite: o.engagement_mois || 1, prix: Number(o.prix_mensuel) }]
+          : [{ description: `Offre ${o.nom}${o.periode !== "unique" ? " (" + libelle("periode", o.periode).toLowerCase() + ")" : ""}`, quantite: 1, prix: Number(o.prix_depart || 0) }];
+        for (const l of lignes) corps.insertAdjacentHTML("beforeend", nouvelleLigneHtml(l));
         if (!form.elements.objet.value) form.elements.objet.value = "Offre " + o.nom;
         recalcul();
       });

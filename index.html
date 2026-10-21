@@ -81,6 +81,29 @@ h3 { font-size: .95rem; font-weight: 700; }
 .muted { color: var(--texte-3); }
 .petit { font-size: .82rem; }
 .sig-apercu { margin-top: 14px; }
+.recette-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.recette-carte { display: grid; gap: 8px; text-decoration: none; color: inherit; }
+.recette-carte:hover { border-color: var(--texte-3); }
+.recette-carte .titre { font-weight: 800; font-size: 1.02rem; }
+.recette-carte .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .8rem; color: var(--texte-3); }
+.recette-carte p { margin: 0; }
+.recette-num { font-size: .72rem; font-weight: 800; letter-spacing: .12em; color: var(--corail-texte); }
+.recette-remplie { display: flex; flex-wrap: wrap; gap: 4px; }
+.recette-remplie span { font-size: .68rem; padding: 2px 7px; border-radius: var(--pilule); border: 1px dashed var(--ligne-forte); color: var(--texte-3); }
+.recette-remplie span.ok { border-style: solid; background: var(--corail-doux); border-color: transparent; color: var(--corail-texte); }
+.recette-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start; }
+.recette-bloc header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.recette-code { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; line-height: 1.5; background: var(--fond); border: 1px solid var(--ligne); border-radius: 12px; padding: 12px 14px; max-height: 420px; overflow: auto; overflow-wrap: anywhere; }
+.recette-check { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.recette-check li { position: relative; padding-left: 26px; font-size: .9rem; }
+.recette-check li::before { content: ""; position: absolute; left: 0; top: 2px; width: 15px; height: 15px; border: 2px solid var(--ligne-forte); border-radius: 5px; }
+.recette-histo { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.recette-histo .lien, .recette-note .lien { background: none; border: 0; padding: 0; color: var(--corail-texte); text-decoration: underline; cursor: pointer; font: inherit; }
+.recette-h3 { font-size: .9rem; margin: 16px 0 6px; }
+.recette-note { display: flex; gap: 12px; align-items: flex-start; margin-top: 16px; }
+.recette-note svg { width: 20px; height: 20px; flex: none; margin-top: 2px; }
+a.retour { display: flex; width: fit-content; align-items: center; gap: 6px; font-size: .82rem; color: var(--texte-3); text-decoration: none; margin-bottom: 6px; }
+a.retour svg { width: 14px; height: 14px; }
 .titre-section { font-size: 1.05rem; margin: 26px 0 10px; display: flex; align-items: center; gap: 10px; }
 tr.non-lu td { font-weight: 800; }
 tr.non-lu td:first-child { box-shadow: inset 3px 0 0 var(--corail); }
@@ -812,6 +835,8 @@ function ecrireStockage(cle, v) { try { localStorage.setItem(cle, v); } catch { 
 
 /* ---------- Libellés ---------- */
 const ETIQ = {
+  statutRecette: { brouillon: ["Brouillon", "gris"], valide: ["Validée", "vert"], obsolete: ["Obsolète", "rouge"] },
+  categorieRecette: { site: ["Site web", "bleu"], dashboard: ["Dashboard", "violet"], outil: ["Outil sur mesure", "jaune"], contenu: ["Contenu", "vert"], autre: ["Autre", "gris"] },
   statutClient: { prospect: ["Prospect", "gris"], contacte: ["Contacté", "bleu"], rendez_vous: ["Rendez-vous", "violet"], offre_envoyee: ["Offre envoyée", "jaune"], mandat_signe: ["Mandat signé", "corail"], livre: ["Livré", "vert"], termine: ["Terminé", "gris"], perdu: ["Perdu", "rouge"] },
   statutProjet: { brief: ["Brief", "gris"], design: ["Design", "violet"], developpement: ["Développement", "bleu"], revue_client: ["Revue client", "jaune"], en_ligne: ["En ligne", "vert"], maintenance: ["Maintenance", "corail"], termine: ["Terminé", "gris"] },
   typeProjet: { vitrine: "Vitrine", vitrine_reservation: "Vitrine + réservation", pack_visibilite: "Pack visibilité", outil: "Outil sur mesure", autre: "Autre" },
@@ -840,6 +865,7 @@ function badge(dict, v) { const e = ETIQ[dict][v]; return e ? `<span class="badg
 
 /* ---------- Icônes ---------- */
 const ICONES = {
+  cadenas: '<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/>',
   recherche: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
   accueil: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
   clients: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14.8c1.9.7 3.1 2.4 3.5 5.2"/>',
@@ -895,6 +921,8 @@ const TABLES = {
   reunions: { ordre: ["date", false] },
   decisions: { ordre: ["date", false] },
   ressources: { ordre: ["titre", true] },
+  recettes: { ordre: ["numero", true], optionnel: true },
+  recettes_historique: { ordre: ["archive_le", false], optionnel: true },
   competences: { ordre: ["nom", true] },
   contacts_clients: { ordre: ["date", false] },
   situations: { ordre: ["date", false], optionnel: true },
@@ -1308,6 +1336,7 @@ const PAGES = {
   projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets, groupe: "Production" },
   taches: { titre: "Tâches", icone: "taches", rendre: pageTaches, groupe: "Production" },
   documents: { titre: "Documents", icone: "documents", rendre: pageDocuments, groupe: "Production" },
+  confidentiel: { titre: "Documents confidentiels", icone: "cadenas", rendre: pageConfidentiel, groupe: "Production", reserve: true },
   equipe: { titre: "Équipe", icone: "equipe", rendre: pageEquipe, groupe: "Équipe et BTA" },
   reunions: { titre: "Réunions et décisions", icone: "reunions", rendre: pageReunions, groupe: "Équipe et BTA" },
   ressources: { titre: "Ressources", icone: "ressources", rendre: pageRessources, groupe: "Équipe et BTA" },
@@ -1362,9 +1391,9 @@ function rendreNav(page) {
   const nonLus = (db.mails_recus || []).filter((x) => !x.lu).length;
   const compteurs = { taches: [mesTaches, "Mes tâches ouvertes"], clients: [relances, "Relances à faire"], mails: [nonLus, "Mails reçus non lus"] };
   const fermes = groupesFermes();
-  const groupes = [...new Set(Object.values(PAGES).map((p) => p.groupe))];
+  const groupes = [...new Set(Object.values(PAGES).filter((p) => !p.reserve || estAssocie()).map((p) => p.groupe))];
   $("#nav").innerHTML = groupes.map((g) => {
-    const pages = Object.entries(PAGES).filter(([, p]) => p.groupe === g);
+    const pages = Object.entries(PAGES).filter(([, p]) => p.groupe === g && (!p.reserve || estAssocie()));
     const actif = pages.some(([k]) => k === page);
     const ouvert = actif || !fermes.includes(g);
     const total = pages.reduce((s, [k]) => s + ((compteurs[k] || [0])[0] || 0), 0);
@@ -2121,6 +2150,113 @@ function pageMails() {
     ${l.map((x) => `<tr data-action="voirMail" data-id="${x.id}"><td>${esc(dateCourte(x.cree_le))}</td><td class="fort">${esc(nomClient(x.client_id)) || vide}</td><td class="masquer-mobile">${esc(x.destinataire)}</td><td>${x.statut === "erreur" ? '<span class="badge t-rouge">Non envoyé</span> ' : ""}${esc(x.sujet)}${x.piece_jointe ? ` <span class="muted petit">· ${esc(x.piece_jointe)}</span>` : ""}</td><td class="masquer-mobile">${esc(prenomDe(x.membre_id)) || vide}</td></tr>`).join("")}
   </tbody></table></div></section>`
   : `<section class="carte"><div class="vide-liste">Aucun mail envoyé pour l’instant. Ouvre une fiche client et clique sur « Mail », ou commence ici.<br><button class="btn primaire" data-action="ecrireMail">${icone("mail")}Nouveau mail</button></div></section>`}`;
+}
+
+/* ==========================================================================
+   Documents confidentiels : la recette de chaque service NexusLab
+   Réservé aux associés. La vraie protection est dans Supabase (est_associe()),
+   ce code ne fait que masquer la page aux autres.
+   ========================================================================== */
+const estAssocie = () => { const m = moi(); return !!(m && m.actif && !m.acces_jusquau); };
+const numeroRecette = (r) => "R-" + String(r.numero || 0).padStart(3, "0");
+const SECTIONS_RECETTE = [
+  ["objectif", "À quoi il sert", false], ["prompt", "Prompt", true], ["playbook", "Playbook", false], ["template", "Template", true],
+  ["checklist", "Checklist", false], ["prix_interne", "Prix interne", false], ["exemple", "Exemple réel", false], ["apprentissages", "Ce qu’on a appris", false],
+];
+const champsRecette = () => [
+  { nom: "service", label: "Service", requis: true, placeholder: "Site vitrine, dashboard, outil de stock…", pleine: true },
+  { nom: "categorie", label: "Catégorie", type: "select", options: options("categorieRecette"), vide: false },
+  { nom: "statut", label: "Statut", type: "select", options: options("statutRecette"), vide: false },
+  { nom: "version", label: "Version", placeholder: "1.0", aide: "Augmente-la à chaque changement important. L’ancienne version est gardée dans l’historique." },
+  { nom: "date_version", label: "Date de la version", type: "date" },
+  { nom: "responsable_id", label: "Responsable", type: "select", options: optMembres(), vide: "Personne" },
+  { nom: "exemple_client_id", label: "Client de l’exemple réel", type: "select", options: optClients(), vide: "Aucun" },
+  { nom: "objectif", label: "À quoi il sert", type: "textarea", rows: 4, pleine: true },
+  { nom: "prompt", label: "Prompt officiel", type: "textarea", rows: 10, pleine: true },
+  { nom: "playbook", label: "Playbook (les étapes)", type: "textarea", rows: 8, pleine: true },
+  { nom: "template", label: "Template (lien GitHub, structure, fichiers)", type: "textarea", rows: 5, pleine: true },
+  { nom: "checklist", label: "Checklist", type: "textarea", rows: 6, pleine: true, aide: "Un point par ligne." },
+  { nom: "prix_interne", label: "Prix interne", type: "textarea", rows: 3, pleine: true },
+  { nom: "exemple", label: "Exemple réel", type: "textarea", rows: 3, pleine: true },
+  { nom: "apprentissages", label: "Ce qu’on a appris", type: "textarea", rows: 4, pleine: true },
+  { nom: "sources", label: "Où vit chaque document (une seule source)", type: "textarea", rows: 4, pleine: true, aide: "Une ligne par document : Titre | Où il vit | lien ou chemin. Ailleurs, on met juste un lien vers cette source." },
+];
+function editerRecette(id) {
+  if (!estAssocie()) { toast("Réservé aux associés.", "erreur"); return; }
+  const r = parId("recettes", id);
+  formulaire({
+    titre: r ? `Modifier ${numeroRecette(r)}` : "Nouvelle fiche de service", champs: champsRecette(), large: true,
+    valeurs: r || { categorie: "outil", statut: "brouillon", version: "0.1", date_version: aujourdhui(), responsable_id: moi()?.id },
+    enregistrer: async (v) => {
+      const enr = await enregistrer("recettes", v, id);
+      await Promise.all([charger("recettes"), charger("recettes_historique")]);
+      toast(r ? "Fiche enregistrée. L’ancienne version est dans l’historique." : "Fiche créée.");
+      if (!r && enr?.id) location.hash = "#/confidentiel/" + enr.id;
+    },
+    supprimer: r ? () => supprimerLigne("recettes", id) : null,
+  });
+}
+function blocTexte(cle, titre, copiable, r) {
+  const v = r[cle];
+  if (!v) return `<section class="carte recette-bloc"><header><h2>${esc(titre)}</h2></header><p class="muted petit">Pas encore rempli.</p></section>`;
+  const corps = cle === "checklist"
+    ? `<ul class="recette-check">${v.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`
+    : `<div class="${copiable ? "recette-code" : "texte-libre"}">${esc(v)}</div>`;
+  return `<section class="carte recette-bloc"><header><h2>${esc(titre)}</h2>${copiable ? `<button class="btn mini" data-action="copierRecette" data-id="${r.id}" data-champ="${cle}">Copier</button>` : ""}</header>${corps}</section>`;
+}
+function ficheRecette(id) {
+  const r = parId("recettes", id);
+  if (!r) return '<div class="vide-liste">Fiche introuvable. <a href="#/confidentiel">Retour aux documents confidentiels</a></div>';
+  const sources = String(r.sources || "").split("\n").map((l) => l.split("|").map((x) => x.trim())).filter((x) => x[0]);
+  const histo = (db.recettes_historique || []).filter((h) => h.recette_id === id);
+  return `
+  <div class="entete"><div><a class="retour" href="#/confidentiel">${icone("cadenas")} Documents confidentiels</a>
+    <h1>${esc(numeroRecette(r))} · ${esc(r.service)}</h1>
+    <div class="sous-titre">${badge("statutRecette", r.statut)} ${esc(libelle("categorieRecette", r.categorie))} · version ${esc(r.version || "")} du ${esc(dateFr(r.date_version))}${r.responsable_id ? " · " + esc(parId("membres", r.responsable_id)?.nom || "") : ""}${r.exemple_client_id ? ` · exemple : <a href="#/clients/${r.exemple_client_id}">${esc(nomClient(r.exemple_client_id))}</a>` : ""}</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="editerRecette" data-id="${r.id}">${icone("crayon")}Modifier</button></div></div>
+  <div class="recette-grille">
+    ${SECTIONS_RECETTE.map(([k, t, c]) => blocTexte(k, t, c, r)).join("")}
+    <section class="carte recette-bloc"><header><h2>Où vit chaque document</h2></header>
+      ${sources.length ? `<div class="table-wrap"><table class="liste"><thead><tr><th>Document</th><th>Où il vit</th><th>Lien ou chemin</th></tr></thead><tbody>
+        ${sources.map(([t, o, l]) => `<tr><td class="fort">${esc(t)}</td><td>${esc(o || "")}</td><td>${l && /^https?:\/\//i.test(l) ? lienExterne(l, l.replace(/^https?:\/\//i, "").slice(0, 40)) : esc(l || "")}</td></tr>`).join("")}
+      </tbody></table></div>` : '<p class="muted petit">Indique pour chaque document l’endroit unique où il est rangé (Notion, PC, projet Claude, GitHub). Partout ailleurs, on met seulement un lien.</p>'}</section>
+    <section class="carte recette-bloc"><header><h2>Historique des versions</h2></header>
+      ${histo.length ? `<ul class="recette-histo">${histo.map((h) => `<li><button class="lien" data-action="voirVersionRecette" data-id="${h.id}">Version ${esc(h.version || "?")}</button><span class="muted petit"> remplacée le ${esc(new Date(h.archive_le).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" }))}${h.archive_par ? " par " + esc(h.archive_par) : ""}</span></li>`).join("")}</ul>` : '<p class="muted petit">Chaque modification garde automatiquement la version précédente ici.</p>'}</section>
+  </div>
+  ${noteProprieteRecettes()}`;
+}
+function noteProprieteRecettes() {
+  return `<div class="message info recette-note">${icone("cadenas")}<div><b>Propriété de NexusLab.</b> Ces recettes appartiennent à NexusLab, donc aux trois associés ensemble, et non à la personne qui les a écrites. Tant que la convention de spin-off n’est pas signée, elles appartiennent légalement à la HES-SO. Clause à inscrire dans la charte, formulation à faire valider par Samuel Balet (SAEI). Ne pas partager en dehors des associés.</div></div>`;
+}
+function voirVersionRecette(hid) {
+  const h = (db.recettes_historique || []).find((x) => x.id === hid);
+  if (!h) return;
+  const c = h.contenu || {};
+  fenetre(`Version ${h.version || "?"} · ${c.service || ""}`, `<p class="muted petit" style="margin-bottom:12px">Remplacée le ${esc(new Date(h.archive_le).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" }))}${h.archive_par ? " par " + esc(h.archive_par) : ""}.</p>
+    ${[...SECTIONS_RECETTE, ["sources", "Où vit chaque document"]].filter(([k]) => c[k]).map(([k, t]) => `<h3 class="recette-h3">${esc(t)}</h3><div class="texte-libre">${esc(c[k])}</div>`).join("") || '<p class="muted">Version vide.</p>'}`, true);
+}
+async function copierRecette(id, champ) {
+  const r = parId("recettes", id);
+  try { await navigator.clipboard.writeText(String(r?.[champ] || "")); toast("Copié."); } catch { toast("Copie impossible sur cet appareil.", "erreur"); }
+}
+function pageConfidentiel(id) {
+  if (!estAssocie()) return `<div class="entete"><div><h1>Documents confidentiels</h1></div></div><div class="message info">Cette section est réservée aux associés de NexusLab.</div>`;
+  if (absente("recettes")) return `<div class="entete"><div><h1>Documents confidentiels</h1></div></div><div class="message info">La section n’est pas encore installée. Lance le fichier supabase/015_documents_confidentiels.sql dans Supabase (SQL Editor), puis recharge la page.</div>`;
+  if (id) return ficheRecette(id);
+  const l = db.recettes;
+  return `
+  <div class="entete"><div><h1>Documents confidentiels</h1>
+    <div class="sous-titre">La recette de chaque service NexusLab : prompt, playbook, template, checklist et prix interne, pour refaire le service chez chaque nouveau client sans tout réinventer. Visible seulement par les associés.</div></div>
+    <div class="boutons"><button class="btn primaire" data-action="editerRecette">${icone("plus")}Nouvelle fiche</button></div></div>
+  ${l.length ? `<div class="recette-liste">${l.map((r) => `<a class="carte recette-carte" href="#/confidentiel/${r.id}">
+      <div class="recette-num">${esc(numeroRecette(r))}</div>
+      <div class="titre">${esc(r.service)}</div>
+      <div class="meta">${badge("statutRecette", r.statut)} ${esc(libelle("categorieRecette", r.categorie))} · v${esc(r.version || "")} · ${esc(dateCourte(r.date_version))}</div>
+      ${r.objectif ? `<p class="muted petit">${esc(r.objectif.length > 140 ? r.objectif.slice(0, 140) + "…" : r.objectif)}</p>` : ""}
+      <div class="recette-remplie">${SECTIONS_RECETTE.map(([k, t]) => `<span class="${r[k] ? "ok" : ""}" title="${esc(t)}${r[k] ? "" : " : à remplir"}">${esc(t)}</span>`).join("")}</div>
+    </a>`).join("")}</div>`
+  : `<section class="carte"><div class="vide-liste">Aucune fiche pour l’instant.<br><button class="btn primaire" data-action="editerRecette">${icone("plus")}Créer la première fiche</button></div></section>`}
+  ${noteProprieteRecettes()}`;
 }
 
 /* ==========================================================================
@@ -3609,7 +3745,7 @@ function resultatsPalette(q) {
   };
   if (!n) {
     ajoute("Actions", CREER.map(([l, ic, act, type]) => ({ titre: l === "Débrief du jour" ? l : "Créer : " + l, icone: ic, faire: () => ACTIONS[act]({ type }) })), 3);
-    ajoute("Pages", Object.entries(PAGES).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), 20);
+    ajoute("Pages", Object.entries(PAGES).filter(([, p]) => !p.reserve || estAssocie()).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), 20);
     return items;
   }
   const brut = q.trim();
@@ -3630,6 +3766,7 @@ function resultatsPalette(q) {
   ], 5, () => (location.hash = "#/mails"));
   ajoute("Entretiens", (db.entretiens || []).filter((e) => ok(nomClient(e.client_id), JSON.stringify(e.reponses || {}), "entretien")).map((e) => ({ titre: "Entretien · " + nomClient(e.client_id), meta: [dateFr(e.date), parId("membres", e.membre_id)?.nom].filter(Boolean).join(" · "), icone: "entretien", faire: () => (location.hash = "#/entretiens/" + e.id) })), 4);
   ajoute("Suivi des clients", (db.contacts_clients || []).filter((k) => ok(k.notes, nomClient(k.client_id))).filter((k) => k.notes).map((k) => ({ titre: k.notes.length > 80 ? k.notes.slice(0, 80) + "…" : k.notes, meta: [nomClient(k.client_id), dateCourte(k.date)].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + k.client_id) })), 4);
+  if (estAssocie()) ajoute("Documents confidentiels", (db.recettes || []).filter((r) => ok(numeroRecette(r), r.service, r.objectif, r.prompt, r.playbook, r.template, r.checklist, r.apprentissages, r.sources, libelle("categorieRecette", r.categorie))).map((r) => ({ titre: `${numeroRecette(r)} · ${r.service}`, meta: [libelle("statutRecette", r.statut), "v" + (r.version || "")].join(" · "), icone: "cadenas", faire: () => (location.hash = "#/confidentiel/" + r.id) })), 4);
   ajoute("Sites", db.projets.filter((p) => ok(p.nom, p.domaine, p.url_en_ligne, nomClient(p.client_id), p.prochaine_etape)).map((p) => ({ titre: p.nom, meta: [nomClient(p.client_id), libelle("statutProjet", p.statut)].filter(Boolean).join(" · "), icone: "projets", faire: () => (location.hash = "#/projets/" + p.id) })), 5);
   ajoute("Tâches", db.taches.filter((t) => ok(t.titre, t.description, t.sprint, t.projet_id && nomProjet(t.projet_id))).map((t) => ({ titre: t.titre, meta: [libelle("statutTache", t.statut), t.echeance && dateCourte(t.echeance)].filter(Boolean).join(" · "), icone: "taches", faire: () => editerTache(t.id) })), 6);
   ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu, dateFr(r.date))).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
@@ -3638,7 +3775,7 @@ function resultatsPalette(q) {
   ajoute("Wiki", db.pages.filter((p) => ok(p.titre, p.contenu)).map((p) => ({ titre: p.titre, meta: libelle("categoriePage", p.categorie), icone: "wiki", faire: () => (location.hash = "#/wiki/" + p.id) })), 5);
   ajoute("Situations apprenantes", db.situations.filter((x) => ok(x.titre, x.ce_que_jai_fait, x.apprentissage)).map((x) => ({ titre: x.titre, meta: [dateFr(x.date), parId("membres", x.membre_id)?.nom].filter(Boolean).join(" · "), icone: "situations", faire: () => editerSituation(x.id) })), 5);
   ajoute("Équipe", db.membres.filter((m) => ok(m.nom, m.nom_complet, m.role, m.email)).map((m) => ({ titre: m.nom_complet || m.nom, meta: m.role || "", icone: "equipe", faire: () => (location.hash = "#/equipe") })), 4);
-  ajoute("Pages", Object.entries(PAGES).filter(([, p]) => ok(p.titre, p.groupe)).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), 4);
+  ajoute("Pages", Object.entries(PAGES).filter(([, p]) => (!p.reserve || estAssocie()) && ok(p.titre, p.groupe)).map(([k, p]) => ({ titre: p.titre, meta: p.groupe, icone: p.icone, faire: () => (location.hash = "#/" + k) })), 4);
   ajoute("Actions", CREER.filter(([l]) => ok("créer nouveau ajouter " + l)).map(([l, ic, act, type]) => ({ titre: l === "Débrief du jour" ? l : "Créer : " + l, icone: ic, faire: () => ACTIONS[act]({ type }) })), 3);
   return items;
 }
@@ -3739,6 +3876,9 @@ const ACTIONS = {
   journalClient: (ds) => journalClient(ds.id),
   ecrireMail: (ds) => ecrireMail(ds.client || null, { devis_id: ds.devis || null }),
   voirMail: (ds) => voirMail(ds.id),
+  editerRecette: (ds) => editerRecette(ds.id || null),
+  copierRecette: (ds) => copierRecette(ds.id, ds.champ),
+  voirVersionRecette: (ds) => voirVersionRecette(ds.id),
   voirMailRecu: (ds) => voirMailRecu(ds.id),
   repondreMail: (ds) => repondreMail(ds.id),
   nouvelEntretien: (ds) => { location.hash = "#/entretiens/" + (ds.client ? "client-" + ds.client : "nouveau"); },

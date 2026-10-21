@@ -100,6 +100,12 @@ h3 { font-size: .95rem; font-weight: 700; }
 .recette-histo { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
 .recette-histo .lien, .recette-note .lien { background: none; border: 0; padding: 0; color: var(--corail-texte); text-decoration: underline; cursor: pointer; font: inherit; }
 .recette-h3 { font-size: .9rem; margin: 16px 0 6px; }
+.recette-large { grid-column: 1 / -1; }
+.recette-fichiers { display: grid; gap: 8px; margin-bottom: 12px; }
+.recette-fichiers .ligne-item .actions { display: flex; gap: 6px; flex: none; }
+.recette-fichiers .meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.recette-ajout { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 6px; }
+.recette-ajout select { width: auto; }
 .recette-note { display: flex; gap: 12px; align-items: flex-start; margin-top: 16px; }
 .recette-note svg { width: 20px; height: 20px; flex: none; margin-top: 2px; }
 a.retour { display: flex; width: fit-content; align-items: center; gap: 6px; font-size: .82rem; color: var(--texte-3); text-decoration: none; margin-bottom: 6px; }
@@ -835,6 +841,7 @@ function ecrireStockage(cle, v) { try { localStorage.setItem(cle, v); } catch { 
 
 /* ---------- Libellés ---------- */
 const ETIQ = {
+  roleFichierRecette: { prompt: ["Prompt", "bleu"], playbook: ["Playbook", "violet"], template: ["Template", "jaune"], exemple: ["Exemple", "vert"], autre: ["Autre", "gris"] },
   statutRecette: { brouillon: ["Brouillon", "gris"], valide: ["Validée", "vert"], obsolete: ["Obsolète", "rouge"] },
   categorieRecette: { site: ["Site web", "bleu"], dashboard: ["Dashboard", "violet"], outil: ["Outil sur mesure", "jaune"], contenu: ["Contenu", "vert"], autre: ["Autre", "gris"] },
   statutClient: { prospect: ["Prospect", "gris"], contacte: ["Contacté", "bleu"], rendez_vous: ["Rendez-vous", "violet"], offre_envoyee: ["Offre envoyée", "jaune"], mandat_signe: ["Mandat signé", "corail"], livre: ["Livré", "vert"], termine: ["Terminé", "gris"], perdu: ["Perdu", "rouge"] },
@@ -923,6 +930,7 @@ const TABLES = {
   ressources: { ordre: ["titre", true] },
   recettes: { ordre: ["numero", true], optionnel: true },
   recettes_historique: { ordre: ["archive_le", false], optionnel: true },
+  recettes_fichiers: { ordre: ["ajoute_le", true], optionnel: true },
   competences: { ordre: ["nom", true] },
   contacts_clients: { ordre: ["date", false] },
   situations: { ordre: ["date", false], optionnel: true },
@@ -1418,7 +1426,7 @@ function rendre() {
   $("#app").classList.remove("menu-ouvert");
   apresRendu(page);
 }
-function apresRendu(page) { if (page === "taches") brancherGlisser(); if (page === "clients") brancherGlisserPipeline(); if (page === "entretiens") brancherEntretien(); }
+function apresRendu(page) { if (page === "confidentiel") brancherRecette(); if (page === "taches") brancherGlisser(); if (page === "clients") brancherGlisserPipeline(); if (page === "entretiens") brancherEntretien(); }
 window.addEventListener("hashchange", () => {
   if (/access_token|error_description/.test(location.hash)) return;
   rendre();
@@ -2220,10 +2228,81 @@ function ficheRecette(id) {
       ${sources.length ? `<div class="table-wrap"><table class="liste"><thead><tr><th>Document</th><th>Où il vit</th><th>Lien ou chemin</th></tr></thead><tbody>
         ${sources.map(([t, o, l]) => `<tr><td class="fort">${esc(t)}</td><td>${esc(o || "")}</td><td>${l && /^https?:\/\//i.test(l) ? lienExterne(l, l.replace(/^https?:\/\//i, "").slice(0, 40)) : esc(l || "")}</td></tr>`).join("")}
       </tbody></table></div>` : '<p class="muted petit">Indique pour chaque document l’endroit unique où il est rangé (Notion, PC, projet Claude, GitHub). Partout ailleurs, on met seulement un lien.</p>'}</section>
+    ${sectionFichiersRecette(r)}
     <section class="carte recette-bloc"><header><h2>Historique des versions</h2></header>
       ${histo.length ? `<ul class="recette-histo">${histo.map((h) => `<li><button class="lien" data-action="voirVersionRecette" data-id="${h.id}">Version ${esc(h.version || "?")}</button><span class="muted petit"> remplacée le ${esc(new Date(h.archive_le).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" }))}${h.archive_par ? " par " + esc(h.archive_par) : ""}</span></li>`).join("")}</ul>` : '<p class="muted petit">Chaque modification garde automatiquement la version précédente ici.</p>'}</section>
   </div>
   ${noteProprieteRecettes()}`;
+}
+const BUCKET_CONF = "confidentiel";
+const fichiersDeRecette = (id) => (db.recettes_fichiers || []).filter((f) => f.recette_id === id);
+function sectionFichiersRecette(r) {
+  if (absente("recettes_fichiers")) return `<section class="carte recette-bloc recette-large"><header><h2>Fichiers</h2></header><p class="muted petit">Pour joindre les vrais documents (playbook complet, templates), lance le fichier supabase/016_fichiers_confidentiels.sql dans Supabase.</p></section>`;
+  const fs = fichiersDeRecette(r.id);
+  return `<section class="carte recette-bloc recette-large"><header><h2>Fichiers (${fs.length})</h2></header>
+    ${fs.length ? `<div class="recette-fichiers">${fs.map((f) => `<div class="ligne-item"><span class="icone-doc">${esc((f.nom.split(".").pop() || "").slice(0, 4))}</span><div class="corps"><div class="titre">${esc(f.nom)}</div><div class="meta">${badge("roleFichierRecette", f.role)} ${esc(tailleFichier(f.taille))} · ${esc(dateCourte(f.ajoute_le))}</div></div>
+      <div class="actions"><button class="btn mini" data-action="ouvrirFichierRecette" data-id="${f.id}">Ouvrir</button><button class="btn discret mini" data-action="supprimerFichierRecette" data-id="${f.id}" aria-label="Supprimer ${esc(f.nom)}">×</button></div></div>`).join("")}</div>` : '<p class="muted petit">Aucun fichier. Joins ici les documents complets : playbook, prompts, templates, exemples.</p>'}
+    <div class="recette-ajout"><select data-rf-role aria-label="Rôle du fichier">${options("roleFichierRecette").map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join("")}</select>
+      <label class="bouton-pj">${icone("plus")}<span>Ajouter des fichiers</span><input type="file" multiple data-rf-input data-recette="${r.id}" hidden></label></div>
+    <small class="muted">Rangés dans un stockage à part, visible seulement par les associés. 50 Mo par fichier.</small></section>`;
+}
+async function ajouterFichiersRecette(recetteId, fichiers, role) {
+  if (!fichiers.length) return;
+  const trop = fichiers.find((f) => f.size > 52428800);
+  if (trop) { toast(`${trop.name} dépasse 50 Mo.`, "erreur"); return; }
+  toast(fichiers.length > 1 ? `Envoi de ${fichiers.length} fichiers…` : "Envoi du fichier…");
+  try {
+    for (const f of fichiers) {
+      const chemin = `${recetteId}/${Date.now()}-${nomFichierSur(f.name)}`;
+      const { error } = await sb.storage.from(BUCKET_CONF).upload(chemin, f, { contentType: f.type || undefined, upsert: false });
+      if (error) throw error;
+      const { error: e2 } = await sb.from("recettes_fichiers").insert({ recette_id: recetteId, nom: f.name, role, chemin, taille: f.size, mime: f.type || null });
+      if (e2) { await sb.storage.from(BUCKET_CONF).remove([chemin]); throw e2; }
+    }
+    await charger("recettes_fichiers"); rendre();
+    toast(fichiers.length > 1 ? `${fichiers.length} fichiers ajoutés.` : "Fichier ajouté.");
+  } catch (err) { toast(msgErreur(err), "erreur"); }
+}
+async function ouvrirFichierRecette(id) {
+  const f = (db.recettes_fichiers || []).find((x) => x.id === id);
+  if (!f) return;
+  const texte = /\.(md|txt|json|csv|css|js|ts|py|sql)$/i.test(f.nom) || /^text\/(plain|markdown|csv)/.test(f.mime || "");
+  if (texte) {
+    const { data, error } = await sb.storage.from(BUCKET_CONF).download(f.chemin);
+    if (error) { toast(msgErreur(error), "erreur"); return; }
+    const contenu = await data.text();
+    fenetre(f.nom, `<div class="boutons" style="margin-bottom:12px"><button class="btn mini" data-action="copierTexteFichier">Copier</button></div><div class="recette-code" data-texte-fichier style="max-height:none">${esc(contenu)}</div>`, true);
+    return;
+  }
+  const fen = window.open("", "_blank");
+  if (f.mime === "text/html" || /\.html?$/i.test(f.nom)) {
+    const { data: fichier, error } = await sb.storage.from(BUCKET_CONF).download(f.chemin);
+    if (error) { if (fen) fen.close(); toast(msgErreur(error), "erreur"); return; }
+    const contenu = (await fichier.text()).replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+    const cadre = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(f.nom)}</title><style>html,body{margin:0;height:100%;background:#fff}iframe{border:0;display:block;width:100%;height:100%}</style></head><body><iframe sandbox="allow-scripts allow-downloads allow-forms allow-modals allow-popups" srcdoc="${contenu}"></iframe></body></html>`;
+    const lien = URL.createObjectURL(new Blob([cadre], { type: "text/html;charset=utf-8" }));
+    if (fen) fen.location.href = lien; else location.href = lien;
+    setTimeout(() => URL.revokeObjectURL(lien), 60000);
+    return;
+  }
+  const { data, error } = await sb.storage.from(BUCKET_CONF).createSignedUrl(f.chemin, 300);
+  if (error) { if (fen) fen.close(); toast(msgErreur(error), "erreur"); return; }
+  if (fen) fen.location.href = data.signedUrl; else location.href = data.signedUrl;
+}
+async function supprimerFichierRecette(id) {
+  const f = (db.recettes_fichiers || []).find((x) => x.id === id);
+  if (!f || !(await confirmer(`Supprimer définitivement « ${f.nom} » ?`))) return;
+  try {
+    const { error } = await sb.storage.from(BUCKET_CONF).remove([f.chemin]);
+    if (error) throw error;
+    await supprimerLigne("recettes_fichiers", id);
+    rendre(); toast("Fichier supprimé.");
+  } catch (err) { toast(msgErreur(err), "erreur"); }
+}
+function brancherRecette() {
+  const inp = $("[data-rf-input]");
+  if (!inp) return;
+  inp.addEventListener("change", (e) => { const role = $("[data-rf-role]")?.value || "autre"; ajouterFichiersRecette(inp.dataset.recette, [...e.target.files], role); e.target.value = ""; });
 }
 function noteProprieteRecettes() {
   return `<div class="message info recette-note">${icone("cadenas")}<div><b>Propriété de NexusLab.</b> Ces recettes appartiennent à NexusLab, donc aux trois associés ensemble, et non à la personne qui les a écrites. Tant que la convention de spin-off n’est pas signée, elles appartiennent légalement à la HES-SO. Clause à inscrire dans la charte, formulation à faire valider par Samuel Balet (SAEI). Ne pas partager en dehors des associés.</div></div>`;
@@ -2253,6 +2332,7 @@ function pageConfidentiel(id) {
       <div class="titre">${esc(r.service)}</div>
       <div class="meta">${badge("statutRecette", r.statut)} ${esc(libelle("categorieRecette", r.categorie))} · v${esc(r.version || "")} · ${esc(dateCourte(r.date_version))}</div>
       ${r.objectif ? `<p class="muted petit">${esc(r.objectif.length > 140 ? r.objectif.slice(0, 140) + "…" : r.objectif)}</p>` : ""}
+      ${fichiersDeRecette(r.id).length ? `<div class="muted petit">${fichiersDeRecette(r.id).length} fichier${fichiersDeRecette(r.id).length > 1 ? "s" : ""} joint${fichiersDeRecette(r.id).length > 1 ? "s" : ""}</div>` : ""}
       <div class="recette-remplie">${SECTIONS_RECETTE.map(([k, t]) => `<span class="${r[k] ? "ok" : ""}" title="${esc(t)}${r[k] ? "" : " : à remplir"}">${esc(t)}</span>`).join("")}</div>
     </a>`).join("")}</div>`
   : `<section class="carte"><div class="vide-liste">Aucune fiche pour l’instant.<br><button class="btn primaire" data-action="editerRecette">${icone("plus")}Créer la première fiche</button></div></section>`}
@@ -3766,7 +3846,7 @@ function resultatsPalette(q) {
   ], 5, () => (location.hash = "#/mails"));
   ajoute("Entretiens", (db.entretiens || []).filter((e) => ok(nomClient(e.client_id), JSON.stringify(e.reponses || {}), "entretien")).map((e) => ({ titre: "Entretien · " + nomClient(e.client_id), meta: [dateFr(e.date), parId("membres", e.membre_id)?.nom].filter(Boolean).join(" · "), icone: "entretien", faire: () => (location.hash = "#/entretiens/" + e.id) })), 4);
   ajoute("Suivi des clients", (db.contacts_clients || []).filter((k) => ok(k.notes, nomClient(k.client_id))).filter((k) => k.notes).map((k) => ({ titre: k.notes.length > 80 ? k.notes.slice(0, 80) + "…" : k.notes, meta: [nomClient(k.client_id), dateCourte(k.date)].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + k.client_id) })), 4);
-  if (estAssocie()) ajoute("Documents confidentiels", (db.recettes || []).filter((r) => ok(numeroRecette(r), r.service, r.objectif, r.prompt, r.playbook, r.template, r.checklist, r.apprentissages, r.sources, libelle("categorieRecette", r.categorie))).map((r) => ({ titre: `${numeroRecette(r)} · ${r.service}`, meta: [libelle("statutRecette", r.statut), "v" + (r.version || "")].join(" · "), icone: "cadenas", faire: () => (location.hash = "#/confidentiel/" + r.id) })), 4);
+  if (estAssocie()) ajoute("Documents confidentiels", (db.recettes || []).filter((r) => ok(numeroRecette(r), r.service, r.objectif, r.prompt, r.playbook, r.template, r.checklist, r.apprentissages, r.sources, libelle("categorieRecette", r.categorie), fichiersDeRecette(r.id).map((f) => f.nom))).map((r) => ({ titre: `${numeroRecette(r)} · ${r.service}`, meta: [libelle("statutRecette", r.statut), "v" + (r.version || "")].join(" · "), icone: "cadenas", faire: () => (location.hash = "#/confidentiel/" + r.id) })), 4);
   ajoute("Sites", db.projets.filter((p) => ok(p.nom, p.domaine, p.url_en_ligne, nomClient(p.client_id), p.prochaine_etape)).map((p) => ({ titre: p.nom, meta: [nomClient(p.client_id), libelle("statutProjet", p.statut)].filter(Boolean).join(" · "), icone: "projets", faire: () => (location.hash = "#/projets/" + p.id) })), 5);
   ajoute("Tâches", db.taches.filter((t) => ok(t.titre, t.description, t.sprint, t.projet_id && nomProjet(t.projet_id))).map((t) => ({ titre: t.titre, meta: [libelle("statutTache", t.statut), t.echeance && dateCourte(t.echeance)].filter(Boolean).join(" · "), icone: "taches", faire: () => editerTache(t.id) })), 6);
   ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu, dateFr(r.date))).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
@@ -3878,6 +3958,9 @@ const ACTIONS = {
   voirMail: (ds) => voirMail(ds.id),
   editerRecette: (ds) => editerRecette(ds.id || null),
   copierRecette: (ds) => copierRecette(ds.id, ds.champ),
+  ouvrirFichierRecette: (ds) => ouvrirFichierRecette(ds.id),
+  supprimerFichierRecette: (ds) => supprimerFichierRecette(ds.id),
+  copierTexteFichier: async () => { try { await navigator.clipboard.writeText($("[data-texte-fichier]").textContent); toast("Copié."); } catch { toast("Copie impossible sur cet appareil.", "erreur"); } },
   voirVersionRecette: (ds) => voirVersionRecette(ds.id),
   voirMailRecu: (ds) => voirMailRecu(ds.id),
   repondreMail: (ds) => repondreMail(ds.id),

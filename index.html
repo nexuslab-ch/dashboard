@@ -3497,14 +3497,14 @@ function ficheReunion(id) {
 /* ==========================================================================
    Dépenses (achats faits pour NexusLab, en attendant la comptabilité Vardena)
    ========================================================================== */
-const champsDepense = () => [
+const champsDepense = (d) => [
   { nom: "libelle", label: "Quoi", requis: true, pleine: true, placeholder: "Papier glacé pour les flyers" },
   { nom: "montant", label: "Montant (CHF)", type: "number", step: "0.05", min: 0, requis: true },
   { nom: "date", label: "Date de l’achat", type: "date", requis: true },
   { nom: "fournisseur", label: "Où (fournisseur)", placeholder: "Payot, Migros, Canva..." },
   { nom: "categorie", label: "Catégorie", type: "select", options: options("categorieDepense"), vide: false, defaut: "autre" },
   { nom: "moyen", label: "Payé comment", type: "select", options: options("moyenDepense"), vide: false, defaut: "avance_membre" },
-  { nom: "paye_par", label: "Qui a avancé l’argent", type: "select", options: optMembres(), vide: "Personne" },
+  { nom: "paye_par", label: "Qui a avancé l’argent", type: "select", options: [...optMembres(), ...(d?.paye_par && !membresActifs().some((m) => m.id === d.paye_par) ? [[d.paye_par, prenomDe(d.paye_par) + " (plus actif)"]] : [])], vide: "Personne" },
   { nom: "statut", label: "Remboursement", type: "select", options: options("statutDepense"), vide: false, defaut: "a_rembourser" },
   { nom: "rembourse_le", label: "Remboursé le", type: "date" },
   { nom: "projet_id", label: "Pour quel site ou projet", type: "select", options: optProjets(), vide: "NexusLab en général" },
@@ -3516,7 +3516,7 @@ function editerDepense(id) {
   if (absente("depenses")) { toast("Le module Dépenses n’est pas encore activé (migration 017).", "erreur"); return; }
   const d = parId("depenses", id);
   formulaire({
-    titre: d ? "Modifier la dépense" : "Nouvelle dépense", champs: champsDepense(),
+    titre: d ? "Modifier la dépense" : "Nouvelle dépense", champs: champsDepense(d),
     valeurs: d || { date: aujourdhui(), categorie: "autre", moyen: "avance_membre", statut: "a_rembourser", paye_par: moi()?.id },
     extra: `<div class="champ pleine" style="margin-top:14px"><label for="f_justif">Justificatif (photo du ticket ou facture)</label>${d?.justificatif_path ? `<small style="margin:0 0 6px">Actuel : ${esc(d.justificatif_nom || "fichier")}. Choisir un fichier le remplace.</small>` : ""}<input id="f_justif" name="justificatif" type="file" accept="image/*,application/pdf"><small>Garde toujours le ticket : sans justificatif, la comptabilité ne peut pas rembourser. 10 Mo maximum.</small></div>`,
     enregistrer: async (v, form) => {

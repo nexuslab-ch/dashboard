@@ -93,6 +93,7 @@ h3 { font-size: .95rem; font-weight: 700; }
 .recette-remplie span.ok { border-style: solid; background: var(--corail-doux); border-color: transparent; color: var(--corail-texte); }
 .recette-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start; }
 .recette-bloc header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.recette-astuce { margin: -6px 0 18px; padding: 12px 16px; border-radius: 12px; background: var(--carte); border: 1px dashed var(--ligne); font-size: .85rem; color: var(--texte-2); }
 .recette-code { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; line-height: 1.5; background: var(--fond); border: 1px solid var(--ligne); border-radius: 12px; padding: 12px 14px; max-height: 420px; overflow: auto; overflow-wrap: anywhere; }
 .recette-check { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
 .recette-check li { position: relative; padding-left: 26px; font-size: .9rem; }
@@ -909,6 +910,7 @@ const ICONES = {
   entretien: '<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20.5l1.4-5A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 10h7M8.5 13.5h4.5"/>',
   wiki: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M8 7h6M8 11h6"/>',
   depenses: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18"/><path d="M7 15h3"/><path d="M16 6l-2-3H8L6 6"/>',
+  copier: '<rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
   calendrierExport: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13v5M9.5 15.5L12 18l2.5-2.5"/>',
 };
 const icone = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
@@ -2242,7 +2244,8 @@ function ficheRecette(id) {
   <div class="entete"><div><a class="retour" href="#/confidentiel">${icone("cadenas")} Documents confidentiels</a>
     <h1>${esc(numeroRecette(r))} · ${esc(r.service)}</h1>
     <div class="sous-titre">${badge("statutRecette", r.statut)} ${esc(libelle("categorieRecette", r.categorie))} · version ${esc(r.version || "")} du ${esc(dateFr(r.date_version))}${r.responsable_id ? " · " + esc(parId("membres", r.responsable_id)?.nom || "") : ""}${r.exemple_client_id ? ` · exemple : <a href="#/clients/${r.exemple_client_id}">${esc(nomClient(r.exemple_client_id))}</a>` : ""}</div></div>
-    <div class="boutons"><button class="btn primaire" data-action="editerRecette" data-id="${r.id}">${icone("crayon")}Modifier</button></div></div>
+    <div class="boutons"><button class="btn primaire" data-action="packageRecette" data-id="${r.id}">${icone("copier")}Copier tout le package</button><button class="btn" data-action="editerRecette" data-id="${r.id}">${icone("crayon")}Modifier</button></div></div>
+  <p class="recette-astuce">Pour refaire ce service : « Copier tout le package », puis colle-le dans un nouveau chat (Claude, Cursor). L’IA reçoit le prompt, la méthode, la base technique, la checklist et le contenu des fichiers texte, et commence par te poser ses questions sur le nouveau client.</p>
   <div class="recette-grille">
     ${SECTIONS_RECETTE.map(([k, t, c]) => blocTexte(k, t, c, r)).join("")}
     <section class="carte recette-bloc"><header><h2>Où vit chaque document</h2></header>
@@ -2256,6 +2259,91 @@ function ficheRecette(id) {
   ${noteProprieteRecettes()}`;
 }
 const BUCKET_CONF = "confidentiel";
+/* ---------- Package complet d'une fiche : tout en un texte à coller dans un chat, ou en .zip ---------- */
+const LIB_ZIP = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+const estFichierTexte = (f) => /\.(md|markdown|txt|json|csv|css|js|mjs|ts|py|sql|html?|xml|ya?ml|svg|toml|env\.example)$/i.test(f.nom) || /^text\//.test(f.mime || "") || /json|javascript|xml|svg/.test(f.mime || "");
+let packageCourant = null;
+const PACKAGE_CONSIGNES = `## Mode d’emploi pour l’IA qui reçoit ce package
+Tu reçois le package complet d’un service de NexusLab (agence numérique de Patrick Lugon, Mehdi Chouchane et Arno Blatter, Team Company Vardena, HES-SO Valais, Sierre). Il contient tout ce qu’il faut pour refaire ce service : le prompt de départ, la méthode étape par étape (playbook), la base technique (template), la checklist, le prix, un exemple réel, les leçons des projets précédents et le contenu des fichiers joints.
+1. Lis tout le package avant de répondre.
+2. Commence par me poser les questions nécessaires pour l’adapter au nouveau client : nom, besoin, calendrier, accès. Ne réutilise jamais les données d’un ancien client : elles ne servent que d’exemple.
+3. Le prompt de départ est ta mission ; le playbook donne l’ordre des étapes ; la checklist doit être entièrement cochée avant la livraison. Signale-moi tout écart.
+4. Les fichiers marqués « à joindre » ne sont pas dans ce texte : demande-les-moi si tu en as besoin.
+5. Réponds en français, phrases complètes, sans tiret cadratin ni demi-cadratin.`;
+async function construirePackage(r) {
+  const fs = fichiersDeRecette(r.id);
+  const charges = [];
+  for (const f of fs) {
+    const { data, error } = await sb.storage.from(BUCKET_CONF).download(f.chemin);
+    charges.push({ f, blob: error ? null : data, texte: !error && estFichierTexte(f) ? await data.text() : null });
+  }
+  const titre = `${numeroRecette(r)} · ${r.service}`;
+  const L = [`# PACKAGE NEXUSLAB : ${titre}`,
+    `Version ${r.version || "?"} du ${dateFr(r.date_version)}, statut ${libelle("statutRecette", r.statut)}, catégorie ${libelle("categorieRecette", r.categorie)}. Package généré le ${dateFr(aujourdhui())}.`,
+    "Confidentiel : savoir-faire de NexusLab, réservé aux associés. Ne pas partager hors de l’équipe.", "", PACKAGE_CONSIGNES, ""];
+  for (const [k, t] of SECTIONS_RECETTE) {
+    if (!r[k]) continue;
+    L.push(`## ${t}`, k === "checklist" ? String(r[k]).split("\n").map((x) => x.trim()).filter(Boolean).map((x) => "- [ ] " + x).join("\n") : String(r[k]).trim(), "");
+  }
+  if (r.sources) L.push("## Où vit chaque document", String(r.sources).trim(), "");
+  const textes = charges.filter((c) => c.texte != null), autres = charges.filter((c) => c.texte == null);
+  if (charges.length) {
+    L.push("## Fichiers joints", ...charges.map((c) => `- ${c.f.nom} (${libelle("roleFichierRecette", c.f.role)}, ${tailleFichier(c.f.taille)})${c.texte != null ? " : contenu complet ci-dessous" : c.blob ? " : à joindre (fichier non texte)" : " : impossible à lire"}`), "");
+    for (const c of textes) {
+      const ext = (c.f.nom.split(".").pop() || "").toLowerCase();
+      const clotures = "`".repeat(Math.max(3, ...[...c.texte.matchAll(/`{3,}/g)].map((m) => m[0].length + 1)));
+      L.push(`### Fichier : ${c.f.nom} (${libelle("roleFichierRecette", c.f.role)})`, clotures + (ext === "md" ? "markdown" : ext), c.texte.replace(/\s+$/, ""), clotures, "");
+    }
+  }
+  L.push(`## Fin du package ${numeroRecette(r)}`);
+  return { r, titre, texte: L.join("\n"), charges, textes: textes.length, autres: autres.filter((c) => c.blob).map((c) => c.f) };
+}
+async function packageRecette(id) {
+  const r = parId("recettes", id);
+  if (!r || !estAssocie()) return;
+  toast("Préparation du package…");
+  try { packageCourant = await construirePackage(r); }
+  catch (err) { toast(msgErreur(err), "erreur"); return; }
+  const p = packageCourant, n = p.texte.length;
+  const gros = n > 100000;
+  fenetre(`Package ${numeroRecette(r)}`, `
+    <p style="margin-top:0"><b>${esc(p.titre)}</b> est prêt : ${fmtEntier.format(n)} caractères (environ ${fmtEntier.format(Math.round(n / 4))} jetons), ${p.textes} fichier${p.textes > 1 ? "s" : ""} texte inclus en entier.</p>
+    ${p.autres.length ? `<p class="petit">À joindre à part dans le chat (PDF, zip, images) : ${esc(p.autres.map((f) => f.nom).join(", "))}. Ils sont tous dans le .zip.</p>` : ""}
+    <p class="petit muted">${gros ? "C’est un gros package : en le collant, le chat le transforme en pièce jointe, ça fonctionne aussi. Tu peux aussi glisser le .zip directement dans le chat." : "Colle-le dans un nouveau chat : l’IA commence par te poser ses questions sur le nouveau client."}</p>
+    <div class="boutons" style="justify-content:flex-start;flex-wrap:wrap;margin:14px 0">
+      <button class="btn primaire" data-action="copierPackage" data-garder>${icone("copier")}Copier le package</button>
+      <button class="btn" data-action="telechargerPackageMd" data-garder>${icone("pdf")}Texte (.md)</button>
+      <button class="btn" data-action="telechargerPackageZip" data-garder>${icone("pdf")}Tout en .zip</button></div>
+    <div class="recette-code" style="max-height:340px">${esc(p.texte.slice(0, 6000))}${n > 6000 ? "\n\n[…] aperçu limité, le package complet est copié ou téléchargé." : ""}</div>`, true);
+}
+async function copierPackage() {
+  if (!packageCourant) return;
+  try { await navigator.clipboard.writeText(packageCourant.texte); toast("Package copié : colle-le dans un nouveau chat."); }
+  catch { toast("Copie impossible sur cet appareil : télécharge le .md.", "erreur"); }
+}
+const nomPackage = (p) => slug(`${numeroRecette(p.r)} ${p.r.service} v${p.r.version || ""}`);
+function telechargerPackageMd() { if (packageCourant) telecharger(nomPackage(packageCourant) + ".md", packageCourant.texte, "text/markdown;charset=utf-8"); }
+async function telechargerPackageZip() {
+  const p = packageCourant;
+  if (!p) return;
+  try {
+    if (!window.JSZip) await chargerScript(LIB_ZIP);
+    const zip = new window.JSZip(), dossier = zip.folder(nomPackage(p));
+    dossier.file("00-PACKAGE.md", p.texte);
+    const vus = new Set();
+    for (const c of p.charges) {
+      if (!c.blob) continue;
+      let nom = c.f.nom, i = 2;
+      while (vus.has(nom)) nom = c.f.nom.replace(/(\.[^.]*)?$/, ` (${i++})$1`);
+      vus.add(nom);
+      dossier.file("fichiers/" + nom, c.blob);
+    }
+    const blob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = nomPackage(p) + ".zip"; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (err) { toast(msgErreur(err), "erreur"); }
+}
 const fichiersDeRecette = (id) => (db.recettes_fichiers || []).filter((f) => f.recette_id === id);
 function sectionFichiersRecette(r) {
   if (absente("recettes_fichiers")) return `<section class="carte recette-bloc recette-large"><header><h2>Fichiers</h2></header><p class="muted petit">Pour joindre les vrais documents (playbook complet, templates), lance le fichier supabase/016_fichiers_confidentiels.sql dans Supabase.</p></section>`;
@@ -3183,7 +3271,7 @@ function fenetre(titre, corps, large) {
 dlg.addEventListener("click", (e) => {
   if (e.target.closest("form")) return;
   const a = e.target.closest("[data-action]");
-  if (a) { e.preventDefault(); fermerModale(); const fn = ACTIONS[a.dataset.action]; if (fn) fn(a.dataset, a); return; }
+  if (a) { e.preventDefault(); if (!a.hasAttribute("data-garder")) fermerModale(); const fn = ACTIONS[a.dataset.action]; if (fn) fn(a.dataset, a); return; }
   if (e.target.closest("[data-href], a[href^='#/']")) fermerModale();
 });
 
@@ -4113,6 +4201,10 @@ const ACTIONS = {
   voirMail: (ds) => voirMail(ds.id),
   editerRecette: (ds) => editerRecette(ds.id || null),
   copierRecette: (ds) => copierRecette(ds.id, ds.champ),
+  packageRecette: (ds) => packageRecette(ds.id),
+  copierPackage: () => copierPackage(),
+  telechargerPackageMd: () => telechargerPackageMd(),
+  telechargerPackageZip: () => telechargerPackageZip(),
   ouvrirFichierRecette: (ds) => ouvrirFichierRecette(ds.id),
   supprimerFichierRecette: (ds) => supprimerFichierRecette(ds.id),
   copierTexteFichier: async () => { try { await navigator.clipboard.writeText($("[data-texte-fichier]").textContent); toast("Copié."); } catch { toast("Copie impossible sur cet appareil.", "erreur"); } },

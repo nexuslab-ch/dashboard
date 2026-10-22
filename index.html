@@ -2263,6 +2263,7 @@ const BUCKET_CONF = "confidentiel";
 const LIB_ZIP = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
 const estFichierTexte = (f) => /\.(md|markdown|txt|json|csv|css|js|mjs|ts|py|sql|html?|xml|ya?ml|svg|toml|env\.example)$/i.test(f.nom) || /^text\//.test(f.mime || "") || /json|javascript|xml|svg/.test(f.mime || "");
 let packageCourant = null;
+const PACKAGE_MAX_FICHIER = 40000;
 const PACKAGE_CONSIGNES = `## Mode d’emploi pour l’IA qui reçoit ce package
 Tu reçois le package complet d’un service de NexusLab (agence numérique de Patrick Lugon, Mehdi Chouchane et Arno Blatter, Team Company Vardena, HES-SO Valais, Sierre). Il contient tout ce qu’il faut pour refaire ce service : le prompt de départ, la méthode étape par étape (playbook), la base technique (template), la checklist, le prix, un exemple réel, les leçons des projets précédents et le contenu des fichiers joints.
 1. Lis tout le package avant de répondre.
@@ -2275,7 +2276,9 @@ async function construirePackage(r) {
   const charges = [];
   for (const f of fs) {
     const { data, error } = await sb.storage.from(BUCKET_CONF).download(f.chemin);
-    charges.push({ f, blob: error ? null : data, texte: !error && estFichierTexte(f) ? await data.text() : null });
+    const t = !error && estFichierTexte(f) ? await data.text() : null;
+    // Un fichier texte très long (maquette avec données, export) rendrait le package trop gros pour un chat : il passe « à joindre »
+    charges.push({ f, blob: error ? null : data, texte: t != null && t.length <= PACKAGE_MAX_FICHIER ? t : null, tropLong: t != null && t.length > PACKAGE_MAX_FICHIER });
   }
   const titre = `${numeroRecette(r)} · ${r.service}`;
   const L = [`# PACKAGE NEXUSLAB : ${titre}`,
@@ -2288,7 +2291,7 @@ async function construirePackage(r) {
   if (r.sources) L.push("## Où vit chaque document", String(r.sources).trim(), "");
   const textes = charges.filter((c) => c.texte != null), autres = charges.filter((c) => c.texte == null);
   if (charges.length) {
-    L.push("## Fichiers joints", ...charges.map((c) => `- ${c.f.nom} (${libelle("roleFichierRecette", c.f.role)}, ${tailleFichier(c.f.taille)})${c.texte != null ? " : contenu complet ci-dessous" : c.blob ? " : à joindre (fichier non texte)" : " : impossible à lire"}`), "");
+    L.push("## Fichiers joints", ...charges.map((c) => `- ${c.f.nom} (${libelle("roleFichierRecette", c.f.role)}, ${tailleFichier(c.f.taille)})${c.texte != null ? " : contenu complet ci-dessous" : c.tropLong ? " : à joindre (trop long pour être collé, il est dans le .zip)" : c.blob ? " : à joindre (fichier non texte)" : " : impossible à lire"}`), "");
     for (const c of textes) {
       const ext = (c.f.nom.split(".").pop() || "").toLowerCase();
       const clotures = "`".repeat(Math.max(3, ...[...c.texte.matchAll(/`{3,}/g)].map((m) => m[0].length + 1)));
@@ -2308,7 +2311,7 @@ async function packageRecette(id) {
   const gros = n > 100000;
   fenetre(`Package ${numeroRecette(r)}`, `
     <p style="margin-top:0"><b>${esc(p.titre)}</b> est prêt : ${fmtEntier.format(n)} caractères (environ ${fmtEntier.format(Math.round(n / 4))} jetons), ${p.textes} fichier${p.textes > 1 ? "s" : ""} texte inclus en entier.</p>
-    ${p.autres.length ? `<p class="petit">À joindre à part dans le chat (PDF, zip, images) : ${esc(p.autres.map((f) => f.nom).join(", "))}. Ils sont tous dans le .zip.</p>` : ""}
+    ${p.autres.length ? `<p class="petit">À joindre à part dans le chat (PDF, zip, images, fichiers très longs) : ${esc(p.autres.map((f) => f.nom).join(", "))}. Ils sont tous dans le .zip.</p>` : ""}
     <p class="petit muted">${gros ? "C’est un gros package : en le collant, le chat le transforme en pièce jointe, ça fonctionne aussi. Tu peux aussi glisser le .zip directement dans le chat." : "Colle-le dans un nouveau chat : l’IA commence par te poser ses questions sur le nouveau client."}</p>
     <div class="boutons" style="justify-content:flex-start;flex-wrap:wrap;margin:14px 0">
       <button class="btn primaire" data-action="copierPackage" data-garder>${icone("copier")}Copier le package</button>

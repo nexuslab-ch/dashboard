@@ -1160,8 +1160,9 @@ const champsProjet = () => [
   { nom: "offre_id", label: "Offre", type: "select", options: optOffres() },
   { nom: "statut", label: "Statut", type: "select", options: options("statutProjet"), vide: false, defaut: "brief" },
   { nom: "version", label: "Version", placeholder: "v1" },
-  { nom: "responsable_id", label: "Responsable", type: "select", options: optMembres() },
+  { nom: "responsable_id", label: "Responsable (mène le mandat)", type: "select", options: optMembres() },
   { nom: "date_mise_en_ligne", label: "Date de mise en ligne", type: "date" },
+  ...(equipeProjetsActive() ? [{ nom: "equipe", label: "Qui travaille sur ce mandat", type: "multi", options: optMembres().map(([id, n]) => [id, n + (id === moi()?.id ? " (moi)" : "")]), pleine: true }] : []),
   { nom: "prochaine_etape", label: "Prochaine étape", pleine: true },
   { type: "separateur" },
   { nom: "url_en_ligne", label: "Adresse en ligne", placeholder: "https://..." },
@@ -1172,12 +1173,25 @@ const champsProjet = () => [
   { nom: "base_supabase", label: "Base Supabase", type: "checkbox" },
   { nom: "notes", label: "Notes", type: "textarea", pleine: true },
 ];
+/* Équipe d'un mandat (migration 018) : le responsable en fait toujours partie */
+const equipeProjetsActive = () => colonnePresente("projets", "equipe");
+const equipeDuProjet = (p) => [...new Set([p.responsable_id, ...(p.equipe || [])].filter(Boolean))];
+async function basculerMoiProjet(id) {
+  const p = parId("projets", id), m = moi();
+  if (!p || !m) return;
+  if (!equipeProjetsActive()) { toast("Lance d’abord la migration 018 dans Supabase.", "erreur"); return; }
+  const dedans = equipeDuProjet(p).includes(m.id);
+  if (dedans && p.responsable_id === m.id) { toast("Tu es responsable de ce mandat : change d’abord le responsable.", "erreur"); return; }
+  const equipe = dedans ? (p.equipe || []).filter((x) => x !== m.id) : [...(p.equipe || []), m.id];
+  try { await enregistrer("projets", { equipe }, id); rendre(); toast(dedans ? "Tu n’es plus sur ce mandat." : "Tu es sur ce mandat."); }
+  catch (err) { toast(msgErreur(err), "erreur"); }
+}
 function editerProjet(id, defauts = {}) {
   const p = parId("projets", id);
   formulaire({
     titre: p ? "Modifier le site" : "Nouveau site", champs: champsProjet(), large: true,
-    valeurs: p || { statut: "brief", type: "vitrine", ...defauts },
-    enregistrer: async (v) => { const r = await enregistrer("projets", v, id); if (!id) location.hash = "#/projets/" + r.id; toast("Site enregistré."); },
+    valeurs: p ? { ...p, equipe: equipeDuProjet(p) } : { statut: "brief", type: "vitrine", responsable_id: moi()?.id || null, equipe: moi() ? [moi().id] : [], ...defauts },
+    enregistrer: async (v) => { if (v.equipe && v.responsable_id && !v.equipe.includes(v.responsable_id)) v.equipe.push(v.responsable_id); const r = await enregistrer("projets", v, id); if (!id) location.hash = "#/projets/" + r.id; toast("Site enregistré."); },
     supprimer: p ? async () => { await supprimerLigne("projets", id); location.hash = "#/projets"; } : null,
   });
 }
@@ -1363,7 +1377,7 @@ const filtres = {
   agenda: { mois: "", moi: "", vue: "mois", semaine: "" },
   reunions: { onglet: "reunions", type: "", q: "" },
   ressources: { q: "", categorie: "" },
-  projets: { q: "", statut: "actifs" },
+  projets: { q: "", statut: "actifs", qui: "" },
   devis: { type: "", statut: "", q: "" },
   depenses: { q: "", statut: "", categorie: "", vardena: "" },
   taches: { vue: "statut", sprint: "", personne: "", projet: "", fait: "1" },
@@ -2357,15 +2371,16 @@ function pageProjets(id) {
   <div class="entete"><div><h1>Projets / Sites</h1><div class="sous-titre">Le suivi de chaque site : client, version, mise en ligne, prochaine étape</div></div>
     <div class="boutons"><button class="btn primaire" data-action="nouveauProjet">${icone("plus")}Nouveau site</button></div></div>
   <div class="filtres"><input type="search" placeholder="Rechercher un site, un client, un domaine" value="${esc(f.q)}" data-filtre="projets.q" aria-label="Rechercher">
+    <select data-filtre="projets.qui" aria-label="Qui"><option value="">Tout le monde</option>${moi() ? `<option value="${moi().id}"${f.qui === moi().id ? " selected" : ""}>Mes mandats</option>` : ""}${membresActifs().filter((m) => m.id !== moi()?.id).map((m) => `<option value="${m.id}"${f.qui === m.id ? " selected" : ""}>Mandats de ${esc(m.nom)}</option>`).join("")}</select>
     <div class="puces">${puces.map(([k, l, n]) => `<button class="puce" aria-pressed="${f.statut === k}" data-action="puce" data-filtre="projets.statut" data-valeur="${k}">${esc(l)}<span class="n">${n}</span></button>`).join("")}</div></div>
   <section class="carte sans-marge"><div class="table-wrap" id="liste-projets">${listeProjets()}</div></section>`;
 }
 function listeProjets() {
   const f = filtres.projets, q = f.q.toLowerCase();
-  const l = db.projets.filter((p) => (f.statut === "" || (f.statut === "actifs" ? p.statut !== "termine" : p.statut === f.statut)) && (!q || [p.nom, nomClient(p.client_id), p.domaine, p.url_en_ligne, p.depot_github].join(" ").toLowerCase().includes(q)));
+  const l = db.projets.filter((p) => (f.statut === "" || (f.statut === "actifs" ? p.statut !== "termine" : p.statut === f.statut)) && (!f.qui || equipeDuProjet(p).includes(f.qui)) && (!q || [p.nom, nomClient(p.client_id), p.domaine, p.url_en_ligne, p.depot_github].join(" ").toLowerCase().includes(q)));
   if (!l.length) return '<div class="vide-liste">Aucun site ne correspond.</div>';
-  return `<table class="liste"><thead><tr><th>Site</th><th>Pour qui</th><th>Version</th><th class="masquer-mobile">En ligne</th><th>Statut</th><th class="masquer-mobile">Prochaine étape</th><th class="masquer-mobile">Resp.</th></tr></thead><tbody>
-    ${l.map((p) => `<tr data-href="#/projets/${p.id}"><td class="fort">${esc(p.nom)}</td><td>${esc(nomClient(p.client_id))}</td><td>${esc(p.version || "")}</td><td class="masquer-mobile">${p.url_en_ligne ? lienExterne(p.url_en_ligne, p.domaine || undefined) : vide}</td><td>${badge("statutProjet", p.statut)}</td><td class="masquer-mobile">${esc(p.prochaine_etape || "")}</td><td class="masquer-mobile">${avatar(p.responsable_id, "Responsable")}</td></tr>`).join("")}
+  return `<table class="liste"><thead><tr><th>Site</th><th>Pour qui</th><th>Version</th><th class="masquer-mobile">En ligne</th><th>Statut</th><th class="masquer-mobile">Prochaine étape</th><th>Équipe</th></tr></thead><tbody>
+    ${l.map((p) => `<tr data-href="#/projets/${p.id}"><td class="fort">${esc(p.nom)}</td><td>${esc(nomClient(p.client_id))}</td><td>${esc(p.version || "")}</td><td class="masquer-mobile">${p.url_en_ligne ? lienExterne(p.url_en_ligne, p.domaine || undefined) : vide}</td><td>${badge("statutProjet", p.statut)}</td><td class="masquer-mobile">${esc(p.prochaine_etape || "")}</td><td>${equipeDuProjet(p).length ? `<span class="avatars">${equipeDuProjet(p).map((m) => avatar(m, m === p.responsable_id ? "Responsable" : "Équipe")).join("")}</span>` : avatar(null, "Responsable")}</td></tr>`).join("")}
   </tbody></table>`;
 }
 function ficheProjet(id) {
@@ -2381,7 +2396,7 @@ function ficheProjet(id) {
   return `
   <div class="fil"><a href="#/projets">Projets / Sites</a>${p.client_id ? ` · <a href="#/clients/${p.client_id}">${esc(nomClient(p.client_id))}</a>` : ""}</div>
   <div class="entete"><div><h1>${esc(p.nom)}</h1><div class="sous-titre">${esc([libelle("typeProjet", p.type), offre && "Offre " + offre.nom, p.version].filter(Boolean).join(" · "))}</div></div>
-    <div class="boutons">${selectStatut("projets", p.id, "statutProjet", p.statut)}<button class="btn" data-action="modifierProjet" data-id="${p.id}">${icone("crayon")}Modifier</button></div></div>
+    <div class="boutons">${selectStatut("projets", p.id, "statutProjet", p.statut)}${equipeProjetsActive() && moi() ? `<button class="btn" data-action="basculerMoiProjet" data-id="${p.id}">${equipeDuProjet(p).includes(moi().id) ? "Me retirer" : `${icone("plus")}M’attribuer`}</button>` : ""}<button class="btn" data-action="modifierProjet" data-id="${p.id}">${icone("crayon")}Modifier</button></div></div>
   <div class="grille g-fiche">
     <div class="pile">
       <section class="carte"><header><h2>Fiche technique</h2></header><dl class="infos">
@@ -2393,6 +2408,7 @@ function ficheProjet(id) {
         <dt>Base Supabase</dt><dd>${p.base_supabase ? "Oui" : "Non"}</dd>
         <dt>Version</dt><dd>${esc(p.version || "") || vide}</dd>
         <dt>Responsable</dt><dd>${parId("membres", p.responsable_id) ? esc(parId("membres", p.responsable_id).nom) : vide}</dd>
+        <dt>Équipe</dt><dd>${equipeDuProjet(p).length ? esc(equipeDuProjet(p).map((m) => parId("membres", m)?.nom).filter(Boolean).join(", ")) : vide}</dd>
         <dt>Mise en ligne</dt><dd>${p.date_mise_en_ligne ? dateFr(p.date_mise_en_ligne) : vide}</dd>
         <dt>Client</dt><dd>${p.client_id ? `<a href="#/clients/${p.client_id}">${esc(nomClient(p.client_id))}</a>` : vide}</dd></dl></section>
       <section class="carte"><header><h2>Prochaine étape</h2></header><p class="texte-libre" style="color:var(--texte);font-weight:600">${esc(p.prochaine_etape || "À définir")}</p>${p.notes ? `<p class="texte-libre" style="margin-top:10px">${esc(p.notes)}</p>` : ""}</section>
@@ -4037,6 +4053,7 @@ const ACTIONS = {
   filtrerClients: (ds) => { filtres.clients.statut = ds.statut; filtres.clients.vue = "liste"; location.hash = "#/clients"; if (lireRoute().page === "clients") rendre(); },
   nouveauProjet: (ds) => editerProjet(null, { client_id: ds.client || null }),
   modifierProjet: (ds) => editerProjet(ds.id),
+  basculerMoiProjet: (ds) => basculerMoiProjet(ds.id),
   nouvelleOffre: () => editerOffre(),
   modifierOffre: (ds) => editerOffre(ds.id),
   basculerOffre: async (ds) => { const o = parId("offres", ds.id); try { await enregistrer("offres", { active: !o.active }, o.id); rendre(); } catch (err) { toast(msgErreur(err), "erreur"); } },

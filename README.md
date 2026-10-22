@@ -3,7 +3,7 @@
 Poste de commande interne de NexusLab, à l'identité du site nexus-lab.ch (graphite, blanc cassé, corail).
 
 - **Pilotage** : Ma journée, Agenda (tout ce qui a une date), Objectifs et indicateurs (automatiques ou à la main).
-- **Commercial** : Clients et pipeline (glisser-déposer, prochaine action, relances), Offres, Devis et factures (PDF avec QR-facture).
+- **Commercial** : Clients et pipeline (glisser-déposer, prochaine action, relances), Offres, Devis et factures (PDF avec QR-facture), Dépenses (qui a avancé l'argent, justificatif, remboursement, export pour la comptabilité de Vardena).
 - **Production** : Projets / Sites, Tâches RACI (avec statut Bloqué), Documents (clients et internes).
 - **Équipe et BTA** : Équipe (charge, heures, compétences, invités avec accès temporaire), Réunions et registre des décisions (débrief tops / flops), Ressources, Situations apprenantes (objectif 26 validées, couverture des 14 compétences, export des plus marquantes), Wiki (charte, process, guides).
 - **Agenda** : export .ics vers Google Agenda, Apple Calendrier ou Outlook.

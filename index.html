@@ -841,6 +841,9 @@ function ecrireStockage(cle, v) { try { localStorage.setItem(cle, v); } catch { 
 
 /* ---------- Libellés ---------- */
 const ETIQ = {
+  categorieDepense: { impression: ["Impression et papeterie", "jaune"], materiel: ["Matériel", "bleu"], logiciel: ["Logiciel et abonnements", "violet"], deplacement: ["Déplacement", "gris"], repas: ["Repas et accueil", "corail"], marketing: ["Marketing et publicité", "vert"], administratif: ["Administratif", "gris"], autre: ["Autre", "gris"] },
+  moyenDepense: { avance_membre: "Avancé par un membre", caisse_nexuslab: "Caisse NexusLab", vardena: "Payé par Vardena" },
+  statutDepense: { a_rembourser: ["À rembourser", "jaune"], rembourse: ["Remboursé", "vert"], sans_objet: ["Rien à rembourser", "gris"] },
   roleFichierRecette: { prompt: ["Prompt", "bleu"], playbook: ["Playbook", "violet"], template: ["Template", "jaune"], exemple: ["Exemple", "vert"], autre: ["Autre", "gris"] },
   statutRecette: { brouillon: ["Brouillon", "gris"], valide: ["Validée", "vert"], obsolete: ["Obsolète", "rouge"] },
   categorieRecette: { site: ["Site web", "bleu"], dashboard: ["Dashboard", "violet"], outil: ["Outil sur mesure", "jaune"], contenu: ["Contenu", "vert"], autre: ["Autre", "gris"] },
@@ -905,6 +908,7 @@ const ICONES = {
   situations: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5"/><path d="M22 9v6"/>',
   entretien: '<path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20.5l1.4-5A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 10h7M8.5 13.5h4.5"/>',
   wiki: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M8 7h6M8 11h6"/>',
+  depenses: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18"/><path d="M7 15h3"/><path d="M16 6l-2-3H8L6 6"/>',
   calendrierExport: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 13v5M9.5 15.5L12 18l2.5-2.5"/>',
 };
 const icone = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n]}</svg>`;
@@ -939,6 +943,7 @@ const TABLES = {
   entretiens: { ordre: ["date", false], optionnel: true },
   mails_envoyes: { ordre: ["cree_le", false], optionnel: true },
   mails_recus: { ordre: ["recu_le", false], optionnel: true },
+  depenses: { ordre: ["date", false], optionnel: true },
 };
 /* Tables pas encore créées (migration 006 pas lancée) : le reste du dashboard continue de fonctionner. */
 const tablesAbsentes = new Set();
@@ -1341,6 +1346,7 @@ const PAGES = {
   mails: { titre: "Mails", icone: "mail", rendre: pageMails, groupe: "Commercial" },
   offres: { titre: "Offres", icone: "offres", rendre: pageOffres, groupe: "Commercial" },
   devis: { titre: "Devis et factures", icone: "devis", rendre: pageDevis, groupe: "Commercial" },
+  depenses: { titre: "Dépenses", icone: "depenses", rendre: pageDepenses, groupe: "Commercial" },
   projets: { titre: "Projets / Sites", icone: "projets", rendre: pageProjets, groupe: "Production" },
   taches: { titre: "Tâches", icone: "taches", rendre: pageTaches, groupe: "Production" },
   documents: { titre: "Documents", icone: "documents", rendre: pageDocuments, groupe: "Production" },
@@ -1359,6 +1365,7 @@ const filtres = {
   ressources: { q: "", categorie: "" },
   projets: { q: "", statut: "actifs" },
   devis: { type: "", statut: "", q: "" },
+  depenses: { q: "", statut: "", categorie: "", vardena: "" },
   taches: { vue: "statut", sprint: "", personne: "", projet: "", fait: "1" },
   documents: { q: "", client: "", projet: "", type: "", portee: "" },
   situations: { membre: "", competence: "", vue: "toutes", q: "" },
@@ -3488,6 +3495,131 @@ function ficheReunion(id) {
 }
 
 /* ==========================================================================
+   Dépenses (achats faits pour NexusLab, en attendant la comptabilité Vardena)
+   ========================================================================== */
+const champsDepense = () => [
+  { nom: "libelle", label: "Quoi", requis: true, pleine: true, placeholder: "Papier glacé pour les flyers" },
+  { nom: "montant", label: "Montant (CHF)", type: "number", step: "0.05", min: 0, requis: true },
+  { nom: "date", label: "Date de l’achat", type: "date", requis: true },
+  { nom: "fournisseur", label: "Où (fournisseur)", placeholder: "Payot, Migros, Canva..." },
+  { nom: "categorie", label: "Catégorie", type: "select", options: options("categorieDepense"), vide: false, defaut: "autre" },
+  { nom: "moyen", label: "Payé comment", type: "select", options: options("moyenDepense"), vide: false, defaut: "avance_membre" },
+  { nom: "paye_par", label: "Qui a avancé l’argent", type: "select", options: optMembres(), vide: "Personne" },
+  { nom: "statut", label: "Remboursement", type: "select", options: options("statutDepense"), vide: false, defaut: "a_rembourser" },
+  { nom: "rembourse_le", label: "Remboursé le", type: "date" },
+  { nom: "projet_id", label: "Pour quel site ou projet", type: "select", options: optProjets(), vide: "NexusLab en général" },
+  { nom: "client_id", label: "Pour quel client", type: "select", options: optClients(), vide: "Aucun" },
+  { nom: "notes", label: "Notes", type: "textarea", pleine: true, rows: 2 },
+  { nom: "transmis_vardena", label: "Transmise à la comptabilité de Vardena", type: "checkbox", pleine: true },
+];
+function editerDepense(id) {
+  if (absente("depenses")) { toast("Le module Dépenses n’est pas encore activé (migration 017).", "erreur"); return; }
+  const d = parId("depenses", id);
+  formulaire({
+    titre: d ? "Modifier la dépense" : "Nouvelle dépense", champs: champsDepense(),
+    valeurs: d || { date: aujourdhui(), categorie: "autre", moyen: "avance_membre", statut: "a_rembourser", paye_par: moi()?.id },
+    extra: `<div class="champ pleine" style="margin-top:14px"><label for="f_justif">Justificatif (photo du ticket ou facture)</label>${d?.justificatif_path ? `<small style="margin:0 0 6px">Actuel : ${esc(d.justificatif_nom || "fichier")}. Choisir un fichier le remplace.</small>` : ""}<input id="f_justif" name="justificatif" type="file" accept="image/*,application/pdf"><small>Garde toujours le ticket : sans justificatif, la comptabilité ne peut pas rembourser. 10 Mo maximum.</small></div>`,
+    enregistrer: async (v, form) => {
+      if (v.moyen !== "avance_membre") { v.paye_par = v.paye_par || null; if (v.statut === "a_rembourser") v.statut = "sans_objet"; }
+      if (v.moyen === "avance_membre" && !v.paye_par) throw new Error("Indique qui a avancé l’argent, sinon personne ne saura qui rembourser.");
+      if (v.statut === "rembourse" && !v.rembourse_le) v.rembourse_le = aujourdhui();
+      if (v.statut !== "rembourse") v.rembourse_le = null;
+      const f = form.elements.justificatif?.files?.[0];
+      let ancien = null;
+      if (f) {
+        if (f.size > 10485760) throw new Error("Le justificatif dépasse 10 Mo.");
+        const chemin = `depenses/${Date.now()}-${nomFichierSur(f.name)}`;
+        const { error } = await sb.storage.from(CONFIG.bucket).upload(chemin, f, { contentType: f.type || undefined, upsert: false });
+        if (error) throw error;
+        ancien = d?.justificatif_path || null;
+        v.justificatif_path = chemin; v.justificatif_nom = f.name;
+      }
+      await enregistrer("depenses", v, id);
+      if (ancien) await sb.storage.from(CONFIG.bucket).remove([ancien]);
+      toast("Dépense enregistrée.");
+    },
+    supprimer: d ? async () => { await supprimerLigne("depenses", id); if (d.justificatif_path) await sb.storage.from(CONFIG.bucket).remove([d.justificatif_path]); } : null,
+    apresOuverture: (form) => {
+      const maj = () => {
+        const avance = form.elements.moyen.value === "avance_membre";
+        form.elements.paye_par.closest(".champ").hidden = !avance;
+        form.elements.rembourse_le.closest(".champ").hidden = form.elements.statut.value !== "rembourse";
+      };
+      form.elements.moyen.addEventListener("change", () => { if (form.elements.moyen.value !== "avance_membre" && form.elements.statut.value === "a_rembourser") form.elements.statut.value = "sans_objet"; if (form.elements.moyen.value === "avance_membre" && form.elements.statut.value === "sans_objet") form.elements.statut.value = "a_rembourser"; maj(); });
+      form.elements.statut.addEventListener("change", () => { if (form.elements.statut.value === "rembourse" && !form.elements.rembourse_le.value) form.elements.rembourse_le.value = aujourdhui(); maj(); });
+      form.elements.projet_id.addEventListener("change", (e) => { const p = parId("projets", e.target.value); if (p?.client_id) form.elements.client_id.value = p.client_id; });
+      maj();
+    },
+  });
+}
+async function rembourserDepense(id) {
+  const d = parId("depenses", id);
+  if (!d || !(await confirmer(`Marquer comme remboursés les ${chf(d.montant)} avancés par ${prenomDe(d.paye_par) || "ce membre"} ?`, "Marquer remboursé"))) return;
+  try { await enregistrer("depenses", { statut: "rembourse", rembourse_le: aujourdhui() }, id); rendre(); toast("Remboursement noté."); }
+  catch (err) { toast(msgErreur(err), "erreur"); }
+}
+async function ouvrirJustificatif(id) {
+  const d = parId("depenses", id);
+  if (!d?.justificatif_path) return;
+  const fenetre = window.open("", "_blank");
+  const { data, error } = await sb.storage.from(CONFIG.bucket).createSignedUrl(d.justificatif_path, 300);
+  if (error) { if (fenetre) fenetre.close(); toast(msgErreur(error), "erreur"); return; }
+  if (fenetre) fenetre.location.href = data.signedUrl; else location.href = data.signedUrl;
+}
+function depensesFiltrees() {
+  const f = filtres.depenses, mots = motsRecherche(f.q);
+  return (db.depenses || []).filter((d) => (!f.statut || d.statut === f.statut) && (!f.categorie || d.categorie === f.categorie)
+    && (!f.vardena || (f.vardena === "non" ? !d.transmis_vardena : d.transmis_vardena))
+    && contientMots(mots, d.libelle, d.fournisseur, d.notes, prenomDe(d.paye_par), nomProjet(d.projet_id), nomClient(d.client_id), libelle("categorieDepense", d.categorie)));
+}
+function pageDepenses() {
+  if (absente("depenses")) return `<div class="entete"><div><h1>Dépenses</h1></div></div>${moduleAbsent("Dépenses", "017_depenses.sql")}`;
+  const f = filtres.depenses, l = db.depenses;
+  const total = l.reduce((s, d) => s + Number(d.montant || 0), 0);
+  const annee = aujourdhui().slice(0, 4);
+  const totalAnnee = l.filter((d) => String(d.date).startsWith(annee)).reduce((s, d) => s + Number(d.montant || 0), 0);
+  const aRemb = l.filter((d) => d.statut === "a_rembourser");
+  const parMembre = new Map();
+  for (const d of aRemb) parMembre.set(d.paye_par || "", (parMembre.get(d.paye_par || "") || 0) + Number(d.montant || 0));
+  const detailRemb = [...parMembre.entries()].map(([m, n]) => `${esc(prenomDe(m) || "Sans nom")} ${chf(n)}`).join(" · ");
+  const nonTransmises = l.filter((d) => !d.transmis_vardena);
+  const sansJustif = l.filter((d) => !d.justificatif_path).length;
+  return `
+  <div class="entete"><div><h1>Dépenses</h1><div class="sous-titre">Chaque achat fait pour NexusLab, qui a avancé l’argent et le ticket, en attendant que la comptabilité de Vardena soit prête.</div></div>
+    <div class="boutons"><button class="btn" data-action="exporterDepenses"${l.length ? "" : " disabled"}>${icone("pdf")}Export Excel</button><button class="btn primaire" data-action="nouvelleDepense">${icone("plus")}Dépense</button></div></div>
+  <div class="kpis">
+    ${kpi("Dépensé en " + annee, chf(totalAnnee), l.length ? `${l.length} achat${l.length > 1 ? "s" : ""} au total, ${chf(total)}` : "Aucun achat noté", "#/depenses")}
+    ${kpi("À rembourser", chf(aRemb.reduce((s, d) => s + Number(d.montant || 0), 0)), detailRemb || "Personne n’attend d’argent", "#/depenses", aRemb.length > 0)}
+    ${kpi("Pas encore chez Vardena", String(nonTransmises.length), nonTransmises.length ? chf(nonTransmises.reduce((s, d) => s + Number(d.montant || 0), 0)) + " à transmettre" : "Tout est transmis", "#/depenses")}
+    ${kpi("Sans justificatif", String(sansJustif), sansJustif ? "Ajoute la photo du ticket" : "Tous les tickets sont là", "#/depenses", sansJustif > 0)}
+  </div>
+  <div class="filtres">
+    <input type="search" placeholder="Quoi, où, qui, pour quel projet" value="${esc(f.q)}" data-filtre="depenses.q" aria-label="Rechercher">
+    <select data-filtre="depenses.statut" aria-label="Remboursement"><option value="">Tous les remboursements</option>${options("statutDepense").map(([k, lb]) => `<option value="${k}"${f.statut === k ? " selected" : ""}>${esc(lb)}</option>`).join("")}</select>
+    <select data-filtre="depenses.categorie" aria-label="Catégorie"><option value="">Toutes les catégories</option>${options("categorieDepense").map(([k, lb]) => `<option value="${k}"${f.categorie === k ? " selected" : ""}>${esc(lb)}</option>`).join("")}</select>
+    <select data-filtre="depenses.vardena" aria-label="Comptabilité Vardena"><option value="">Vardena : toutes</option><option value="non"${f.vardena === "non" ? " selected" : ""}>Pas encore transmises</option><option value="oui"${f.vardena === "oui" ? " selected" : ""}>Déjà transmises</option></select>
+  </div>
+  <section class="carte sans-marge" id="liste-depenses">${listeDepenses()}</section>
+  <p class="petit muted" style="margin-top:12px">Bonne pratique : noter la dépense le jour même, avec la photo du ticket. Le remboursement se fait sur la base du justificatif, et la comptabilité de Vardena en aura besoin pour chaque ligne.</p>`;
+}
+function listeDepenses() {
+  const l = depensesFiltrees();
+  if (!l.length) return `<div class="vide-liste">${(db.depenses || []).length ? "Aucune dépense ne correspond aux filtres." : "Aucune dépense notée pour l’instant."}<br><button class="btn" data-action="nouvelleDepense">${icone("plus")}Noter un achat</button></div>`;
+  const total = l.reduce((s, d) => s + Number(d.montant || 0), 0);
+  return `<div style="padding:8px 8px 6px"><div class="table-wrap"><table class="liste"><thead><tr><th>Date</th><th>Quoi</th><th class="masquer-mobile">Où</th><th class="masquer-mobile">Catégorie</th><th class="num">Montant</th><th class="masquer-mobile">Payé par</th><th>Remboursement</th><th></th></tr></thead><tbody>
+    ${l.map((d) => `<tr data-action="modifierDepense" data-id="${d.id}" style="cursor:pointer"><td style="white-space:nowrap">${dateFr(d.date)}</td><td class="fort" style="min-width:min(170px,30vw)">${esc(d.libelle)}${d.projet_id ? `<div class="petit muted">${esc(nomProjet(d.projet_id))}</div>` : ""}</td><td class="masquer-mobile">${esc(d.fournisseur || "")}</td><td class="masquer-mobile">${badge("categorieDepense", d.categorie)}</td><td class="num" style="white-space:nowrap">${chf(d.montant)}</td><td class="masquer-mobile">${d.moyen === "avance_membre" ? esc(prenomDe(d.paye_par)) : esc(libelle("moyenDepense", d.moyen))}</td><td>${badge("statutDepense", d.statut)}${d.transmis_vardena ? ' <span class="badge t-bleu">Vardena</span>' : ""}</td>
+      <td class="num" style="white-space:nowrap">${d.justificatif_path ? `<button class="btn discret mini" data-action="justificatifDepense" data-id="${d.id}" title="Voir le justificatif">Ticket</button>` : '<span class="petit muted">Pas de ticket</span>'}${d.statut === "a_rembourser" ? ` <button class="btn mini" data-action="rembourserDepense" data-id="${d.id}">Remboursé</button>` : ""}</td></tr>`).join("")}
+  </tbody></table></div></div><div class="petit muted" style="padding:0 22px 14px;text-align:right">${l.length} dépense${l.length > 1 ? "s" : ""} · total ${chf(total)}</div>`;
+}
+function exporterDepenses() {
+  const l = depensesFiltrees();
+  const cel = (v) => { const t = String(v ?? ""); return /[";\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+  const lignes = [["Date", "Quoi", "Fournisseur", "Catégorie", "Montant CHF", "Payé comment", "Avancé par", "Remboursement", "Remboursé le", "Projet", "Client", "Transmise à Vardena", "Justificatif", "Notes"]]
+    .concat(l.map((d) => [dateFr(d.date), d.libelle, d.fournisseur, libelle("categorieDepense", d.categorie), Number(d.montant || 0).toFixed(2), libelle("moyenDepense", d.moyen), prenomDe(d.paye_par), libelle("statutDepense", d.statut), dateFr(d.rembourse_le), nomProjet(d.projet_id), nomClient(d.client_id), d.transmis_vardena ? "oui" : "non", d.justificatif_nom || "manquant", d.notes]));
+  telecharger(`depenses-nexuslab-${aujourdhui()}.csv`, "﻿" + lignes.map((r) => r.map(cel).join(";")).join("\r\n"), "text/csv;charset=utf-8");
+}
+
+/* ==========================================================================
    Ressources et liens utiles
    ========================================================================== */
 const champsRessource = () => [
@@ -3568,8 +3700,8 @@ function editerCompetence(id, membreId) {
 /* ==========================================================================
    Version 3 : situations apprenantes, wiki, export d'agenda
    ========================================================================== */
-function moduleAbsent(nom) {
-  return `<section class="carte module-absent"><div class="vide-liste"><b>${esc(nom)} : module à activer.</b><br>La table n’existe pas encore dans la base. Il faut lancer une fois <code>supabase/006_bta_wiki_commentaires.sql</code> dans Supabase (SQL Editor).</div></section>`;
+function moduleAbsent(nom, fichier = "006_bta_wiki_commentaires.sql") {
+  return `<section class="carte module-absent"><div class="vide-liste"><b>${esc(nom)} : module à activer.</b><br>La table n’existe pas encore dans la base. Il faut lancer une fois <code>supabase/${esc(fichier)}</code> dans Supabase (SQL Editor).</div></section>`;
 }
 function telecharger(nomFichier, contenu, type) {
   const url = URL.createObjectURL(new Blob([contenu], { type }));
@@ -3795,7 +3927,7 @@ function exporterAgenda() {
 
 const CREER = [
   ["Client", "clients", "nouveauClient"], ["Entretien découverte", "entretien", "nouvelEntretien"], ["Mail", "mail", "ecrireMail"], ["Site", "projets", "nouveauProjet"], ["Tâche", "taches", "nouvelleTache"],
-  ["Devis", "devis", "nouveauDf", "devis"], ["Facture", "devis", "nouveauDf", "facture"], ["Réunion", "reunions", "nouvelleReunion"],
+  ["Devis", "devis", "nouveauDf", "devis"], ["Facture", "devis", "nouveauDf", "facture"], ["Dépense", "depenses", "nouvelleDepense"], ["Réunion", "reunions", "nouvelleReunion"],
   ["Débrief du jour", "eclair", "debriefDuJour"], ["Document", "documents", "ajouterDocument"], ["Ressource", "ressources", "nouvelleRessource"], ["Objectif", "objectifs", "nouvelObjectif"],
   ["Situation apprenante", "situations", "nouvelleSituation"], ["Page du wiki", "wiki", "nouvellePage"],
 ];
@@ -3847,6 +3979,7 @@ function resultatsPalette(q) {
   ajoute("Entretiens", (db.entretiens || []).filter((e) => ok(nomClient(e.client_id), JSON.stringify(e.reponses || {}), "entretien")).map((e) => ({ titre: "Entretien · " + nomClient(e.client_id), meta: [dateFr(e.date), parId("membres", e.membre_id)?.nom].filter(Boolean).join(" · "), icone: "entretien", faire: () => (location.hash = "#/entretiens/" + e.id) })), 4);
   ajoute("Suivi des clients", (db.contacts_clients || []).filter((k) => ok(k.notes, nomClient(k.client_id))).filter((k) => k.notes).map((k) => ({ titre: k.notes.length > 80 ? k.notes.slice(0, 80) + "…" : k.notes, meta: [nomClient(k.client_id), dateCourte(k.date)].filter(Boolean).join(" · "), icone: "clients", faire: () => (location.hash = "#/clients/" + k.client_id) })), 4);
   if (estAssocie()) ajoute("Documents confidentiels", (db.recettes || []).filter((r) => ok(numeroRecette(r), r.service, r.objectif, r.prompt, r.playbook, r.template, r.checklist, r.apprentissages, r.sources, libelle("categorieRecette", r.categorie), fichiersDeRecette(r.id).map((f) => f.nom))).map((r) => ({ titre: `${numeroRecette(r)} · ${r.service}`, meta: [libelle("statutRecette", r.statut), "v" + (r.version || "")].join(" · "), icone: "cadenas", faire: () => (location.hash = "#/confidentiel/" + r.id) })), 4);
+  ajoute("Dépenses", (db.depenses || []).filter((d) => ok(d.libelle, d.fournisseur, d.notes, libelle("categorieDepense", d.categorie), prenomDe(d.paye_par), nomProjet(d.projet_id), nomClient(d.client_id), String(d.montant), dateFr(d.date), "depense achat")).map((d) => ({ titre: d.libelle, meta: [chf(d.montant), d.fournisseur, dateFr(d.date)].filter(Boolean).join(" · "), icone: "depenses", faire: () => editerDepense(d.id) })), 4);
   ajoute("Sites", db.projets.filter((p) => ok(p.nom, p.domaine, p.url_en_ligne, nomClient(p.client_id), p.prochaine_etape)).map((p) => ({ titre: p.nom, meta: [nomClient(p.client_id), libelle("statutProjet", p.statut)].filter(Boolean).join(" · "), icone: "projets", faire: () => (location.hash = "#/projets/" + p.id) })), 5);
   ajoute("Tâches", db.taches.filter((t) => ok(t.titre, t.description, t.sprint, t.projet_id && nomProjet(t.projet_id))).map((t) => ({ titre: t.titre, meta: [libelle("statutTache", t.statut), t.echeance && dateCourte(t.echeance)].filter(Boolean).join(" · "), icone: "taches", faire: () => editerTache(t.id) })), 6);
   ajoute("Réunions", db.reunions.filter((r) => ok(r.titre, r.notes, r.lieu, dateFr(r.date))).map((r) => ({ titre: r.titre, meta: dateFr(r.date), icone: "reunions", faire: () => (location.hash = "#/reunions/" + r.id) })), 4);
@@ -3894,6 +4027,11 @@ document.addEventListener("keydown", (e) => {
    Actions (boutons) et filtres : délégation d'événements
    ========================================================================== */
 const ACTIONS = {
+  nouvelleDepense: () => editerDepense(),
+  modifierDepense: (ds) => editerDepense(ds.id),
+  rembourserDepense: (ds) => rembourserDepense(ds.id),
+  justificatifDepense: (ds) => ouvrirJustificatif(ds.id),
+  exporterDepenses: () => exporterDepenses(),
   nouveauClient: () => editerClient(),
   modifierClient: (ds) => editerClient(ds.id),
   filtrerClients: (ds) => { filtres.clients.statut = ds.statut; filtres.clients.vue = "liste"; location.hash = "#/clients"; if (lireRoute().page === "clients") rendre(); },
@@ -3985,7 +4123,7 @@ document.addEventListener("click", (e) => { if (!$("#menu-creer").hidden && !e.t
 document.addEventListener("keydown", (e) => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches("article.tache[data-action]")) { e.preventDefault(); ACTIONS.modifierTache(e.target.dataset); }
 });
-const LISTES = { situations: ["#liste-situations", listeSituations], wiki: ["#liste-wiki", listeWiki], reunions: ["#liste-reunions", listeReunions], ressources: ["#liste-ressources", listeRessources], clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
+const LISTES = { situations: ["#liste-situations", listeSituations], wiki: ["#liste-wiki", listeWiki], reunions: ["#liste-reunions", listeReunions], ressources: ["#liste-ressources", listeRessources], clients: ["#liste-clients", listeClients], projets: ["#liste-projets", listeProjets], devis: ["#liste-devis", listeDevis], depenses: ["#liste-depenses", listeDepenses], taches: ["#liste-taches", listeTaches], documents: ["#liste-documents", listeDocuments] };
 function majFiltre(el) {
   const [pg, cle] = el.dataset.filtre.split(".");
   filtres[pg][cle] = el.type === "checkbox" ? (el.checked ? "1" : "") : el.value;
